@@ -22,7 +22,13 @@ interface EvolutionPayload {
 export async function POST(request: Request) {
     try {
         const payload = await request.json()
-        console.log('Webhook received:', JSON.stringify(payload, null, 2))
+        const event = payload?.event || 'unknown'
+        console.log(`[Webhook] Event: ${event} received.`)
+
+        // Log específico para mensajes
+        if (event === 'messages.upsert') {
+            console.log(`[Webhook] Message payload:`, JSON.stringify(payload.data, null, 2))
+        }
 
         // Validar payload mínimo (adaptar según docs reales de Evolution API v2)
         // Nota: Evolution API tiene varios tipos de eventos (messages.upsert, etc)
@@ -38,25 +44,39 @@ export async function POST(request: Request) {
             return NextResponse.json({ ok: true }) // Responder 200 siempre para no bloquear webhook
         }
 
-        // Limpiar teléfono (quitar @s.whatsapp.net)
-        const cleanPhone = phone.replace('@s.whatsapp.net', '')
+        // Limpiar teléfono (quitar @s.whatsapp.net y cualquier signo +)
+        const cleanPhone = phone.replace('@s.whatsapp.net', '').replace('+', '')
 
         const supabase = await createClient()
 
-        // 1. Buscar contacto por teléfono
-        // Nota: En producción esto debe ser super robusto (normalización de prefijos, etc)
-        // Aquí asumimos coincidencia exacta para el MVP
-        const { data: contact, error: contactError } = await supabase
+        // 1. Buscar contacto por teléfono (buscando que contenga el número limpio)
+        let { data: contact, error: contactError } = await supabase
             .from('contacts')
             .select('id')
-            .eq('phone', cleanPhone)
-            .single()
+            .or(`phone.ilike.%${cleanPhone}%,phone.ilike.%${cleanPhone.substring(2)}%`) // Busca con y sin prefijo
+            .limit(1)
+            .maybeSingle()
 
-        if (contactError || !contact) {
-            console.log(`Contact not found for phone: ${cleanPhone}`)
-            // TODO: Crear contacto desconocido o usar log de "mensajes huérfanos"
-            // PENDIENTE: Decisión de negocio -> ¿Creamos lead automático?
-            return NextResponse.json({ ok: true })
+        if (!contact) {
+            console.log(`Contact not found for phone: ${cleanPhone}. Creating automatic prospect.`)
+            const { data: newContact, error: createError } = await supabase
+                .from('contacts')
+                .insert({
+                    company_name: `WhatsApp ${cleanPhone}`,
+                    contact_name: payload?.data?.pushName || `User ${cleanPhone}`,
+                    phone: cleanPhone,
+                    source: 'inbound_whatsapp',
+                    status: 'prospect',
+                    pipeline_stage: 'nuevo'
+                })
+                .select('id')
+                .single()
+
+            if (createError) {
+                console.error('Error creating automatic contact:', createError)
+                return NextResponse.json({ ok: true })
+            }
+            contact = newContact
         }
 
         // 2. Insertar mensaje en BD
