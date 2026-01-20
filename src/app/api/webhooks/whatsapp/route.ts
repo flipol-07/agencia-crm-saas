@@ -19,13 +19,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ ok: true })
         }
 
-        // Si es un mensaje nuestro enviado desde fuera, ignorar
-        if (data?.key?.fromMe) {
-            console.log('[Webhook] Ignoring message fromMe: true')
-            return NextResponse.json({ ok: true })
-        }
-
-        // 2. Extraer teléfono y contenido
+        // 2. Extraer teléfono y contenido (lógica unificada)
         const remoteJid = data?.key?.remoteJid || payload.sender || ''
         const phone = remoteJid.split('@')[0].replace(/\D/g, '')
 
@@ -82,17 +76,26 @@ export async function POST(request: Request) {
 
         if (!contactId) return NextResponse.json({ ok: true })
 
-        // 4. Insertar mensaje
-        console.log(`[Webhook] Inserting message for contact_id: ${contactId}`)
+        // Detectar dirección
+        const isFromMe = data?.key?.fromMe || false
+        const direction = isFromMe ? 'outbound' : 'inbound'
+        const status = isFromMe ? 'sent' : 'delivered'
+
+        // 4. Insertar mensaje (o actualizar si ya existe por ID)
+        console.log(`[Webhook] Upserting message (${direction}) for contact_id: ${contactId}`)
+
         const { error: msgError } = await (supabase
             .from('messages')
-            .insert({
+            .upsert({
                 contact_id: contactId,
                 content: content,
-                direction: 'inbound',
-                status: 'delivered',
+                direction: direction,
+                status: status,
                 whatsapp_message_id: data?.key?.id || data?.messageId,
                 payload: data
+            }, {
+                onConflict: 'whatsapp_message_id',
+                ignoreDuplicates: true
             } as any) as any)
 
         if (msgError) {
