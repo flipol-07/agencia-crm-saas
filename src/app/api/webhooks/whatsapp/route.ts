@@ -23,48 +23,58 @@ export async function POST(request: Request) {
     try {
         const payload = await request.json()
         const event = payload?.event || 'unknown'
-        console.log(`[Webhook] Event: ${event} received.`)
 
-        // Log específico para mensajes
-        if (event === 'messages.upsert') {
-            console.log(`[Webhook] Message payload:`, JSON.stringify(payload.data, null, 2))
+        // Log para depuración en Vercel
+        console.log(`[Webhook] Event: ${event}`, JSON.stringify(payload, null, 2))
+
+        // Solo procesamos inserción de mensajes
+        if (event !== 'messages.upsert') {
+            return NextResponse.json({ ok: true })
         }
 
-        // Validar payload mínimo (adaptar según docs reales de Evolution API v2)
-        // Nota: Evolution API tiene varios tipos de eventos (messages.upsert, etc)
-        // Aquí asumimos una estructura genérica para el ejemplo
+        const messageData = payload.data?.message || payload.data
+        if (!messageData) return NextResponse.json({ ok: true })
 
         // Extraer datos clave
-        let phone = payload?.data?.key?.remoteJid || payload?.sender
-        let content = payload?.data?.message?.conversation || payload?.data?.message?.extendedTextMessage?.text
-        let messageId = payload?.data?.key?.id || payload?.data?.keyId
+        // Evolution v2 usa key.remoteJid para el destinatario/remitente
+        const remoteJid = payload.data?.key?.remoteJid || payload.sender
+        if (!remoteJid) return NextResponse.json({ ok: true })
 
-        if (!phone || !content) {
-            console.log('Ignored webhook: No phone or content found')
-            return NextResponse.json({ ok: true }) // Responder 200 siempre para no bloquear webhook
+        const phone = remoteJid.replace('@s.whatsapp.net', '').replace('+', '')
+
+        // El contenido puede venir en varios campos según el tipo de mensaje
+        const content =
+            payload.data?.message?.conversation ||
+            payload.data?.message?.extendedTextMessage?.text ||
+            payload.data?.message?.imageMessage?.caption ||
+            payload.data?.message?.videoMessage?.caption ||
+            '';
+
+        const messageId = payload.data?.key?.id
+
+        // Si es un mensaje nuestro (fromMe: true), lo ignoramos para evitar bucles 
+        // o lo marcamos como outbound si queremos sincronizar lo enviado desde fuera del CRM
+        if (payload.data?.key?.fromMe) {
+            console.log('Ignoring outbound message from WhatsApp Web/Mobile')
+            return NextResponse.json({ ok: true })
         }
-
-        // Limpiar teléfono (quitar @s.whatsapp.net y cualquier signo +)
-        const cleanPhone = phone.replace('@s.whatsapp.net', '').replace('+', '')
 
         const supabase = await createClient()
 
-        // 1. Buscar contacto por teléfono (buscando que contenga el número limpio)
-        let { data: contact, error: contactError } = await supabase
+        // 1. Buscar o crear contacto
+        let { data: contact } = await supabase
             .from('contacts')
             .select('id')
-            .or(`phone.ilike.%${cleanPhone}%,phone.ilike.%${cleanPhone.substring(2)}%`) // Busca con y sin prefijo
-            .limit(1)
+            .or(`phone.ilike.%${phone}%,phone.ilike.%${phone.substring(2)}%`)
             .maybeSingle()
 
         if (!contact) {
-            console.log(`Contact not found for phone: ${cleanPhone}. Creating automatic prospect.`)
-            const { data: newContact, error: createError } = await supabase
+            const { data: newContact, error: errorCur } = await supabase
                 .from('contacts')
                 .insert({
-                    company_name: `WhatsApp ${cleanPhone}`,
-                    contact_name: payload?.data?.pushName || `User ${cleanPhone}`,
-                    phone: cleanPhone,
+                    company_name: `WhatsApp ${phone}`,
+                    contact_name: payload.data?.pushName || `User ${phone}`,
+                    phone: phone,
                     source: 'inbound_whatsapp',
                     status: 'prospect',
                     pipeline_stage: 'nuevo'
@@ -72,14 +82,11 @@ export async function POST(request: Request) {
                 .select('id')
                 .single()
 
-            if (createError) {
-                console.error('Error creating automatic contact:', createError)
-                return NextResponse.json({ ok: true })
-            }
+            if (errorCur) throw errorCur
             contact = newContact
         }
 
-        // 2. Insertar mensaje en BD
+        // 2. Insertar mensaje como INBOUND
         const { error: msgError } = await supabase
             .from('messages')
             .insert({
@@ -88,17 +95,14 @@ export async function POST(request: Request) {
                 direction: 'inbound',
                 status: 'delivered',
                 whatsapp_message_id: messageId,
-                media_url: null, // TODO: Manejar media
+                payload: payload.data // Guardamos todo por si acaso
             })
 
-        if (msgError) {
-            console.error('Error inserting message:', msgError)
-            return NextResponse.json({ error: msgError.message }, { status: 500 })
-        }
+        if (msgError) throw msgError
 
         return NextResponse.json({ success: true })
-    } catch (error) {
-        console.error('Webhook error:', error)
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    } catch (error: any) {
+        console.error('Webhook error:', error.message)
+        return NextResponse.json({ error: error.message }, { status: 500 })
     }
 }
