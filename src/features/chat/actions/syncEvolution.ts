@@ -5,21 +5,28 @@ import type { EvolutionConfig } from '@/features/settings/services/settingsServi
 
 export async function syncEvolutionData(config: EvolutionConfig) {
     try {
-        const { baseUrl, apiKey, instanceName } = config
+        // 1. Configuración: Prioridad ENV > Argumentos
+        const baseUrl = process.env.EVOLUTION_API_URL || config.baseUrl
+        const apiKey = process.env.EVOLUTION_API_KEY || config.apiKey
+        const instanceName = process.env.EVOLUTION_INSTANCE_NAME || config.instanceName
 
         // Normalizar URL (quitar slash final si tiene)
-        const cleanUrl = baseUrl.replace(/\/$/, '')
+        const cleanUrl = baseUrl?.replace(/\/$/, '')
+
+        if (!cleanUrl || !apiKey || !instanceName) {
+            throw new Error('Configuración incompleta. Revisa las variables de entorno o la configuración.')
+        }
 
         console.log(`[Server Action] Syncing with Evolution API: ${cleanUrl}, Instance: ${instanceName}`)
 
-        // 1. Fetch Contactos/Chats desde Evolution (Server-to-Server request, no hay CORS/Mixed Content issues)
-        // Endpoint: /chat/findContacts/{instance}
-        const response = await fetch(`${cleanUrl}/chat/findContacts/${instanceName}`, {
+        // 2. Fetch Chats desde Evolution
+        // Intentamos /chat/findChats que es el endpoint para listar conversaciones activas
+        const response = await fetch(`${cleanUrl}/chat/findChats/${instanceName}`, {
             headers: {
                 'apikey': apiKey,
                 'Content-Type': 'application/json'
             },
-            cache: 'no-store' // No cachear
+            cache: 'no-store'
         })
 
         if (!response.ok) {
