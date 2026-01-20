@@ -93,7 +93,7 @@ export async function POST(request: Request) {
                 status: status,
                 whatsapp_message_id: data?.key?.id || data?.messageId,
                 payload: data
-            }, {
+            } as any, {
                 onConflict: 'whatsapp_message_id',
                 ignoreDuplicates: true
             } as any) as any)
