@@ -33,9 +33,11 @@ export function useChat(contactId: string, contactPhone: string | null) {
     useEffect(() => {
         fetchMessages()
 
-        // Suscribirse a cambios en la tabla messages para este contacto
+        console.log(`[useChat] Subscribing to messages for contact: ${contactId}`)
+
+        // Canal simplificado para mayor compatibilidad
         const channel = supabase
-            .channel(`public:messages:contact_id=eq.${contactId}`)
+            .channel(`contact-chat-${contactId}`)
             .on(
                 'postgres_changes',
                 {
@@ -45,22 +47,26 @@ export function useChat(contactId: string, contactPhone: string | null) {
                     filter: `contact_id=eq.${contactId}`,
                 },
                 (payload: any) => {
-                    console.log('Realtime message received:', payload.new)
+                    console.log('[useChat] Realtime INSERT received:', payload.new)
                     const newMsg = payload.new as Message
+
                     setMessages((prev) => {
-                        // Evitar duplicados si el optimismo ya lo insertó
-                        if (prev.some(m => m.id === newMsg.id || (m.whatsapp_message_id && m.whatsapp_message_id === newMsg.whatsapp_message_id))) {
-                            return prev
-                        }
+                        // Evitar duplicados
+                        const exists = prev.some(m =>
+                            m.id === newMsg.id ||
+                            (m.whatsapp_message_id && m.whatsapp_message_id === newMsg.whatsapp_message_id)
+                        )
+                        if (exists) return prev
                         return [...prev, newMsg]
                     })
                 }
             )
             .subscribe((status: string) => {
-                console.log('Realtime status:', status)
+                console.log(`[useChat] Realtime status for ${contactId}:`, status)
             })
 
         return () => {
+            console.log(`[useChat] Unsubscribing from ${contactId}`)
             supabase.removeChannel(channel)
         }
     }, [contactId, fetchMessages, supabase])
