@@ -19,9 +19,9 @@ export async function syncEvolutionData(config: EvolutionConfig) {
 
         console.log(`[Server Action] Syncing with Evolution API: ${cleanUrl}, Instance: ${instanceName}`)
 
-        // 2. Fetch Chats desde Evolution
-        // Intentamos /chat/findChats que es el endpoint para listar conversaciones activas
-        const response = await fetch(`${cleanUrl}/chat/findChats/${instanceName}`, {
+        // 2. Fetch Chats/Contactos desde Evolution
+        // El endpoint más común en v2 para traer la lista de contactos es fetchContacts
+        const response = await fetch(`${cleanUrl}/chat/fetchContacts/${instanceName}`, {
             headers: {
                 'apikey': apiKey,
                 'Content-Type': 'application/json'
