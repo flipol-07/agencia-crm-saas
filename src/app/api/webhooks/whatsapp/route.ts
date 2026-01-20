@@ -1,4 +1,4 @@
-import { createAdminClient } from '@/lib/supabase/admin'
+import { createAdminClient as createClient } from '@/lib/supabase/admin'
 import { NextResponse } from 'next/server'
 
 export async function POST(request: Request) {
@@ -44,7 +44,7 @@ export async function POST(request: Request) {
 
         console.log(`[Webhook] Processing Message from ${phone}. Content length: ${content.length}`)
 
-        const supabase = createAdminClient()
+        const supabase = createClient()
 
         // 3. Buscar o crear contacto
         const phoneSuffix = phone.slice(-9)
