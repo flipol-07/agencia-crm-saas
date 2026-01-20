@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { settingsService, type EvolutionConfig } from '@/features/settings/services/settingsService'
-import { syncService } from '@/features/chat/services'
+import { syncEvolutionData } from '@/features/chat/actions/syncEvolution'
 
 export default function SettingsPage() {
     const [config, setConfig] = useState<EvolutionConfig>({
@@ -56,11 +56,18 @@ export default function SettingsPage() {
         setStatusMsg('⏳ Iniciando sincronización...')
 
         try {
-            const res = await syncService.syncEverything(config, (msg) => setStatusMsg(msg))
-            setStatusMsg(`✅ Sincronización completada. Contactos procesados: ${res.syncedContacts}`)
+            // Llamada a Server Action (Backend Node.js)
+            const res = await syncEvolutionData(config)
+
+            if (res.success) {
+                setStatusMsg(`✅ Sincronización completada. Nuevos contactos: ${res.count} (de ${res.totalFound} chats encontrados)`)
+            } else {
+                setStatusMsg(`❌ Error remoto: ${res.error}`)
+            }
+
         } catch (error: any) {
             console.error(error)
-            setStatusMsg(`❌ Error de sincronización: ${error.message}`)
+            setStatusMsg(`❌ Error cliente: ${error.message}`)
         } finally {
             setSyncing(false)
         }
