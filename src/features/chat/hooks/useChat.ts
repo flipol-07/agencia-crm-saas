@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback, useRef } from 'react'
+import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Message } from '@/types/database'
 import { evolutionService } from '../services'
@@ -10,7 +10,8 @@ export function useChat(contactId: string, contactPhone: string | null) {
     const [loading, setLoading] = useState(true)
     const [sending, setSending] = useState(false)
 
-    const supabase = createClient()
+    // Memoizar el cliente para evitar que fetchMessages cambie en cada render
+    const supabase = useMemo(() => createClient(), [])
     const channelRef = useRef<any>(null)
 
     // Fetch inicial
@@ -43,7 +44,7 @@ export function useChat(contactId: string, contactPhone: string | null) {
                     table: 'messages',
                     filter: `contact_id=eq.${contactId}`,
                 },
-                (payload) => {
+                (payload: any) => {
                     console.log('Realtime message received:', payload.new)
                     const newMsg = payload.new as Message
                     setMessages((prev) => {
@@ -55,7 +56,7 @@ export function useChat(contactId: string, contactPhone: string | null) {
                     })
                 }
             )
-            .subscribe((status) => {
+            .subscribe((status: string) => {
                 console.log('Realtime status:', status)
             })
 
