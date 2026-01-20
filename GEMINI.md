@@ -304,6 +304,11 @@ test('should calculate total with tax', () => {
 - **Fix**: Siempre usar `npm run dev` (auto-detecta puerto)
 - **Aplicar en**: Todos los proyectos
 
+### 2026-01-20: Variables de Entorno en Vercel
+- **Error**: Build falla en CI/CD con "@supabase/ssr: URL and API key required" durante prerenderizado estático.
+- **Fix**: Copiar variables de `.env.local` a Settings > Environment Variables en Vercel antes del primer deploy.
+- **Aplicar en**: Todos los proyectos Next.js + Supabase en Vercel.
+
 ---
 
 *Este archivo es el cerebro de la fábrica. Cada error documentado la hace más fuerte.*
