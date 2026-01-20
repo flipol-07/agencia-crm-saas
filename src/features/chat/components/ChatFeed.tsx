@@ -16,7 +16,12 @@ export function ChatFeed({ contactId, contactPhone }: ChatFeedProps) {
     // Auto-scroll al fondo al recibir mensajes
     useEffect(() => {
         if (scrollRef.current) {
-            scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+            // Pequeño timeout para asegurar que el DOM se pintó
+            setTimeout(() => {
+                if (scrollRef.current) {
+                    scrollRef.current.scrollTop = scrollRef.current.scrollHeight
+                }
+            }, 50)
         }
     }, [messages])
 
