@@ -109,72 +109,87 @@ export class GooglePlacesService {
   }
 
   /**
-   * Busca negocios con paginación hasta alcanzar el límite deseado
+   * Busca negocios con paginación hasta alcanzar el límite deseado de RESULTADOS VÁLIDOS
+   * Retorna los resultados y el token para la siguiente página si existe.
    */
   async search(
     query: string,
-    maxResults: number = 20,
+    targetCount: number = 20,
+    filterFn?: (place: PlaceResult) => boolean,
     location?: { lat: number; lng: number },
-    radiusMeters: number = 50000
-  ): Promise<PlaceResult[]> {
-    const allResults: PlaceResult[] = [];
-    let pageToken: string | undefined = undefined;
+    radiusMeters: number = 50000,
+    initialPageToken?: string
+  ): Promise<{ results: PlaceResult[], nextPageToken?: string }> {
+    const validResults: PlaceResult[] = [];
+    let pageToken: string | undefined = initialPageToken;
     let pageNumber = 0;
-    const maxPages = Math.ceil(maxResults / 20);
+    const maxPagesPerCall = 5; // Límite por llamada individual
 
     try {
       do {
         pageNumber++;
 
-        const response = await this.textSearchPage(query, location, radiusMeters, pageToken);
+        // Buscar página
+        const response: TextSearchResponse = await this.textSearchPage(query, location, radiusMeters, pageToken);
         const places = response.places || [];
 
-        allResults.push(...places);
+        // Filtrar resultados de esta página
+        const pageValidResults = filterFn ? places.filter(filterFn) : places;
+
+        // Añadir a acumulado
+        validResults.push(...pageValidResults);
+
         pageToken = response.nextPageToken;
 
-        // Si ya tenemos suficientes resultados, parar
-        if (allResults.length >= maxResults) {
+        // Si ya tenemos suficientes resultados válidos, parar
+        if (validResults.length >= targetCount) {
           break;
         }
 
-        // Delay entre páginas
-        if (pageToken) {
-          await new Promise(resolve => setTimeout(resolve, 300));
+        // Si no hay token, no hay más resultados en Google
+        if (!pageToken) {
+          break;
         }
 
-      } while (pageToken && pageNumber < maxPages);
+        // Delay corto entre páginas dentro de una misma llamada
+        await new Promise(resolve => setTimeout(resolve, 300));
+
+      } while (pageToken && validResults.length < targetCount && pageNumber < maxPagesPerCall);
+
+      return {
+        results: validResults.slice(0, targetCount),
+        nextPageToken: validResults.length >= targetCount ? undefined : pageToken
+      };
 
     } catch (error) {
       console.error(`Error buscando "${query}":`, error);
       throw error;
     }
-
-    // Recortar al número exacto pedido
-    return allResults.slice(0, maxResults);
   }
 
   /**
    * Busca negocios según la configuración del usuario
    */
-  async searchByConfig(config: SearchConfig): Promise<PlaceResult[]> {
+  async searchByConfig(config: SearchConfig, pageToken?: string): Promise<{ results: PlaceResult[], nextPageToken?: string }> {
     const query = `${config.sector} en ${config.ubicacion}`;
-    
-    // Por ahora buscamos sin coordenadas específicas
-    // Google es bueno inferiendo la ubicación del texto
-    const results = await this.search(query, config.cantidad);
 
-    // Aplicar filtros
-    let filtered = results;
+    // Construir función de filtrado
+    const filterFn = (place: PlaceResult) => {
+      // Filtro Website
+      if (config.filtros.requiereWebsite && !place.websiteUri) {
+        return false;
+      }
 
-    if (config.filtros.requiereWebsite) {
-      filtered = filtered.filter(r => r.websiteUri);
-    }
+      // Filtro Rating
+      if (config.filtros.ratingMinimo && (place.rating || 0) < config.filtros.ratingMinimo!) {
+        return false;
+      }
 
-    if (config.filtros.ratingMinimo) {
-      filtered = filtered.filter(r => (r.rating || 0) >= config.filtros.ratingMinimo!);
-    }
+      return true;
+    };
 
-    return filtered;
+    // Buscar hasta cumplir la cuota o agotar páginas
+    return await this.search(query, config.cantidad, filterFn, undefined, 50000, pageToken);
   }
 
   /**

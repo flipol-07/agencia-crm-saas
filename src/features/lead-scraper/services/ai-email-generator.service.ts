@@ -32,29 +32,33 @@ ESTRUCTURA:
 
 RESPONDE SOLO CON EL HTML, sin explicaciones.`;
 
-const EMAIL_PERSONALIZATION_PROMPT = `Eres un copywriter experto que personaliza emails de ventas.
+const EMAIL_PERSONALIZATION_PROMPT = `Eres Pol, un experto en IA que escribe emails de ventas personalizados para AURIE.
+
+CONTEXTO:
+- Eres un profesional que ofrece servicios de automatización con IA
+- Tu tono es profesional pero cercano, como un consultor de confianza
+- Usas "vosotros/os" y demuestras que has analizado su web/negocio
+- Destacas datos importantes con <span style="color: #bfff00;">texto</span>
 
 ENTRADA:
-- Información del lead (nombre, categoría, ubicación)
+- Información del lead (nombre del negocio, categoría, ubicación)
 - Análisis de su web (si disponible)
-- Template base con variables {{variable}}
 
-SALIDA (JSON):
+SALIDA (JSON estricto):
 {
-  "subject": "Asunto creativo y específico (máx 60 chars)",
-  "variables": {
-    "parrafo_problema": "2-3 frases identificando un problema específico",
-    "parrafo_beneficio": "La propuesta de valor personalizada",
-    "parrafo_cierre": "Call to action con urgencia"
-  }
+  "subject": "Asunto profesional y específico al negocio (máx 50 chars)",
+  "parrafo_problema": "2-3 frases identificando UN problema o reto específico de su sector. Demuestra conocimiento de su industria. Ejemplo: 'Gestionar certificaciones ISO y mantener toda la documentación actualizada consume recursos valiosos de vuestro equipo.'",
+  "parrafo_oferta": "La propuesta comercial profesional. Menciona el nombre de la empresa. Usa highlights con <span style='color: #bfff00;'>texto</span>. Ejemplo: 'Existe una oportunidad con el <span style=\"color: #bfff00;\">Decreto 173/2025</span> que cubre el <span style=\"color: #bfff00;\">85%</span> del coste de implementar IA en vuestros procesos. <span style=\"color: #bfff00;\">{{nombre}} solo aportaría el 15%</span>.'",
+  "parrafo_cierre": "Cierre profesional. Reconoce que es una hipótesis basada en tu análisis y propón una consultoría para validar. Ejemplo: 'Esta es una primera valoración basada en lo que he observado. Os propongo una breve consultoría con mi equipo para analizar vuestro caso concreto y ver si realmente podemos aportaros valor.'"
 }
 
 REGLAS:
-- Tono cercano pero profesional
-- Sé específico al sector/negocio
-- Usa <span style="color: ${HIGHLIGHT_COLOR};">texto</span> para destacar
-- No uses jerga técnica
-- Máximo 150 palabras total`;
+- El parrafo_problema debe ser ESPECÍFICO al sector del negocio
+- Tono profesional de consultor, NO de vendedor agresivo
+- Usa datos reales si los tienes del análisis web
+- Máximo 200 palabras total entre los 3 párrafos
+- NO uses frases tipo "estamos para ayudarte" o demasiado comerciales
+- SÉ ESPECÍFICO al sector - demuestra que entiendes su negocio`;
 
 export class AIEmailGeneratorService {
     private openaiApiKey: string;
@@ -90,6 +94,65 @@ Genera el HTML completo del email.`;
         // Limpiar posibles markdown code blocks
         let html = response;
         if (html.includes('```html')) {
+            html = html.replace(/```html\n?/g, '').replace(/```\n?/g, '');
+        }
+
+        return html.trim();
+    }
+
+    /**
+     * Genera un template HTML completo basándose en un prompt descriptivo del usuario
+     */
+    async generateTemplateFromPrompt(userPrompt: string, config?: {
+        logoUrl?: string;
+        webUrl?: string;
+        emailRespuesta?: string;
+        nombreRemitente?: string;
+        empresaRemitente?: string;
+        infoUrl?: string;
+        infoTexto?: string;
+    }): Promise<string> {
+        const systemPrompt = `Eres un experto diseñador de emails HTML. Generas templates de email profesionales y modernos.
+
+ESTILO BASE:
+- Fondo oscuro (#0d0a1b) con texto claro (#ececec)
+- Color de acento: #bfff00 (verde lima neón)
+- Fuente: Inter (Google Fonts)
+- Max-width: 600px, con border-radius y sombras sutiles
+- Diseño centrado en tablas (compatibilidad email)
+
+VARIABLES DISPONIBLES (el usuario puede usar estas en el contenido):
+- {{nombre}} - Nombre del negocio destinatario
+- {{parrafo_problema}} - Texto generado por IA sobre el problema
+- {{parrafo_oferta}} - Texto generado por IA con la propuesta
+- {{parrafo_cierre}} - Texto generado por IA de cierre
+
+CONFIGURACIÓN DEL REMITENTE:
+- Logo: ${config?.logoUrl || '{{logo_url}}'}
+- Web: ${config?.webUrl || '{{web_url}}'}
+- Email respuesta: ${config?.emailRespuesta || '{{email_respuesta}}'}
+- Nombre remitente: ${config?.nombreRemitente || '{{nombre_remitente}}'}
+- Empresa remitente: ${config?.empresaRemitente || '{{empresa_remitente}}'}
+- Link info: ${config?.infoUrl || '{{info_url}}'} con texto: ${config?.infoTexto || '{{info_texto}}'}
+
+REGLAS:
+1. Genera HTML inline styles (no CSS externo excepto Google Fonts import)
+2. Usa tables para layout (compatibilidad con clientes de email)
+3. Incluye CTAs con botones llamativos
+4. Incluye firma/footer profesional
+5. Mantén el código limpio y bien estructurado
+
+RESPONDE SOLO CON EL CÓDIGO HTML, sin explicaciones ni markdown code blocks.`;
+
+        const response = await this.callOpenAI(
+            `${systemPrompt}\n\nSOLICITUD DEL USUARIO:\n${userPrompt}`,
+            'gpt-4o',
+            4000
+        );
+
+        // Limpiar posibles markdown code blocks
+        let html = response;
+        if (html.includes('```')) {
             html = html.replace(/```html\n?/g, '').replace(/```\n?/g, '');
         }
 

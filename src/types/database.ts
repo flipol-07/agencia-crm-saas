@@ -369,6 +369,99 @@ export interface Database {
                 Insert: SettingsInsert
                 Update: SettingsUpdate
             }
+            // Scraper Tables
+            email_templates: {
+                Row: {
+                    id: string
+                    user_id: string
+                    name: string
+                    html_content: string
+                    description: string | null
+                    is_default: boolean
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    user_id: string
+                    name: string
+                    html_content: string
+                    description?: string | null
+                    is_default?: boolean
+                }
+                Update: {
+                    name?: string
+                    html_content?: string
+                    description?: string | null
+                    is_default?: boolean
+                    updated_at?: string
+                }
+            }
+            scraper_campaigns: {
+                Row: {
+                    id: string
+                    user_id: string
+                    name: string
+                    status: string
+                    search_config: any
+                    template_id: string | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    user_id: string
+                    name: string
+                    status: string
+                    search_config: any
+                    template_id?: string | null
+                }
+                Update: {
+                    name?: string
+                    status?: string
+                    template_id?: string | null
+                    updated_at?: string
+                }
+            }
+            scraper_leads: {
+                Row: {
+                    id: string
+                    campaign_id: string
+                    nombre: string
+                    categoria: string | null
+                    direccion: string | null
+                    ubicacion: string | null
+                    telefono: string | null
+                    email: string | null
+                    website: string | null
+                    rating: number | null
+                    total_reviews: number | null
+                    place_id: string | null
+                    email_subject: string | null
+                    email_html: string | null
+                    email_status: 'pending' | 'generated' | 'sent' | 'error'
+                    sent_at: string | null
+                    created_at: string
+                }
+                Insert: {
+                    campaign_id: string
+                    nombre: string
+                    categoria?: string | null
+                    direccion?: string | null
+                    ubicacion?: string | null
+                    telefono?: string | null
+                    email?: string | null
+                    website?: string | null
+                    rating?: number | null
+                    total_reviews?: number | null
+                    place_id?: string | null
+                    email_status?: 'pending' | 'generated' | 'sent' | 'error'
+                }
+                Update: {
+                    email_subject?: string | null
+                    email_html?: string | null
+                    email_status?: 'pending' | 'generated' | 'sent' | 'error'
+                    sent_at?: string | null
+                }
+            }
         }
     }
 }

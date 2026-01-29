@@ -4,14 +4,12 @@ import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type {
     Invoice,
-    InvoiceInsert,
-    InvoiceUpdate,
-    InvoiceItemInsert
+    InvoiceWithDetails
 } from '@/types/database'
 
-// Hook para facturas de un cliente
-export function useContactInvoices(contactId: string) {
-    const [invoices, setInvoices] = useState<Invoice[]>([])
+// Hook para facturas (global o de un cliente)
+export function useInvoices(contactId?: string) {
+    const [invoices, setInvoices] = useState<InvoiceWithDetails[]>([])
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
@@ -21,56 +19,42 @@ export function useContactInvoices(contactId: string) {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('invoices')
-            .select('*')
-            .eq('contact_id', contactId)
-            .order('created_at', { ascending: false })
+        try {
+            let query = supabase
+                .from('invoices')
+                .select(`
+                    *,
+                    contacts (
+                        id,
+                        company_name,
+                        contact_name,
+                        tax_id,
+                        tax_address,
+                        email,
+                        phone
+                    ),
+                    invoice_items (*)
+                `)
+                .order('created_at', { ascending: false })
 
-        if (error) {
-            setError(error.message)
-        } else {
-            setInvoices(data || [])
+            if (contactId) {
+                query = query.eq('contact_id', contactId)
+            }
+
+            const { data, error } = await query
+
+            if (error) throw error
+            setInvoices((data as InvoiceWithDetails[]) || [])
+        } catch (err: any) {
+            setError(err.message)
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
     }, [supabase, contactId])
 
     useEffect(() => {
-        if (contactId) {
-            fetchInvoices()
-        }
-    }, [contactId, fetchInvoices])
-
-    const createInvoice = async () => {
-        // Generar número simple (en producción se usaría secuencia o lógica compleja)
-        const number = `INV-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`
-
-        const { data, error } = await supabase
-            .from('invoices')
-            .insert({
-                contact_id: contactId,
-                invoice_number: number,
-                status: 'draft',
-                issue_date: new Date().toISOString().split('T')[0],
-                subtotal: 0,
-                tax_rate: 21,
-                tax_amount: 0,
-                total: 0,
-                currency: 'EUR',
-                project_id: null,
-                notes: null,
-                due_date: null,
-                paid_date: null,
-                created_by: null
-            })
-            .select()
-            .single()
-
-        if (error) throw new Error(error.message)
-
-        setInvoices(prev => [data, ...prev])
-        return data
-    }
+        fetchInvoices()
+    }, [fetchInvoices])
 
     const deleteInvoice = async (id: string) => {
         const { error } = await supabase
@@ -87,8 +71,10 @@ export function useContactInvoices(contactId: string) {
         invoices,
         loading,
         error,
-        createInvoice,
         deleteInvoice,
         refetch: fetchInvoices
     }
 }
+
+// Re-export for compatibility if needed, though we should update callsites
+export const useContactInvoices = (contactId: string) => useInvoices(contactId)

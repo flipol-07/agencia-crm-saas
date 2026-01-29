@@ -1,1 +1,2 @@
-export { useContactInvoices } from './useInvoices'
+export { useInvoices, useContactInvoices } from './useInvoices'
+

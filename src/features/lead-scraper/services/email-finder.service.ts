@@ -133,17 +133,22 @@ export class EmailFinderService {
         // Importar playwright dinámicamente
         let playwright;
         try {
+            console.log(`[EmailFinder] Iniciando búsqueda para: ${url}`);
             playwright = await import('playwright');
-        } catch {
-            result.error = 'Playwright no está instalado. Ejecuta: npm install playwright';
+        } catch (err) {
+            console.error('[EmailFinder] Error importando Playwright:', err);
+            result.error = 'Playwright no está instalado correctamente.';
             return result;
         }
 
         let browser;
         try {
-            browser = await playwright.chromium.launch({ headless: this.config.headless });
+            browser = await playwright.chromium.launch({
+                headless: this.config.headless,
+                args: ['--no-sandbox', '--disable-setuid-sandbox'] // Mejor compatibilidad en linux
+            });
             const context = await browser.newContext({
-                userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             });
             const page = await context.newPage();
             page.setDefaultTimeout(this.config.pageTimeout);
@@ -151,7 +156,9 @@ export class EmailFinderService {
             try {
                 await page.goto(url, { waitUntil: 'domcontentloaded' });
                 result.pagesCrawled++;
+                console.log(`[EmailFinder] Página principal cargada: ${url}`);
             } catch (error) {
+                console.warn(`[EmailFinder] Error al cargar ${url}:`, error instanceof Error ? error.message : error);
                 result.error = `No se pudo cargar: ${error}`;
                 await browser.close();
                 return result;
@@ -173,17 +180,20 @@ export class EmailFinderService {
 
             for (const contactUrl of contactPages.slice(0, this.config.maxPagesPerSite - 1)) {
                 try {
+                    console.log(`[EmailFinder] Visitando contacto: ${contactUrl}`);
                     await page.goto(contactUrl, { waitUntil: 'domcontentloaded' });
                     result.pagesCrawled++;
                     const contactContent = await page.evaluate(() => document.body?.innerText || '');
-                    allEmails = [...allEmails, ...extractEmails(contactContent)];
-                } catch {
+                    const emailsFound = extractEmails(contactContent);
+                    allEmails = [...allEmails, ...emailsFound];
+                } catch (error) {
                     // Ignorar errores en páginas secundarias
                 }
             }
 
             // Deduplicar
             const uniqueEmails = [...new Set(allEmails.map(e => e.toLowerCase()))];
+            console.log(`[EmailFinder] Terminado ${url}. Emails encontrados: ${uniqueEmails.length}`);
 
             result.emails = uniqueEmails;
             result.corporateEmails = uniqueEmails.filter(e => !isGenericEmail(e));

@@ -7,6 +7,7 @@
  * 3. Guardar en Supabase
  */
 
+import { SupabaseClient } from '@supabase/supabase-js';
 import { createClient } from '@/lib/supabase/client';
 import { GooglePlacesService, createGooglePlacesService } from './google-places.service';
 import { EmailFinderService, createEmailFinder } from './email-finder.service';
@@ -19,13 +20,19 @@ import type {
 } from '../types/lead-scraper.types';
 
 export class LeadScraperService {
-    private supabase = createClient();
+    private supabase: SupabaseClient;
     private placesService: GooglePlacesService;
     private emailFinder: EmailFinderService;
     private progress: ScrapingProgress | null = null;
     private onProgressCallback?: (progress: ScrapingProgress) => void;
 
-    constructor() {
+    /**
+     * @param supabaseClient Cliente de Supabase opcional (necesario para Server Side con auth)
+     */
+    constructor(supabaseClient?: SupabaseClient) {
+        // Usar cliente inyectado o crear cliente default (browser/anon)
+        this.supabase = supabaseClient || createClient();
+
         this.placesService = createGooglePlacesService();
         this.emailFinder = createEmailFinder();
     }
@@ -77,7 +84,7 @@ export class LeadScraperService {
     }
 
     /**
-     * Ejecuta el scraping completo
+     * Ejecuta el scraping completo (Iterativo hasta cumplir cuota)
      */
     async runScraping(campaignId: string): Promise<Lead[]> {
         // Obtener campaña
@@ -89,58 +96,106 @@ export class LeadScraperService {
 
         if (error) throw error;
         const campaign = this.mapCampaign(campaignData);
+        const targetCount = campaign.searchConfig.cantidad;
+        const requiereEmail = campaign.searchConfig.filtros.requiereEmail;
 
         // Actualizar estado a "scraping"
         await this.updateCampaignStatus(campaignId, 'scraping');
 
+        const allValidLeads: Lead[] = [];
+        let nextPageToken: string | undefined = undefined;
+        let iteration = 0;
+        const maxIterations = 10;
+
         try {
-            // FASE 1: Google Places API
-            this.updateProgress('places', 0, campaign.searchConfig.cantidad, 'Buscando negocios...');
+            while (allValidLeads.length < targetCount && iteration < maxIterations) {
+                iteration++;
+                const remainingNeeded = targetCount - allValidLeads.length;
 
-            const placeResults = await this.placesService.searchByConfig(campaign.searchConfig);
+                // Si necesitamos emails, pedimos más a Google para compensar el filtro posterior
+                const askAmount = requiereEmail ? Math.max(20, remainingNeeded * 3) : remainingNeeded;
 
-            // Convertir a leads
-            const leads: Lead[] = placeResults.map(result =>
-                GooglePlacesService.resultToLead(result, campaign.searchConfig.sector, campaign.searchConfig.ubicacion)
-            );
+                // 1. Buscar negocios en Google Places
+                this.updateProgress(
+                    'places',
+                    allValidLeads.length,
+                    targetCount,
+                    `Buscando más negocios... (Iteración ${iteration})`
+                );
 
-            this.updateProgress('places', leads.length, leads.length, `Encontrados ${leads.length} negocios`);
+                const { results: placeResults, nextPageToken: currentToken } =
+                    await this.placesService.searchByConfig({
+                        ...campaign.searchConfig,
+                        cantidad: askAmount
+                    }, nextPageToken);
 
-            // FASE 2: Email Finder (si está habilitado)
-            let enrichedLeads = leads;
-            if (!campaign.searchConfig.filtros.requiereEmail || campaign.searchConfig.filtros.requiereEmail) {
+                nextPageToken = currentToken;
+
+                if (placeResults.length === 0) {
+                    console.log('No se encontraron más negocios en esta iteración.');
+                    break;
+                }
+
+                // Convertir a leads
+                const leads: Lead[] = placeResults.map(result =>
+                    GooglePlacesService.resultToLead(result, campaign.searchConfig.sector, campaign.searchConfig.ubicacion)
+                );
+
+                // 2. Buscar emails
                 await this.updateCampaignStatus(campaignId, 'finding_emails');
-                this.updateProgress('emails', 0, leads.length, 'Buscando emails...');
+                this.updateProgress(
+                    'emails',
+                    allValidLeads.length,
+                    targetCount,
+                    `Buscando emails en lote de ${leads.length} negocios...`
+                );
 
-                enrichedLeads = await this.emailFinder.enrichLeadsWithEmails(
+                const enrichedLeads = await this.emailFinder.enrichLeadsWithEmails(
                     leads,
                     (current, total, lead) => {
-                        this.updateProgress('emails', current, total, `Buscando email de ${lead.nombre}...`);
+                        const globalCurrent = allValidLeads.length + current;
+                        this.updateProgress('emails', globalCurrent, targetCount, `Buscando email de ${lead.nombre}...`);
                     }
                 );
+
+                // 3. Filtrar y acumular
+                const validBatch = requiereEmail
+                    ? enrichedLeads.filter(l => l.email)
+                    : enrichedLeads;
+
+                allValidLeads.push(...validBatch);
+
+                console.log(`Lote completado: ${validBatch.length} leads válidos añadidos. Total: ${allValidLeads.length}/${targetCount}`);
+
+                // Si no hay más resultados en Google, salimos
+                if (!nextPageToken) break;
+
+                // Si llegamos a la cuota, salimos
+                if (allValidLeads.length >= targetCount) break;
             }
 
-            // Filtrar si requiere email
-            if (campaign.searchConfig.filtros.requiereEmail) {
-                enrichedLeads = enrichedLeads.filter(lead => lead.email);
+            // Recortar al exacto pedido por el usuario
+            const finalLeads = allValidLeads.slice(0, targetCount);
+
+            // 4. Guardar en Supabase
+            if (finalLeads.length > 0) {
+                await this.saveLeads(campaignId, finalLeads);
             }
 
-            // FASE 3: Guardar en Supabase
-            const savedLeads = await this.saveLeads(campaignId, enrichedLeads);
-
-            // Actualizar campaña
+            // Actualizar campaña final
             await this.supabase
                 .from('scraper_campaigns')
                 .update({
                     status: 'ready',
-                    leads_count: savedLeads.length,
+                    leads_count: finalLeads.length,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', campaignId);
 
-            return savedLeads;
+            return finalLeads;
 
         } catch (error) {
+            console.error('Error en bucle de scraping:', error);
             await this.updateCampaignStatus(campaignId, 'draft');
             throw error;
         }
@@ -255,6 +310,6 @@ export class LeadScraperService {
     }
 }
 
-export function createLeadScraperService(): LeadScraperService {
-    return new LeadScraperService();
+export function createLeadScraperService(supabaseClient?: SupabaseClient): LeadScraperService {
+    return new LeadScraperService(supabaseClient);
 }
