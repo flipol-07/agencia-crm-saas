@@ -55,54 +55,69 @@ export function InvoiceList({ contactId }: { contactId: string }) {
     return (
         <div className="space-y-4">
             {invoices.length === 0 ? (
-                <div className="text-center py-6">
-                    <div className="w-12 h-12 mx-auto mb-3 bg-white/5 rounded-full flex items-center justify-center">
-                        <svg className="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <div className="text-center py-12 bg-zinc-900/20 border border-white/5 rounded-2xl">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-zinc-900 rounded-full flex items-center justify-center border border-white/5 shadow-inner">
+                        <svg className="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <p className="text-gray-500 text-sm mb-4">Sin facturas</p>
+                    <p className="text-zinc-500 text-sm mb-6">No hay facturas registradas</p>
                     <button
                         onClick={() => setCreating(true)}
-                        className="text-sm text-lime-400 hover:text-lime-300"
+                        className="px-4 py-2 bg-lime-400 hover:bg-lime-500 text-black font-medium rounded-lg text-sm transition-colors shadow-lg shadow-lime-400/20"
                     >
-                        + Crear factura
+                        + Crear primera factura
                     </button>
                 </div>
             ) : (
                 <>
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         {invoices.map(invoice => (
-                            <div key={invoice.id} className="group flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/10 transition-all border border-transparent hover:border-white/10">
-                                <Link href={`/invoices/${invoice.id}`} className="flex-1 flex items-center gap-3">
+                            <div key={invoice.id} className="group relative flex items-center justify-between p-4 bg-zinc-900/20 rounded-xl hover:bg-zinc-900/40 border border-white/5 hover:border-lime-400/20 transition-all duration-300 hover:shadow-lg">
+                                <Link href={`/invoices/${invoice.id}`} className="absolute inset-0 z-10" />
+                                
+                                <div className="flex items-center gap-4 z-20 pointer-events-none">
+                                    <div className="w-10 h-10 rounded-lg bg-zinc-800 flex items-center justify-center border border-white/5 group-hover:border-lime-400/20 transition-colors">
+                                        <svg className="w-5 h-5 text-zinc-500 group-hover:text-lime-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                    </div>
                                     <div className="flex flex-col">
-                                        <span className="text-sm font-medium text-white">
+                                        <span className="text-sm font-semibold text-zinc-200 group-hover:text-lime-400 transition-colors">
                                             {invoice.invoice_number || 'Borrador'}
                                         </span>
-                                        <span className="text-xs text-gray-500">
-                                            {new Date(invoice.issue_date).toLocaleDateString('es-ES')}
+                                        <span className="text-xs text-zinc-500">
+                                            {new Date(invoice.issue_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
                                         </span>
                                     </div>
-                                    <span className={`text-xs px-2 py-0.5 rounded-full ${statusColors[invoice.status]}`}>
-                                        {statusLabels[invoice.status]}
-                                    </span>
-                                </Link>
-
-                                <div className="text-right mr-3">
-                                    <span className="text-sm font-bold text-white block">
-                                        {invoice.total.toLocaleString('es-ES', { style: 'currency', currency: invoice.currency })}
-                                    </span>
                                 </div>
 
-                                <button
-                                    onClick={() => deleteInvoice(invoice.id)}
-                                    className="p-1 text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-all"
-                                    title="Eliminar factura"
-                                >
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                                <div className="flex items-center gap-6 z-20 pointer-events-none">
+                                    <span className={`text-[10px] uppercase tracking-wider font-semibold px-2.5 py-1 rounded-full border ${statusColors[invoice.status].replace('bg-', 'bg-opacity-10 bg-')}`}>
+                                        {statusLabels[invoice.status]}
+                                    </span>
+
+                                    <div className="text-right min-w-[100px]">
+                                        <span className="text-sm font-bold text-zinc-200 block group-hover:scale-105 transition-transform origin-right">
+                                            {invoice.total.toLocaleString('es-ES', { style: 'currency', currency: invoice.currency })}
+                                        </span>
+                                        <span className="text-[10px] text-zinc-600 uppercase tracking-wider">Total</span>
+                                    </div>
+
+                                    <button
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            e.stopPropagation() // Stop link navigation
+                                            deleteInvoice(invoice.id)
+                                        }}
+                                        className="pointer-events-auto p-2 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0"
+                                        title="Eliminar factura"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         ))}
                     </div>

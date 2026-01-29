@@ -36,8 +36,8 @@ export function useContactProjects(contactId: string) {
         }
     }, [contactId, fetchProjects])
 
-    const createProject = async (project: Partial<ProjectInsert>) => {
-        const { data, error } = await supabase
+    const createProject = async (project: Partial<ProjectInsert>): Promise<Project> => {
+        const { data, error } = await (supabase as any)
             .from('projects')
             .insert({
                 contact_id: contactId,
@@ -54,12 +54,13 @@ export function useContactProjects(contactId: string) {
             throw new Error(error.message)
         }
 
-        setProjects(prev => [data, ...prev])
-        return data
+        const newProject = data as Project
+        setProjects(prev => [newProject, ...prev])
+        return newProject
     }
 
-    const updateProject = async (id: string, updates: ProjectUpdate) => {
-        const { data, error } = await supabase
+    const updateProject = async (id: string, updates: ProjectUpdate): Promise<Project> => {
+        const { data, error } = await (supabase as any)
             .from('projects')
             .update(updates)
             .eq('id', id)
@@ -70,8 +71,9 @@ export function useContactProjects(contactId: string) {
             throw new Error(error.message)
         }
 
-        setProjects(prev => prev.map(p => p.id === id ? data : p))
-        return data
+        const updatedProject = data as Project
+        setProjects(prev => prev.map(p => p.id === id ? updatedProject : p))
+        return updatedProject
     }
 
     return {
