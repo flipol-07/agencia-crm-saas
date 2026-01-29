@@ -26,7 +26,7 @@ export function ContactCard({ contact }: ContactCardProps) {
 
     const getSourceLabel = (source: string) => {
         const labels: Record<string, string> = {
-            inbound_whatsapp: '📱 WhatsApp',
+            inbound_whatsapp: '📱 Mensajería',
             inbound_email: '📧 Email',
             outbound: '📤 Outbound',
             referral: '🤝 Referido',

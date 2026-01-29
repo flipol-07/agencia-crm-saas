@@ -105,6 +105,7 @@ export interface ProjectWithContact extends Project {
 // ============================================
 
 export type TaskPriority = 'low' | 'medium' | 'high' | 'urgent'
+export type TaskStatus = 'todo' | 'in_progress' | 'in_review' | 'blocked' | 'done'
 
 export interface Task {
     id: string
@@ -112,9 +113,11 @@ export interface Task {
     title: string
     description: string | null
     priority: TaskPriority
-    is_completed: boolean
+    status: TaskStatus
+    is_completed: boolean  // Legacy, use status === 'done'
     completed_at: string | null
-    assigned_to: string | null
+    assigned_to: string | null  // Legacy single assignee
+    contact_id: string | null  // Direct client association
     due_date: string | null
     created_at: string
     updated_at: string
@@ -142,6 +145,48 @@ export const TASK_PRIORITIES = [
     { id: 'high', label: 'Alta', color: 'amber' },
     { id: 'urgent', label: 'Urgente', color: 'red' },
 ] as const
+
+// Status labels y colores
+export const TASK_STATUSES = [
+    { id: 'todo', label: 'Por hacer', color: 'gray', icon: '⏳' },
+    { id: 'in_progress', label: 'En progreso', color: 'blue', icon: '▶️' },
+    { id: 'in_review', label: 'En revisión', color: 'purple', icon: '👁️' },
+    { id: 'blocked', label: 'Bloqueado', color: 'red', icon: '🚫' },
+    { id: 'done', label: 'Completado', color: 'lime', icon: '✅' },
+] as const
+
+// Task Comment
+export interface TaskComment {
+    id: string
+    task_id: string
+    user_id: string
+    content: string
+    created_at: string
+    updated_at: string
+}
+
+export type TaskCommentInsert = Omit<TaskComment, 'id' | 'created_at' | 'updated_at'>
+export type TaskCommentUpdate = Partial<Pick<TaskComment, 'content'>>
+
+// Task Assignee (many-to-many)
+export interface TaskAssignee {
+    id: string
+    task_id: string
+    user_id: string
+    created_at: string
+}
+
+// Task with assignees and comments
+export interface TaskWithDetails extends Task {
+    projects: Pick<Project, 'id' | 'name' | 'contact_id'> & {
+        contacts: Pick<Contact, 'id' | 'company_name'>
+    }
+    task_assignees: (TaskAssignee & {
+        profiles: Pick<Profile, 'id' | 'full_name' | 'email' | 'avatar_url'>
+    })[]
+    task_comments?: TaskComment[]
+    contacts?: Pick<Contact, 'id' | 'company_name'> | null
+}
 
 // ============================================
 // Message Types (Evolution API)

@@ -4,7 +4,7 @@ import { useState } from 'react'
 import type { Contact, ContactUpdate } from '@/types/database'
 import { PIPELINE_STAGES } from '@/types/database'
 import { ProjectTasksPanel } from '@/features/projects/components'
-import { ChatFeed } from '@/features/chat/components'
+
 import { InvoiceList } from '@/features/invoices/components'
 
 interface ContactDetail360Props {
@@ -48,7 +48,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
     const statusBadge = getStatusBadge(contact.status)
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* ====== COLUMNA IZQUIERDA: Datos + Pipeline + Notas ====== */}
             <div className="space-y-6">
                 {/* Datos del cliente */}
@@ -84,8 +84,8 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
 
                         {contact.phone && (
                             <div>
-                                <span className="text-sm text-gray-500">WhatsApp</span>
-                                <a href={`https://wa.me/${contact.phone.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="text-lime-400 hover:text-lime-300 block">
+                                <span className="text-sm text-gray-500">Teléfono</span>
+                                <a href={`tel:${contact.phone}`} className="text-lime-400 hover:text-lime-300 block">
                                     {contact.phone}
                                 </a>
                             </div>
@@ -166,12 +166,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                 </div>
             </div>
 
-            {/* ====== COLUMNA CENTRAL: Chat / Feed de Actividad (Placeholder) ====== */}
-            {/* ====== COLUMNA CENTRAL: Chat / Feed de Actividad ====== */}
-            <div className="space-y-6">
-                {/* Chat Component */}
-                <ChatFeed contactId={contact.id} contactPhone={contact.phone} />
-            </div>
+
 
             {/* ====== COLUMNA DERECHA: Proyectos, Tareas y Facturas ====== */}
             <div className="space-y-6">

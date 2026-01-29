@@ -1,110 +1,66 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { useAllTasks } from '@/features/tasks/hooks'
+import { useTasksWithDetails, useTeamMembers } from '@/features/tasks/hooks'
+import {
+    TaskStatusSelector,
+    TaskAssigneeAvatars,
+    TaskModal,
+    CreateTaskModal,
+    TaskCard,
+    KanbanBoard
+} from '@/features/tasks/components'
 import { useAuth } from '@/hooks/useAuth'
-import { TASK_PRIORITIES } from '@/types/database'
-import type { TaskWithProject, TaskPriority } from '@/types/database'
+import { TASK_PRIORITIES, TASK_STATUSES } from '@/types/database'
+import type { TaskWithDetails, TaskStatus, TaskPriority } from '@/types/database'
 
+type ViewMode = 'list' | 'kanban'
 type FilterMode = 'all' | 'mine'
-type SortMode = 'priority' | 'due_date' | 'project'
 
-function TaskCard({
-    task,
-    onToggle
+// TaskCard local eliminado - Usando importado
+
+// ============ LIST VIEW ============
+function TasksListView({
+    tasks,
+    onOpenTask,
+    onStatusChange
 }: {
-    task: TaskWithProject
-    onToggle: () => void
+    tasks: TaskWithDetails[]
+    onOpenTask: (task: TaskWithDetails) => void
+    onStatusChange: (taskId: string, status: TaskStatus) => void
 }) {
-    const priority = TASK_PRIORITIES.find(p => p.id === task.priority)
+    const statusOrder: TaskStatus[] = ['todo', 'in_progress', 'in_review', 'blocked']
 
-    const priorityColors: Record<string, string> = {
-        low: 'border-l-gray-500',
-        medium: 'border-l-blue-500',
-        high: 'border-l-amber-500',
-        urgent: 'border-l-red-500',
-    }
-
-    const priorityBadgeColors: Record<string, string> = {
-        low: 'bg-gray-500/20 text-gray-400',
-        medium: 'bg-blue-500/20 text-blue-400',
-        high: 'bg-amber-500/20 text-amber-400',
-        urgent: 'bg-red-500/20 text-red-400',
-    }
-
-    const isOverdue = task.due_date && new Date(task.due_date) < new Date()
-
-    return (
-        <div className={`glass rounded-lg p-4 border-l-4 ${priorityColors[task.priority]} hover:bg-white/5 transition-all`}>
-            <div className="flex items-start gap-3">
-                <button
-                    onClick={onToggle}
-                    className="mt-1 w-5 h-5 rounded border-2 border-white/30 hover:border-lime-400 flex items-center justify-center transition-all"
-                />
-
-                <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-white">{task.title}</h3>
-
-                    <div className="flex items-center gap-3 mt-2 text-sm">
-                        <Link
-                            href={`/contacts/${task.projects.contact_id}`}
-                            className="text-gray-400 hover:text-lime-400 transition-colors"
-                        >
-                            🏢 {task.projects.contacts.company_name}
-                        </Link>
-                        <span className="text-gray-600">→</span>
-                        <span className="text-gray-400">📋 {task.projects.name}</span>
-                    </div>
-
-                    <div className="flex items-center gap-3 mt-3">
-                        <span className={`text-xs px-2 py-0.5 rounded-full ${priorityBadgeColors[task.priority]}`}>
-                            {priority?.label}
-                        </span>
-
-                        {task.due_date && (
-                            <span className={`text-xs ${isOverdue ? 'text-red-400' : 'text-gray-500'}`}>
-                                📅 {new Date(task.due_date).toLocaleDateString('es-ES')}
-                                {isOverdue && ' (Vencida)'}
-                            </span>
-                        )}
-                    </div>
-                </div>
-            </div>
-        </div>
-    )
-}
-
-function TasksGroupedByPriority({ tasks, onToggle }: { tasks: TaskWithProject[], onToggle: (id: string) => void }) {
-    const priorityOrder: TaskPriority[] = ['urgent', 'high', 'medium', 'low']
-
-    const grouped = priorityOrder.reduce((acc, priority) => {
-        acc[priority] = tasks.filter(t => t.priority === priority)
+    const grouped = statusOrder.reduce((acc, status) => {
+        acc[status] = tasks.filter(t => t.status === status)
         return acc
-    }, {} as Record<TaskPriority, TaskWithProject[]>)
+    }, {} as Record<TaskStatus, TaskWithDetails[]>)
 
-    const priorityLabels: Record<TaskPriority, string> = {
-        urgent: '🔴 Urgente',
-        high: '🟠 Alta',
-        medium: '🔵 Media',
-        low: '⚪ Baja',
-    }
+    const statusConfig = TASK_STATUSES.reduce((acc, s) => {
+        acc[s.id as TaskStatus] = s
+        return acc
+    }, {} as Record<TaskStatus, typeof TASK_STATUSES[number]>)
 
     return (
-        <div className="space-y-6">
-            {priorityOrder.map(priority => {
-                if (grouped[priority].length === 0) return null
+        <div className="space-y-8">
+            {statusOrder.map(status => {
+                if (grouped[status].length === 0) return null
+                const config = statusConfig[status]
                 return (
-                    <div key={priority}>
-                        <h3 className="text-sm font-medium text-gray-400 mb-3">
-                            {priorityLabels[priority]} ({grouped[priority].length})
+                    <div key={status}>
+                        <h3 className="text-sm font-medium text-gray-400 mb-3 flex items-center gap-2">
+                            <span>{config.icon}</span>
+                            <span>{config.label}</span>
+                            <span className="text-gray-600 bg-white/5 px-2 py-0.5 rounded-full text-xs">{grouped[status].length}</span>
                         </h3>
                         <div className="space-y-3">
-                            {grouped[priority].map(task => (
+                            {grouped[status].map(task => (
                                 <TaskCard
                                     key={task.id}
                                     task={task}
-                                    onToggle={() => onToggle(task.id)}
+                                    onOpen={() => onOpenTask(task)}
+                                    onStatusChange={(s) => onStatusChange(task.id, s)}
                                 />
                             ))}
                         </div>
@@ -115,88 +71,190 @@ function TasksGroupedByPriority({ tasks, onToggle }: { tasks: TaskWithProject[],
     )
 }
 
-function TasksGroupedByProject({ tasks, onToggle }: { tasks: TaskWithProject[], onToggle: (id: string) => void }) {
-    const grouped = tasks.reduce((acc, task) => {
-        const projectId = task.projects.id
-        if (!acc[projectId]) {
-            acc[projectId] = {
-                project: task.projects,
-                tasks: [],
-            }
-        }
-        acc[projectId].tasks.push(task)
-        return acc
-    }, {} as Record<string, { project: TaskWithProject['projects'], tasks: TaskWithProject[] }>)
+// TasksKanbanView local eliminado - Usando KanbanBoard importado con DnD
 
-    return (
-        <div className="space-y-6">
-            {Object.values(grouped).map(({ project, tasks }) => (
-                <div key={project.id}>
-                    <h3 className="text-sm font-medium text-gray-400 mb-3">
-                        📋 {project.name} — {project.contacts.company_name} ({tasks.length})
-                    </h3>
-                    <div className="space-y-3">
-                        {tasks.map(task => (
-                            <TaskCard
-                                key={task.id}
-                                task={task}
-                                onToggle={() => onToggle(task.id)}
-                            />
-                        ))}
-                    </div>
-                </div>
-            ))}
-        </div>
-    )
-}
-
+// ============ MAIN PAGE ============
 export default function TasksPage() {
     const { user } = useAuth()
-    const { tasks, loading, toggleComplete } = useAllTasks()
+    const { tasks, loading, updateTaskStatus, assignUser, unassignUser, updateTaskDetails, createQuickTask, refetch } = useTasksWithDetails()
+    const { members } = useTeamMembers()
+
+    const [viewMode, setViewMode] = useState<ViewMode>('list')
     const [filterMode, setFilterMode] = useState<FilterMode>('all')
-    const [sortMode, setSortMode] = useState<SortMode>('priority')
+    const [filterAssignee, setFilterAssignee] = useState<string>('')
+    const [filterPriority, setFilterPriority] = useState<TaskPriority | ''>('')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null)
+    const [showCreateModal, setShowCreateModal] = useState(false)
 
     // Filtrar tareas
-    const filteredTasks = filterMode === 'mine' && user
-        ? tasks.filter(t => t.assigned_to === user.id)
-        : tasks
+    const filteredTasks = useMemo(() => {
+        let result = tasks
 
-    // Ordenar si es por fecha
-    const sortedTasks = sortMode === 'due_date'
-        ? [...filteredTasks].sort((a, b) => {
-            if (!a.due_date) return 1
-            if (!b.due_date) return -1
-            return new Date(a.due_date).getTime() - new Date(b.due_date).getTime()
-        })
-        : filteredTasks
+        // Búsqueda
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase()
+            result = result.filter(t =>
+                t.title.toLowerCase().includes(query) ||
+                t.description?.toLowerCase().includes(query) ||
+                t.projects?.name.toLowerCase().includes(query) ||
+                t.projects?.contacts?.company_name.toLowerCase().includes(query)
+            )
+        }
 
-    const handleToggle = async (id: string) => {
+        // Mis tareas
+        if (filterMode === 'mine' && user) {
+            result = result.filter(t =>
+                t.task_assignees.some(a => a.user_id === user.id)
+            )
+        }
+
+        // Por asignado
+        if (filterAssignee) {
+            result = result.filter(t =>
+                t.task_assignees.some(a => a.user_id === filterAssignee)
+            )
+        }
+
+        // Por prioridad
+        if (filterPriority) {
+            result = result.filter(t => t.priority === filterPriority)
+        }
+
+        return result
+    }, [tasks, searchQuery, filterMode, filterAssignee, filterPriority, user])
+
+    const handleStatusChange = async (taskId: string, status: TaskStatus) => {
         try {
-            await toggleComplete(id, true)
+            await updateTaskStatus(taskId, status)
+            if (selectedTask?.id === taskId) {
+                setSelectedTask(prev => prev ? { ...prev, status } : null)
+            }
         } catch (error) {
-            console.error('Error toggling task:', error)
+            console.error('Error updating status:', error)
         }
     }
+
+    const handleAssign = async (userId: string) => {
+        if (!selectedTask) return
+        try {
+            await assignUser(selectedTask.id, userId)
+            const member = members.find(m => m.id === userId)
+            if (member) {
+                setSelectedTask(prev => prev ? {
+                    ...prev,
+                    task_assignees: [...prev.task_assignees, {
+                        id: crypto.randomUUID(),
+                        task_id: prev.id,
+                        user_id: userId,
+                        created_at: new Date().toISOString(),
+                        profiles: member
+                    }]
+                } : null)
+            }
+        } catch (error) {
+            console.error('Error assigning user:', error)
+        }
+    }
+
+    const handleUnassign = async (userId: string) => {
+        if (!selectedTask) return
+        try {
+            await unassignUser(selectedTask.id, userId)
+            setSelectedTask(prev => prev ? {
+                ...prev,
+                task_assignees: prev.task_assignees.filter(a => a.user_id !== userId)
+            } : null)
+        } catch (error) {
+            console.error('Error unassigning user:', error)
+        }
+    }
+
+    const handleUpdateDetails = async (updates: { title?: string; description?: string | null; priority?: TaskPriority; due_date?: string | null }) => {
+        if (!selectedTask) return
+        try {
+            await updateTaskDetails(selectedTask.id, updates)
+            setSelectedTask(prev => prev ? { ...prev, ...updates } : null)
+        } catch (error) {
+            console.error('Error updating task:', error)
+        }
+    }
+
+    const handleCreateTask = async (taskData: {
+        title: string
+        project_id: string
+        description?: string
+        priority: TaskPriority
+        due_date?: string | null
+    }) => {
+        await createQuickTask(taskData.title, taskData.project_id, {
+            description: taskData.description,
+            priority: taskData.priority,
+            due_date: taskData.due_date || null,
+        })
+        await refetch()
+    }
+
+    const hasFilters = searchQuery || filterAssignee || filterPriority || filterMode !== 'all'
 
     return (
         <div className="space-y-6">
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-tight">Mis Tareas</h1>
+                    <h1 className="text-3xl font-black uppercase tracking-tight">Gestión de Tareas</h1>
                     <p className="text-gray-400 mt-1">
                         {loading ? 'Cargando...' : `${filteredTasks.length} tareas pendientes`}
+                        {hasFilters && tasks.length !== filteredTasks.length && ` (de ${tasks.length})`}
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    {/* Filter */}
+                <div className="flex items-center gap-3 flex-wrap">
+                    {/* Create Task Button */}
+                    <button
+                        onClick={() => setShowCreateModal(true)}
+                        className="px-4 py-2 bg-lime-500 hover:bg-lime-400 text-black font-bold rounded-lg transition-all flex items-center gap-2"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        Nueva Tarea
+                    </button>
+                    {/* View Mode Toggle */}
+                    <div className="flex rounded-lg overflow-hidden border border-white/10">
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`px-3 py-2 text-sm transition-all ${viewMode === 'list'
+                                ? 'bg-lime-400 text-black'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                }`}
+                            title="Vista Lista"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                            </svg>
+                        </button>
+                        <button
+                            onClick={() => setViewMode('kanban')}
+                            className={`px-3 py-2 text-sm transition-all ${viewMode === 'kanban'
+                                ? 'bg-lime-400 text-black'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                }`}
+                            title="Vista Kanban"
+                        >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    {/* My Tasks Toggle */}
                     <div className="flex rounded-lg overflow-hidden border border-white/10">
                         <button
                             onClick={() => setFilterMode('all')}
                             className={`px-4 py-2 text-sm transition-all ${filterMode === 'all'
-                                    ? 'bg-lime-400 text-black'
-                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                ? 'bg-lime-400 text-black'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                         >
                             Todas
@@ -204,25 +262,82 @@ export default function TasksPage() {
                         <button
                             onClick={() => setFilterMode('mine')}
                             className={`px-4 py-2 text-sm transition-all ${filterMode === 'mine'
-                                    ? 'bg-lime-400 text-black'
-                                    : 'bg-white/5 text-gray-400 hover:bg-white/10'
+                                ? 'bg-lime-400 text-black'
+                                : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                         >
                             Mis Tareas
                         </button>
                     </div>
-
-                    {/* Sort */}
-                    <select
-                        value={sortMode}
-                        onChange={(e) => setSortMode(e.target.value as SortMode)}
-                        className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-lime-400"
-                    >
-                        <option value="priority" className="bg-gray-900">Por Prioridad</option>
-                        <option value="project" className="bg-gray-900">Por Proyecto</option>
-                        <option value="due_date" className="bg-gray-900">Por Fecha</option>
-                    </select>
                 </div>
+            </div>
+
+            {/* Filters Row */}
+            <div className="flex items-center gap-3 flex-wrap">
+                {/* Search */}
+                <div className="relative flex-1 min-w-[200px] max-w-md">
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Buscar tareas..."
+                        className="w-full pl-10 pr-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400"
+                    />
+                    {searchQuery && (
+                        <button
+                            onClick={() => setSearchQuery('')}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white"
+                        >
+                            ✕
+                        </button>
+                    )}
+                </div>
+
+                {/* Filter by priority */}
+                <select
+                    value={filterPriority}
+                    onChange={(e) => setFilterPriority(e.target.value as TaskPriority | '')}
+                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-lime-400"
+                >
+                    <option value="" className="bg-gray-900">Todas las prioridades</option>
+                    {TASK_PRIORITIES.map(p => (
+                        <option key={p.id} value={p.id} className="bg-gray-900">
+                            {p.label}
+                        </option>
+                    ))}
+                </select>
+
+                {/* Filter by assignee */}
+                <select
+                    value={filterAssignee}
+                    onChange={(e) => setFilterAssignee(e.target.value)}
+                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-lime-400"
+                >
+                    <option value="" className="bg-gray-900">Todos los miembros</option>
+                    {members.map(m => (
+                        <option key={m.id} value={m.id} className="bg-gray-900">
+                            {m.full_name || m.email}
+                        </option>
+                    ))}
+                </select>
+
+                {/* Clear filters */}
+                {hasFilters && (
+                    <button
+                        onClick={() => {
+                            setSearchQuery('')
+                            setFilterAssignee('')
+                            setFilterPriority('')
+                            setFilterMode('all')
+                        }}
+                        className="px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                    >
+                        Limpiar filtros
+                    </button>
+                )}
             </div>
 
             {/* Tasks */}
@@ -238,18 +353,56 @@ export default function TasksPage() {
             ) : filteredTasks.length === 0 ? (
                 <div className="glass rounded-xl p-12 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 bg-lime-400/10 rounded-full flex items-center justify-center">
-                        <svg className="w-8 h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                        </svg>
+                        {hasFilters ? (
+                            <svg className="w-8 h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        ) : (
+                            <svg className="w-8 h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                        )}
                     </div>
-                    <h3 className="text-xl font-semibold text-white mb-2">¡Todo al día!</h3>
-                    <p className="text-gray-400">No hay tareas pendientes</p>
+                    <h3 className="text-xl font-semibold text-white mb-2">
+                        {hasFilters ? 'Sin resultados' : '¡Todo al día!'}
+                    </h3>
+                    <p className="text-gray-400">
+                        {hasFilters ? 'Prueba con otros filtros' : 'No hay tareas pendientes'}
+                    </p>
                 </div>
-            ) : sortMode === 'project' ? (
-                <TasksGroupedByProject tasks={sortedTasks} onToggle={handleToggle} />
+            ) : viewMode === 'kanban' ? (
+                <KanbanBoard
+                    tasks={filteredTasks}
+                    onOpenTask={setSelectedTask}
+                    onStatusChange={handleStatusChange}
+                />
             ) : (
-                <TasksGroupedByPriority tasks={sortedTasks} onToggle={handleToggle} />
+                <TasksListView
+                    tasks={filteredTasks}
+                    onOpenTask={setSelectedTask}
+                    onStatusChange={handleStatusChange}
+                />
             )}
+
+            {/* Task Modal */}
+            {selectedTask && (
+                <TaskModal
+                    task={selectedTask}
+                    isOpen={!!selectedTask}
+                    onClose={() => setSelectedTask(null)}
+                    onUpdateStatus={(status) => handleStatusChange(selectedTask.id, status)}
+                    onAssign={handleAssign}
+                    onUnassign={handleUnassign}
+                    onUpdateDetails={handleUpdateDetails}
+                />
+            )}
+
+            {/* Create Task Modal */}
+            <CreateTaskModal
+                isOpen={showCreateModal}
+                onClose={() => setShowCreateModal(false)}
+                onCreateTask={handleCreateTask}
+            />
         </div>
     )
 }

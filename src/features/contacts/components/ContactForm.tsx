@@ -93,7 +93,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
 
                 <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-2">
-                        WhatsApp
+                        Teléfono
                     </label>
                     <input
                         id="phone"
@@ -118,7 +118,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
                     >
                         <option value="outbound" className="bg-gray-900">Outbound (Prospección)</option>
-                        <option value="inbound_whatsapp" className="bg-gray-900">Inbound WhatsApp</option>
+                        <option value="inbound_whatsapp" className="bg-gray-900">Inbound Mensajería</option>
                         <option value="inbound_email" className="bg-gray-900">Inbound Email</option>
                         <option value="referral" className="bg-gray-900">Referido</option>
                         <option value="website" className="bg-gray-900">Website</option>

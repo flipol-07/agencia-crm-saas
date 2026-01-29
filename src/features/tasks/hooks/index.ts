@@ -1,1 +1,8 @@
-export { useProjectTasks, useMyTasks, useAllTasks } from './useTasks'
+export {
+    useProjectTasks,
+    useTasksWithDetails,
+    useMyTasks,
+    useAllTasks,
+    useTaskComments,
+    useTeamMembers
+} from './useTasks'
