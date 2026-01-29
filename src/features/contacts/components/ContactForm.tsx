@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import type { ContactSource } from '@/types/database'
+import { ServiceTagSelector } from './ServiceTagSelector'
 
 interface ContactFormProps {
     onSubmit: (data: ContactFormData) => Promise<void>
@@ -14,6 +15,10 @@ export interface ContactFormData {
     contact_name: string
     email: string
     phone: string
+    website: string
+    tax_id: string
+    tax_address: string
+    services: string[]
     source: ContactSource
     notes: string
 }
@@ -24,6 +29,10 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
         contact_name: '',
         email: '',
         phone: '',
+        website: '',
+        tax_id: '',
+        tax_address: '',
+        services: [],
         source: 'outbound',
         notes: '',
     })
@@ -58,6 +67,21 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         onChange={handleChange}
                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
                         placeholder="Nombre de la empresa"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="website" className="block text-sm font-medium text-gray-300 mb-2">
+                        Sitio Web
+                    </label>
+                    <input
+                        id="website"
+                        name="website"
+                        type="url"
+                        value={formData.website}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        placeholder="https://ejemplo.com"
                     />
                 </div>
 
@@ -106,7 +130,37 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                     />
                 </div>
 
-                <div className="md:col-span-2">
+                <div>
+                    <label htmlFor="tax_id" className="block text-sm font-medium text-gray-300 mb-2">
+                        NIF
+                    </label>
+                    <input
+                        id="tax_id"
+                        name="tax_id"
+                        type="text"
+                        value={formData.tax_id}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        placeholder="NIF / CIF"
+                    />
+                </div>
+
+                <div>
+                    <label htmlFor="tax_address" className="block text-sm font-medium text-gray-300 mb-2">
+                        Dirección Fiscal
+                    </label>
+                    <input
+                        id="tax_address"
+                        name="tax_address"
+                        type="text"
+                        value={formData.tax_address}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        placeholder="Calle, Ciudad, CP..."
+                    />
+                </div>
+
+                <div>
                     <label htmlFor="source" className="block text-sm font-medium text-gray-300 mb-2">
                         Origen
                     </label>
@@ -124,6 +178,13 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         <option value="website" className="bg-gray-900">Website</option>
                         <option value="other" className="bg-gray-900">Otro</option>
                     </select>
+                </div>
+
+                <div className="md:col-span-2">
+                    <ServiceTagSelector
+                        selectedTags={formData.services}
+                        onChange={(tags) => setFormData(prev => ({ ...prev, services: tags }))}
+                    />
                 </div>
 
                 <div className="md:col-span-2">

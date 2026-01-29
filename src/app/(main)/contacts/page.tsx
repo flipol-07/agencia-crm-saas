@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { ContactList, ContactForm } from '@/features/contacts/components'
 import { useContacts } from '@/features/contacts/hooks'
 import type { ContactFormData } from '@/features/contacts/components/ContactForm'
+import { analyzeWebsite } from '@/features/contacts/actions/analyze-website'
 
 export default function ContactsPage() {
     const { contacts, loading, createContact } = useContacts()
@@ -13,14 +14,37 @@ export default function ContactsPage() {
     const handleCreateContact = async (data: ContactFormData) => {
         setIsCreating(true)
         try {
-            await createContact({
+            const newContact = await createContact({
                 company_name: data.company_name,
                 contact_name: data.contact_name || null,
                 email: data.email || null,
                 phone: data.phone || null,
                 source: data.source,
                 notes: data.notes || null,
+                website: data.website || null,
+                services: data.services || [],
             })
+
+            // Automatización Post-Creación
+            if (newContact) {
+                const promises = []
+
+                // 1. Análisis Web IA
+                if (data.website) {
+                    promises.push(analyzeWebsite(data.website, newContact.id))
+                }
+
+                // 2. Sync Emails (si hay email)
+                if (data.email) {
+                    const { syncContactEmails } = await import('@/features/emails/actions/sync')
+                    promises.push(syncContactEmails(newContact.id, data.email))
+                }
+
+                if (promises.length > 0) {
+                    await Promise.allSettled(promises)
+                }
+            }
+
             setShowForm(false)
         } catch (error) {
             console.error('Error creating contact:', error)

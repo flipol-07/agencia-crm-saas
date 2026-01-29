@@ -52,6 +52,16 @@ export function useContactInvoices(contactId: string) {
                 invoice_number: number,
                 status: 'draft',
                 issue_date: new Date().toISOString().split('T')[0],
+                subtotal: 0,
+                tax_rate: 21,
+                tax_amount: 0,
+                total: 0,
+                currency: 'EUR',
+                project_id: null,
+                notes: null,
+                due_date: null,
+                paid_date: null,
+                created_by: null
             })
             .select()
             .single()
@@ -79,5 +89,6 @@ export function useContactInvoices(contactId: string) {
         error,
         createInvoice,
         deleteInvoice,
+        refetch: fetchInvoices
     }
 }

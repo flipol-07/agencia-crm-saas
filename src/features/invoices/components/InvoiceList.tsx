@@ -4,21 +4,13 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { useContactInvoices } from '../hooks'
 import type { InvoiceStatus } from '@/types/database'
+import { InvoiceForm } from './InvoiceForm'
 
 export function InvoiceList({ contactId }: { contactId: string }) {
-    const { invoices, loading, createInvoice, deleteInvoice } = useContactInvoices(contactId)
+    const { invoices, loading, deleteInvoice, refetch } = useContactInvoices(contactId || '')
     const [creating, setCreating] = useState(false)
 
-    const handleCreate = async () => {
-        setCreating(true)
-        try {
-            await createInvoice()
-        } catch (error) {
-            console.error('Error creating invoice:', error)
-        } finally {
-            setCreating(false)
-        }
-    }
+    // Si no hay contactId (lista global?), podríamos manejarlo, pero este componente parece específico de contacto.
 
     const statusColors: Record<InvoiceStatus, string> = {
         draft: 'bg-gray-500/20 text-gray-400',
@@ -36,13 +28,27 @@ export function InvoiceList({ contactId }: { contactId: string }) {
         cancelled: 'Cancelada',
     }
 
-    if (loading) {
+    if (loading && !creating) {
         return (
             <div className="space-y-3">
                 {[...Array(2)].map((_, i) => (
                     <div key={i} className="h-12 bg-white/5 rounded-lg animate-pulse" />
                 ))}
             </div>
+        )
+    }
+
+    if (creating) {
+        return (
+            <InvoiceForm
+                initialContactId={contactId}
+                onSuccess={() => {
+                    setCreating(false)
+                    // Recargar lista
+                    window.location.reload() // O mejor, usar refetch si lo expone useContactInvoices (que no lo hace aun)
+                }}
+                onCancel={() => setCreating(false)}
+            />
         )
     }
 
@@ -57,11 +63,10 @@ export function InvoiceList({ contactId }: { contactId: string }) {
                     </div>
                     <p className="text-gray-500 text-sm mb-4">Sin facturas</p>
                     <button
-                        onClick={handleCreate}
-                        disabled={creating}
+                        onClick={() => setCreating(true)}
                         className="text-sm text-lime-400 hover:text-lime-300"
                     >
-                        {creating ? 'Creando...' : '+ Crear factura'}
+                        + Crear factura
                     </button>
                 </div>
             ) : (
@@ -103,11 +108,10 @@ export function InvoiceList({ contactId }: { contactId: string }) {
                     </div>
 
                     <button
-                        onClick={handleCreate}
-                        disabled={creating}
+                        onClick={() => setCreating(true)}
                         className="w-full py-2 bg-white/5 hover:bg-white/10 text-gray-400 hover:text-white rounded-lg text-sm transition-all"
                     >
-                        {creating ? 'Creando...' : '+ Nueva Factura'}
+                        + Nueva Factura
                     </button>
                 </>
             )}

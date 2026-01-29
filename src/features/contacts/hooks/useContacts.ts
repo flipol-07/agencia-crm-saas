@@ -32,7 +32,7 @@ export function useContacts() {
         fetchContacts()
     }, [fetchContacts])
 
-    const createContact = async (contact: Partial<ContactInsert>) => {
+    const createContact = async (contact: Partial<ContactInsert>): Promise<Contact | null> => {
         const { data, error } = await supabase
             .from('contacts')
             .insert({
@@ -46,7 +46,11 @@ export function useContacts() {
                 pain_points: contact.pain_points || [],
                 requirements: contact.requirements || [],
                 notes: contact.notes,
-            })
+                website: contact.website,
+                tax_id: contact.tax_id,
+                tax_address: contact.tax_address,
+                services: contact.services || [],
+            } as any)
             .select()
             .single()
 
@@ -61,7 +65,7 @@ export function useContacts() {
     const updateContact = async (id: string, updates: ContactUpdate) => {
         const { data, error } = await supabase
             .from('contacts')
-            .update(updates)
+            .update(updates as any)
             .eq('id', id)
             .select()
             .single()
@@ -106,32 +110,32 @@ export function useContact(id: string) {
 
     const supabase = createClient()
 
-    useEffect(() => {
-        async function fetchContact() {
-            setLoading(true)
-            const { data, error } = await supabase
-                .from('contacts')
-                .select('*')
-                .eq('id', id)
-                .single()
+    const fetchContact = useCallback(async () => {
+        setLoading(true)
+        const { data, error } = await supabase
+            .from('contacts')
+            .select('*')
+            .eq('id', id)
+            .single()
 
-            if (error) {
-                setError(error.message)
-            } else {
-                setContact(data)
-            }
-            setLoading(false)
+        if (error) {
+            setError(error.message)
+        } else {
+            setContact(data)
         }
+        setLoading(false)
+    }, [id, supabase])
 
+    useEffect(() => {
         if (id) {
             fetchContact()
         }
-    }, [id, supabase])
+    }, [id, fetchContact])
 
     const updateContact = async (updates: ContactUpdate) => {
         const { data, error } = await supabase
             .from('contacts')
-            .update(updates)
+            .update(updates as any)
             .eq('id', id)
             .select()
             .single()
@@ -149,5 +153,61 @@ export function useContact(id: string) {
         loading,
         error,
         updateContact,
+        refetch: fetchContact // Exportar refetch
     }
+}
+
+export function useContactEmails(contactId: string, shouldSync: boolean = false, contactEmail?: string | null) {
+    const [emails, setEmails] = useState<any[]>([])
+    const [loading, setLoading] = useState(true)
+    const [lastSync, setLastSync] = useState<Date | null>(null)
+    const supabase = createClient()
+
+    const fetchEmails = useCallback(async () => {
+        if (!contactId) return
+        setLoading(true)
+        const { data } = await supabase
+            .from('contact_emails')
+            .select('*')
+            .eq('contact_id', contactId)
+            .order('received_at', { ascending: false })
+
+        if (data) setEmails(data)
+        setLoading(false)
+    }, [contactId, supabase])
+
+    // Sincronización automática con proveedor de email (IMAP)
+    useEffect(() => {
+        let mounted = true
+
+        const sync = async () => {
+            if (shouldSync && contactEmail && contactId) {
+                try {
+                    // Import dinámico para evitar problemas de dependencias en cliente si syncContactEmails usa librerías de servidor
+                    // Nota: syncContactEmails es Server Action, se puede llamar directo.
+                    // Pero para evitar bloqueo de UI inicial, lo hacemos después de un primer render o tick.
+                    const { syncContactEmails } = await import('@/features/emails/actions/sync')
+                    await syncContactEmails(contactId, contactEmail)
+                    if (mounted) {
+                        setLastSync(new Date())
+                        fetchEmails() // Recargar datos locales después del sync
+                    }
+                } catch (error) {
+                    console.error("Auto-sync failed:", error)
+                }
+            }
+        }
+
+        // Ejecutar sync solo una vez al montar si shouldSync es true
+        // y solo si tenemos los datos necesarios
+        if (shouldSync && contactEmail) {
+            sync()
+        }
+    }, [contactId, contactEmail, shouldSync, fetchEmails])
+
+    useEffect(() => {
+        fetchEmails()
+    }, [fetchEmails])
+
+    return { emails, loading, refetch: fetchEmails, lastSync }
 }

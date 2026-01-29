@@ -45,6 +45,10 @@ export interface Contact {
     updated_at: string
     created_by: string | null
     estimated_value: number | null
+    website: string | null
+    ai_description: string | null
+    services: string[] | null
+    last_interaction: string | null
 }
 
 export type ContactInsert = Omit<Contact, 'id' | 'created_at' | 'updated_at'>
@@ -61,6 +65,31 @@ export const PIPELINE_STAGES = [
 ] as const
 
 export type PipelineStageId = typeof PIPELINE_STAGES[number]['id']
+
+// ============================================
+// Contact Emails Types
+// ============================================
+
+export type EmailDirection = 'inbound' | 'outbound'
+
+export interface ContactEmail {
+    id: string
+    contact_id: string
+    message_id: string
+    subject: string | null
+    snippet: string | null
+    from_email: string | null
+    to_email: string | null
+    direction: EmailDirection
+    is_read: boolean
+    received_at: string | null
+    created_at: string
+    body_text: string | null
+    body_html: string | null
+}
+
+export type ContactEmailInsert = Omit<ContactEmail, 'id' | 'created_at'>
+export type ContactEmailUpdate = Partial<Omit<ContactEmail, 'id' | 'created_at'>>
 
 // ============================================
 // Project Types
@@ -269,6 +298,28 @@ export interface InvoiceWithDetails extends Invoice {
     invoice_items: InvoiceItem[]
 }
 
+// ============================================
+// Settings Types
+// ============================================
+
+export interface Settings {
+    id: string
+    company_name: string | null
+    tax_id: string | null
+    address: string | null
+    email: string | null
+    phone: string | null
+    website: string | null
+    logo_url: string | null
+    default_tax_rate: number
+    currency: string
+    created_at: string
+    updated_at: string
+}
+
+export type SettingsInsert = Omit<Settings, 'id' | 'created_at' | 'updated_at'>
+export type SettingsUpdate = Partial<Omit<Settings, 'id' | 'created_at'>>
+
 // Database type para Supabase
 export interface Database {
     public: {
@@ -282,6 +333,11 @@ export interface Database {
                 Row: Contact
                 Insert: ContactInsert
                 Update: ContactUpdate
+            }
+            contact_emails: {
+                Row: ContactEmail
+                Insert: ContactEmailInsert
+                Update: ContactEmailUpdate
             }
             projects: {
                 Row: Project
@@ -307,6 +363,11 @@ export interface Database {
                 Row: InvoiceItem
                 Insert: InvoiceItemInsert
                 Update: InvoiceItemUpdate
+            }
+            settings: {
+                Row: Settings
+                Insert: SettingsInsert
+                Update: SettingsUpdate
             }
         }
     }
