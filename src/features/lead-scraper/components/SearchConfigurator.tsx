@@ -75,7 +75,10 @@ export function SearchConfigurator() {
             <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 space-y-6">
                     <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                        <span>🎯</span> Configurar Búsqueda
+                        <svg className="w-6 h-6 text-[#bfff00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+                        </svg>
+                        Configurar Búsqueda
                     </h2>
 
                     {/* Nombre de Campaña */}
@@ -112,8 +115,8 @@ export function SearchConfigurator() {
                                     type="button"
                                     onClick={() => setSector(s)}
                                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${sector === s
-                                            ? 'bg-[#bfff00] text-black font-medium'
-                                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                        ? 'bg-[#bfff00] text-black font-medium'
+                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                                         }`}
                                 >
                                     {s}
@@ -142,8 +145,8 @@ export function SearchConfigurator() {
                                     type="button"
                                     onClick={() => setUbicacion(u)}
                                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${ubicacion === u
-                                            ? 'bg-[#bfff00] text-black font-medium'
-                                            : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
+                                        ? 'bg-[#bfff00] text-black font-medium'
+                                        : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                                         }`}
                                 >
                                     {u}
@@ -155,7 +158,7 @@ export function SearchConfigurator() {
                     {/* Cantidad */}
                     <div>
                         <div className="flex justify-between items-end mb-2">
-                             <label className="block text-sm font-medium text-gray-300">
+                            <label className="block text-sm font-medium text-gray-300">
                                 Cantidad de Leads a Buscar
                             </label>
                             <input

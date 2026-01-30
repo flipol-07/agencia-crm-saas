@@ -99,10 +99,11 @@ export default function MainLayout({
               href="/lead-scraper"
               className="flex items-center gap-3 px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 rounded-lg transition-all group"
             >
-              <span className="text-lg group-hover:animate-pulse">🎯</span>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
+              </svg>
               <span className="flex items-center gap-2">
                 Lead Scraper
-                <span className="px-1.5 py-0.5 text-[10px] font-medium bg-[#bfff00]/20 text-[#bfff00] rounded">NEW</span>
               </span>
             </Link>
             <Link

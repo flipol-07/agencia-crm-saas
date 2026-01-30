@@ -66,17 +66,33 @@ export class EmailSenderService {
 
             try {
                 if (config.testMode) {
-                    // Simular envío
-                    await this.delay(100);
-                    console.log(`[TEST] Simularía envío a: ${lead.email}`);
+                    // Si hay un email de prueba, enviarlo allí. Si no, solo simular.
+                    if (config.testEmail) {
+                        console.log(`[TEST] Enviando email de prueba a: ${config.testEmail} (Original: ${lead.email})`);
+                        await this.sendEmail(
+                            config.testEmail,
+                            lead.email_subject as string,
+                            lead.email_html as string
+                        );
+                    } else {
+                        await this.delay(100);
+                        console.log(`[TEST] Simulación (sin envío): ${lead.email}`);
+                    }
                 } else {
-                    await this.sendEmail(lead);
+                    await this.sendEmail(
+                        lead.email as string,
+                        lead.email_subject as string,
+                        lead.email_html as string
+                    );
                 }
 
-                // Marcar como enviado
-                await (this.supabase.from('scraper_leads') as any)
-                    .update({ email_status: 'sent', sent_at: new Date().toISOString() })
-                    .eq('id', lead.id);
+                // Marcar como enviado (incluso en test mode si se envió a un email de prueba, o según prefieras)
+                // Usualmente en modo test real no queremos manchar la DB como "sent" a menos que queramos ver el flujo completo
+                if (!config.testMode) {
+                    await (this.supabase.from('scraper_leads') as any)
+                        .update({ email_status: 'sent', sent_at: new Date().toISOString() })
+                        .eq('id', lead.id);
+                }
 
                 this.progress.sent++;
             } catch (error) {
@@ -114,14 +130,14 @@ export class EmailSenderService {
     /**
      * Envía un email individual usando API Route
      */
-    private async sendEmail(lead: Record<string, unknown>): Promise<void> {
+    private async sendEmail(to: string, subject: string, html: string): Promise<void> {
         const response = await fetch('/api/lead-scraper/send-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                to: lead.email,
-                subject: lead.email_subject,
-                html: lead.email_html,
+                to,
+                subject,
+                html,
             }),
         });
 

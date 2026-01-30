@@ -172,28 +172,40 @@ export class LeadScraperService {
                 if (allValidLeads.length >= targetCount) break;
             }
 
-            // Recortar al exacto pedido por el usuario
-            const finalLeads = allValidLeads.slice(0, targetCount);
+            // 4. Obtener Place IDs ya existentes en esta campaña para filtrar
+            const { data: existingLeads } = await (this.supabase.from('scraper_leads') as any)
+                .select('place_id')
+                .eq('campaign_id', campaignId);
 
-            // 4. Guardar en Supabase
-            if (finalLeads.length > 0) {
-                await this.saveLeads(campaignId, finalLeads);
+            const existingPlaceIds = new Set((existingLeads || []).map((l: any) => l.place_id));
+
+            // Filtrar leads que ya tenemos
+            const newLeads = allValidLeads.filter(l => !existingPlaceIds.has(l.placeId));
+
+            // 5. Guardar nuevos leads en Supabase
+            if (newLeads.length > 0) {
+                await this.saveLeads(campaignId, newLeads);
             }
+
+            // Obtener conteo total actualizado
+            const { count: finalCount } = await (this.supabase.from('scraper_leads') as any)
+                .select('*', { count: 'exact', head: true })
+                .eq('campaign_id', campaignId);
 
             // Actualizar campaña final
             await (this.supabase.from('scraper_campaigns') as any)
                 .update({
                     status: 'ready',
-                    leads_count: finalLeads.length,
+                    leads_count: finalCount || 0,
                     updated_at: new Date().toISOString(),
                 })
                 .eq('id', campaignId);
 
-            return finalLeads;
+            return newLeads;
 
         } catch (error) {
             console.error('Error en bucle de scraping:', error);
-            await this.updateCampaignStatus(campaignId, 'draft');
+            await this.updateCampaignStatus(campaignId, 'ready'); // Volver a ready si falla
             throw error;
         }
     }

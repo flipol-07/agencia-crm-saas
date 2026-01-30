@@ -8,10 +8,11 @@ interface LeadsTableProps {
     leads: Lead[]
     isLoading: boolean
     onGenerateEmails?: (leadIds: string[]) => Promise<void>
+    onAddLeads?: () => void
     onPreviewLead?: (leadId: string) => void
 }
 
-export function LeadsTable({ leads, isLoading, onGenerateEmails, onPreviewLead }: LeadsTableProps) {
+export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onPreviewLead }: LeadsTableProps) {
     const { selectedLeads, toggleLeadSelection, selectAllLeads, clearSelection } = useLeadScraperStore()
     const [isGenerating, setIsGenerating] = useState(false)
     const [generateError, setGenerateError] = useState('')
@@ -80,6 +81,17 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onPreviewLead }
                     <span className="text-sm text-gray-400">
                         {leads.length} leads • {leads.filter(l => l.email).length} con email
                     </span>
+
+                    {!someSelected && onAddLeads && (
+                        <button
+                            onClick={onAddLeads}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 text-white rounded-lg text-sm border border-white/10 transition-colors"
+                            title="Generar más leads para esta campaña"
+                        >
+                            <span>➕</span>
+                            <span>Generar más</span>
+                        </button>
+                    )}
 
                     {someSelected && (
                         <>

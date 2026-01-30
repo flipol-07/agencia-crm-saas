@@ -128,6 +128,7 @@ export interface SendingConfig {
   delayBetweenEmails: number; // segundos
   dailyLimit: number;
   testMode: boolean;
+  testEmail?: string;
 }
 
 // ============ API RESPONSES ============

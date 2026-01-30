@@ -151,6 +151,101 @@ export function useLeadScraper() {
     }, [setLoading, setError, setLeads]);
 
     /**
+     * Elimina una campaña
+     */
+    const deleteCampaign = useCallback(async (id: string) => {
+        if (!confirm('¿Estás seguro de que quieres eliminar esta campaña y todos sus leads?')) return;
+
+        setLoading(true);
+        setError(null);
+
+        try {
+            const response = await fetch(`/api/lead-scraper/campaigns/${id}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const result = await response.json();
+                throw new Error(result.error || 'Error eliminando campaña');
+            }
+
+            // Actualizar estado local
+            setCampaigns(campaigns.filter(c => c.id !== id));
+            if (currentCampaign?.id === id) {
+                setCurrentCampaign(null);
+                setActiveTab('search');
+            }
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error eliminando campaña');
+        } finally {
+            setLoading(false);
+        }
+    }, [campaigns, currentCampaign, setCampaigns, setCurrentCampaign, setActiveTab, setLoading, setError]);
+
+    /**
+     * Añade más leads a una campaña existente
+     */
+    const addLeads = useCallback(async (campaignId: string, additionalCount: number) => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            // 1. Actualizar la configuración de la campaña para pedir más
+            const currentCount = currentCampaign?.leadsCount || 0;
+            const newTotal = currentCount + additionalCount;
+
+            const updateResponse = await fetch(`/api/lead-scraper/campaigns/${campaignId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    search_config: {
+                        ...currentCampaign?.searchConfig,
+                        cantidad: newTotal
+                    }
+                }),
+            });
+
+            if (!updateResponse.ok) {
+                const result = await updateResponse.json();
+                throw new Error(result.error || 'Error actualizando campaña');
+            }
+
+            // 2. Ejecutar scraping
+            setScrapingProgress({
+                phase: 'places',
+                current: 0,
+                total: additionalCount,
+                message: 'Buscando más leads...',
+                startedAt: new Date().toISOString(),
+            });
+
+            const scrapeResponse = await fetch('/api/lead-scraper/scrape', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ campaignId }),
+            });
+
+            const scrapeResult = await scrapeResponse.json();
+
+            if (!scrapeResponse.ok) {
+                throw new Error(scrapeResult.error || 'Error en scraping');
+            }
+
+            // Recargar leads y campaña
+            await loadLeads(campaignId);
+            await loadCampaigns();
+
+            return scrapeResult.leads;
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error añadiendo leads');
+            throw err;
+        } finally {
+            setLoading(false);
+            setScrapingProgress(null);
+        }
+    }, [currentCampaign, setLoading, setError, setScrapingProgress, loadLeads, loadCampaigns]);
+
+    /**
      * Genera emails para leads seleccionados
      */
     const generateEmails = useCallback(async (campaignId: string, leadIds?: string[], templateId?: string) => {
@@ -261,5 +356,7 @@ export function useLeadScraper() {
         loadLeads,
         generateEmails,
         sendEmails,
+        deleteCampaign,
+        addLeads,
     };
 }

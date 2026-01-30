@@ -111,18 +111,39 @@ export function SendingPanel({ campaign, leads }: SendingPanelProps) {
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                        <input
-                            type="checkbox"
-                            id="testMode"
-                            checked={config.testMode}
-                            onChange={(e) => setConfig({ ...config, testMode: e.target.checked })}
-                            disabled={isSending}
-                            className="w-4 h-4 rounded border-white/10 bg-black/20 text-[#bfff00] focus:ring-[#bfff00]/50"
-                        />
-                        <label htmlFor="testMode" className="text-sm text-yellow-200">
-                            <strong>Modo de Prueba:</strong> Simular el envío sin realmente enviar emails ni usar créditos SMTP.
-                        </label>
+                    <div className="space-y-4">
+                        <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                            <input
+                                type="checkbox"
+                                id="testMode"
+                                checked={config.testMode}
+                                onChange={(e) => setConfig({ ...config, testMode: e.target.checked })}
+                                disabled={isSending}
+                                className="w-4 h-4 rounded border-white/10 bg-black/20 text-[#bfff00] focus:ring-[#bfff00]/50"
+                            />
+                            <label htmlFor="testMode" className="text-sm text-yellow-200">
+                                <strong>Modo de Prueba:</strong> Redirigir todos los emails a una dirección de prueba o solo simular.
+                            </label>
+                        </div>
+
+                        {config.testMode && (
+                            <div className="space-y-2 p-4 bg-white/5 border border-white/10 rounded-lg animate-in slide-in-from-top-1 duration-200">
+                                <label className="text-sm font-medium text-gray-300 block">
+                                    Email de Recepción (Pruebas)
+                                </label>
+                                <input
+                                    type="email"
+                                    placeholder="ejemplo@test.com"
+                                    value={config.testEmail || ''}
+                                    onChange={(e) => setConfig({ ...config, testEmail: e.target.value })}
+                                    disabled={isSending}
+                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#bfff00]/50 transition-colors"
+                                />
+                                <p className="text-xs text-gray-500">
+                                    Si dejas esto vacío, el sistema solo simulará el envío sin mandar ningún email.
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     {isSending && progress && (

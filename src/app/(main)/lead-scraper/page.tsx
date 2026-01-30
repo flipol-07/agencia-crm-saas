@@ -27,6 +27,8 @@ export default function LeadScraperPage() {
         loadCampaigns,
         loadLeads,
         generateEmails,
+        deleteCampaign,
+        addLeads,
     } = useLeadScraper()
 
     const [showCampaigns, setShowCampaigns] = useState(false)
@@ -104,6 +106,7 @@ export default function LeadScraperPage() {
                         setActiveTab('leads')
                         setShowCampaigns(false)
                     }}
+                    onDelete={deleteCampaign}
                     onClose={() => setShowCampaigns(false)}
                 />
             )}
@@ -155,6 +158,21 @@ export default function LeadScraperPage() {
                                     setPendingPreviewLeadIds(leadIds)
                                 } catch (error) {
                                     console.error('Error generando emails:', error)
+                                }
+                            }
+                        }}
+                        onAddLeads={async () => {
+                            if (currentCampaign) {
+                                const countStr = prompt('¿Cuántos leads adicionales quieres buscar?', '20')
+                                if (countStr) {
+                                    const count = parseInt(countStr)
+                                    if (!isNaN(count) && count > 0) {
+                                        try {
+                                            await addLeads(currentCampaign.id, count)
+                                        } catch (error) {
+                                            console.error('Error añadiendo leads:', error)
+                                        }
+                                    }
                                 }
                             }
                         }}
