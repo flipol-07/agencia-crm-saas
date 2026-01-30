@@ -130,7 +130,7 @@ function PipelineColumn({
     return (
         <div
             ref={setNodeRef}
-            className={`flex flex-col min-w-[280px] max-w-[320px] border rounded-xl ${colorClasses[color]} h-full`}
+            className={`flex flex-col flex-1 min-w-[160px] border rounded-xl ${colorClasses[color]} h-full`}
         >
             <div className="p-4 border-b border-white/10">
                 <div className="flex items-center justify-between mb-1">
@@ -193,7 +193,7 @@ export function PipelineKanban() {
         return (
             <div className="flex gap-4 overflow-x-auto pb-4">
                 {PIPELINE_STAGES.map(stage => (
-                    <div key={stage.id} className="flex flex-col min-w-[280px] max-w-[320px] border border-white/10 rounded-xl animate-pulse">
+                    <div key={stage.id} className="flex flex-col flex-1 min-w-[160px] border border-white/10 rounded-xl animate-pulse">
                         <div className="p-4 border-b border-white/10">
                             <div className="h-5 bg-white/10 rounded w-24" />
                         </div>
@@ -246,7 +246,7 @@ export function PipelineKanban() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-4 overflow-x-auto pb-4 min-h-[calc(100vh-200px)]">
+            <div className="flex gap-2 overflow-x-auto pb-4 min-h-[calc(100vh-200px)] w-full">
                 {PIPELINE_STAGES.map(stage => (
                     <PipelineColumn
                         key={stage.id}

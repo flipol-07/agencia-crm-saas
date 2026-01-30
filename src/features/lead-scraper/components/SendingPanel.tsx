@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import type { Campaign, Lead, SendingProgress, SendingConfig } from '../types/lead-scraper.types'
 import { createEmailSenderService } from '../services/email-sender.service'
 import { useLeadScraper } from '../hooks/useLeadScraper'
+import { Card } from '@/shared/components/ui/Card'
+import { Button } from '@/shared/components/ui/Button'
+import { Badge } from '@/shared/components/ui/Badge'
 
 interface SendingPanelProps {
     campaign: Campaign
@@ -56,31 +59,31 @@ export function SendingPanel({ campaign, leads }: SendingPanelProps) {
         <div className="space-y-6 animate-in fade-in duration-500">
             {/* Stats Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <p className="text-gray-400 text-sm">Leads Listos</p>
-                    <p className="text-3xl font-bold text-[#bfff00] mt-1">{leadsReady}</p>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <p className="text-gray-400 text-sm">Emails Enviados</p>
-                    <p className="text-3xl font-bold text-white mt-1">{leadsSent}</p>
-                </div>
-                <div className="bg-white/5 border border-white/10 rounded-xl p-6">
-                    <p className="text-gray-400 text-sm">Errores</p>
-                    <p className="text-3xl font-bold text-red-400 mt-1">{leadsError}</p>
-                </div>
+                <Card className="p-6">
+                    <p className="text-text-muted text-sm">Leads Listos</p>
+                    <p className="text-3xl font-display font-bold text-brand mt-1">{leadsReady}</p>
+                </Card>
+                <Card className="p-6">
+                    <p className="text-text-muted text-sm">Emails Enviados</p>
+                    <p className="text-3xl font-display font-bold text-text-primary mt-1">{leadsSent}</p>
+                </Card>
+                <Card className="p-6">
+                    <p className="text-text-muted text-sm">Errores</p>
+                    <p className="text-3xl font-display font-bold text-red-400 mt-1">{leadsError}</p>
+                </Card>
             </div>
 
             {/* Config & Progress */}
-            <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
+            <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden glass">
                 <div className="p-6 border-b border-white/10 bg-white/[0.02]">
-                    <h2 className="text-lg font-semibold text-white">Configuración de Envío</h2>
-                    <p className="text-sm text-gray-400">Ajusta los parámetros para un envío seguro.</p>
+                    <h2 className="text-lg font-semibold text-text-primary">Configuración de Envío</h2>
+                    <p className="text-sm text-text-muted">Ajusta los parámetros para un envío seguro.</p>
                 </div>
 
                 <div className="p-6 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-300 block">
+                            <label className="text-sm font-medium text-text-secondary block">
                                 Delay entre emails (segundos)
                             </label>
                             <input
@@ -88,17 +91,17 @@ export function SendingPanel({ campaign, leads }: SendingPanelProps) {
                                 value={config.delayBetweenEmails}
                                 onChange={(e) => setConfig({ ...config, delayBetweenEmails: parseInt(e.target.value) })}
                                 disabled={isSending}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#bfff00]/50 transition-colors"
+                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand/50 transition-colors"
                                 min="1"
                                 max="3600"
                             />
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-text-muted">
                                 Recomendado: 30-60 segundos para evitar filtros de spam.
                             </p>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="text-sm font-medium text-gray-300 block">
+                            <label className="text-sm font-medium text-text-secondary block">
                                 Límite Diario
                             </label>
                             <input
@@ -106,29 +109,29 @@ export function SendingPanel({ campaign, leads }: SendingPanelProps) {
                                 value={config.dailyLimit}
                                 onChange={(e) => setConfig({ ...config, dailyLimit: parseInt(e.target.value) })}
                                 disabled={isSending}
-                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#bfff00]/50 transition-colors"
+                                className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand/50 transition-colors"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        <div className="flex items-center gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+                        <div className="flex items-center gap-3 p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg">
                             <input
                                 type="checkbox"
                                 id="testMode"
                                 checked={config.testMode}
                                 onChange={(e) => setConfig({ ...config, testMode: e.target.checked })}
                                 disabled={isSending}
-                                className="w-4 h-4 rounded border-white/10 bg-black/20 text-[#bfff00] focus:ring-[#bfff00]/50"
+                                className="w-4 h-4 rounded border-white/10 bg-black/20 text-brand focus:ring-brand/50"
                             />
-                            <label htmlFor="testMode" className="text-sm text-yellow-200">
+                            <label htmlFor="testMode" className="text-sm text-amber-200">
                                 <strong>Modo de Prueba:</strong> Redirigir todos los emails a una dirección de prueba o solo simular.
                             </label>
                         </div>
 
                         {config.testMode && (
                             <div className="space-y-2 p-4 bg-white/5 border border-white/10 rounded-lg animate-in slide-in-from-top-1 duration-200">
-                                <label className="text-sm font-medium text-gray-300 block">
+                                <label className="text-sm font-medium text-text-secondary block">
                                     Email de Recepción (Pruebas)
                                 </label>
                                 <input
@@ -137,9 +140,9 @@ export function SendingPanel({ campaign, leads }: SendingPanelProps) {
                                     value={config.testEmail || ''}
                                     onChange={(e) => setConfig({ ...config, testEmail: e.target.value })}
                                     disabled={isSending}
-                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-[#bfff00]/50 transition-colors"
+                                    className="w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white focus:outline-none focus:border-brand/50 transition-colors"
                                 />
-                                <p className="text-xs text-gray-500">
+                                <p className="text-xs text-text-muted">
                                     Si dejas esto vacío, el sistema solo simulará el envío sin mandar ningún email.
                                 </p>
                             </div>
@@ -149,20 +152,20 @@ export function SendingPanel({ campaign, leads }: SendingPanelProps) {
                     {isSending && progress && (
                         <div className="space-y-4 animate-in slide-in-from-top-2 duration-300">
                             <div className="flex justify-between text-sm">
-                                <span className="text-gray-400">Progreso de envío</span>
+                                <span className="text-text-muted">Progreso de envío</span>
                                 <span className="text-white font-medium">
                                     {progress.sent + progress.failed} / {progress.total}
                                 </span>
                             </div>
                             <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                                 <div
-                                    className="h-full bg-gradient-to-r from-[#bfff00]/50 to-[#bfff00] transition-all duration-500"
+                                    className="h-full bg-gradient-to-r from-brand/50 to-brand transition-all duration-500"
                                     style={{ width: `${((progress.sent + progress.failed) / progress.total) * 100}%` }}
                                 />
                             </div>
                             {progress.currentLead && (
-                                <p className="text-xs text-center text-gray-500">
-                                    Enviando a: <span className="text-gray-300">{progress.currentLead}</span>
+                                <p className="text-xs text-center text-text-muted">
+                                    Enviando a: <span className="text-text-secondary">{progress.currentLead}</span>
                                 </p>
                             )}
                         </div>
@@ -170,20 +173,22 @@ export function SendingPanel({ campaign, leads }: SendingPanelProps) {
 
                     <div className="flex justify-end gap-3 pt-4 border-t border-white/10">
                         {isSending ? (
-                            <button
+                            <Button
                                 onClick={handleAbort}
-                                className="px-6 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-lg transition-colors font-medium"
+                                variant="destructive"
                             >
                                 Detener Envío
-                            </button>
+                            </Button>
                         ) : (
-                            <button
+                            <Button
                                 onClick={handleStartSending}
                                 disabled={leadsReady === 0}
-                                className="px-8 py-2 bg-[#bfff00] hover:bg-[#a6e600] disabled:bg-gray-800 disabled:text-gray-500 text-black rounded-lg transition-all font-bold tracking-tight shadow-[0_0_20px_rgba(191,255,0,0.2)]"
+                                variant="primary"
+                                size="lg"
+                                className="w-full md:w-auto"
                             >
                                 Iniciar Campaña Masiva
-                            </button>
+                            </Button>
                         )}
                     </div>
                 </div>
