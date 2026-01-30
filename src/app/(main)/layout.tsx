@@ -57,12 +57,18 @@ export default function MainLayout({
       {/* Main content */}
       <div className="flex">
         {/* Sidebar */}
-        <Sidebar />
+        <Suspense fallback={<div className="hidden lg:flex w-64 border-r border-white/10 animate-pulse bg-white/5" />}>
+          <Sidebar />
+        </Suspense>
 
         {/* Content */}
         <main className="flex-1 p-6 lg:p-8 min-w-0 overflow-x-hidden">
-          {children}
-          <FloatingChat />
+          <Suspense fallback={<div className="animate-pulse bg-white/5 h-screen rounded-xl" />}>
+            {children}
+          </Suspense>
+          <Suspense fallback={null}>
+            <FloatingChat />
+          </Suspense>
         </main>
       </div>
     </div>

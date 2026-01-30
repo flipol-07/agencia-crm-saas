@@ -3,7 +3,9 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-export function Sidebar() {
+import { Suspense } from 'react'
+
+function SidebarContent() {
     const pathname = usePathname()
 
     const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`)
@@ -127,5 +129,13 @@ export function Sidebar() {
                 </div>
             )}
         </aside>
+    )
+}
+
+export function Sidebar() {
+    return (
+        <Suspense fallback={<div className="hidden lg:flex w-64 fixed top-[73px] bottom-0 left-0 border-r border-white/10 animate-pulse bg-white/5" />}>
+            <SidebarContent />
+        </Suspense>
     )
 }
