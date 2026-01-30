@@ -22,8 +22,7 @@ interface InvoiceWithClientAndItems extends Invoice {
 async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithClientAndItems, settings: Settings | null } | null> {
     const supabase = await createClient()
 
-    const { data, error: invoiceError } = await supabase
-        .from('invoices')
+    const { data, error: invoiceError } = await (supabase.from('invoices') as any)
         .select(`
             *,
             invoice_items (*),
@@ -39,8 +38,7 @@ async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithClientA
 
     const invoice = data as unknown as InvoiceWithClientAndItems
 
-    const { data: settings } = await supabase
-        .from('settings')
+    const { data: settings } = await (supabase.from('settings') as any)
         .select('*')
         .limit(1)
         .single()

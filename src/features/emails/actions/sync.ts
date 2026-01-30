@@ -32,8 +32,7 @@ export async function syncContactEmails(contactId: string, contactEmail: string)
         }))
 
         // Upsert para no duplicar
-        const { error } = await supabase
-            .from('contact_emails')
+        const { error } = await (supabase.from('contact_emails') as any)
             .upsert(emailsToUpsert as any, { onConflict: 'message_id' })
 
         if (error) throw new Error(`Error BD: ${error.message}`)
@@ -41,8 +40,7 @@ export async function syncContactEmails(contactId: string, contactEmail: string)
         // Actualizar last_interaction del contacto con la fecha del email más reciente
         if (emails.length > 0) {
             const lastEmailDate = emails[0].date.toISOString()
-            await supabase
-                .from('contacts')
+            await (supabase.from('contacts') as any)
                 .update({ last_interaction: lastEmailDate } as any)
                 .eq('id', contactId)
         }

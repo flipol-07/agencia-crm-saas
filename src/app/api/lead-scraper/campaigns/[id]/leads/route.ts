@@ -21,8 +21,7 @@ export async function GET(
         }
 
         // Verificar que la campaña pertenece al usuario
-        const { data: campaign, error: campaignError } = await supabase
-            .from('scraper_campaigns')
+        const { data: campaign, error: campaignError } = await (supabase.from('scraper_campaigns') as any)
             .select('id')
             .eq('id', campaignId)
             .eq('user_id', user.id)
@@ -33,8 +32,7 @@ export async function GET(
         }
 
         // Obtener leads
-        const { data, error } = await supabase
-            .from('scraper_leads')
+        const { data, error } = await (supabase.from('scraper_leads') as any)
             .select('*')
             .eq('campaign_id', campaignId)
             .order('created_at', { ascending: false });
@@ -56,8 +54,8 @@ export async function GET(
             totalReviews: row.total_reviews,
             placeId: row.place_id,
             emailStatus: row.email_status || 'pending',
-            generatedSubject: row.generated_subject,
-            generatedHtml: row.generated_html,
+            emailSubject: row.email_subject,
+            emailHtml: row.email_html,
             sentAt: row.sent_at,
         }));
 

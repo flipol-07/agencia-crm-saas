@@ -80,8 +80,7 @@ export async function updateProfile(formData: FormData) {
         return { error: 'Not authenticated' }
     }
 
-    const { error } = await supabase
-        .from('profiles')
+    const { error } = await (supabase.from('profiles') as any)
         .update({
             full_name: formData.get('full_name') as string,
             updated_at: new Date().toISOString(),

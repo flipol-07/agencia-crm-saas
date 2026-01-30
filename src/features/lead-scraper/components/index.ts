@@ -10,3 +10,4 @@ export { CampaignsList } from './CampaignsList';
 export { ScrapingProgress } from './ScrapingProgress';
 export { TemplateEditor } from './TemplateEditor';
 export { EmailPreview } from './EmailPreview';
+export { SendingPanel } from './SendingPanel';

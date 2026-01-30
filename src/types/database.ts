@@ -1,10 +1,17 @@
-export interface Profile {
+export type Profile = {
     id: string
     email: string
     full_name: string | null
     avatar_url: string | null
     created_at: string
     updated_at: string
+    height?: number | null
+    weight?: number | null
+    gender?: string | null
+    birth_date?: string | null
+    level?: string | null
+    main_styles?: string[] | null
+    personal_records?: any | null
 }
 
 // Enums de Contact
@@ -321,48 +328,189 @@ export type SettingsInsert = Omit<Settings, 'id' | 'created_at' | 'updated_at'>
 export type SettingsUpdate = Partial<Omit<Settings, 'id' | 'created_at'>>
 
 // Database type para Supabase
-export interface Database {
+export type Database = {
     public: {
         Tables: {
             profiles: {
                 Row: Profile
-                Insert: Omit<Profile, 'created_at' | 'updated_at'>
-                Update: Partial<Omit<Profile, 'id' | 'created_at'>>
+                Insert: {
+                    id: string
+                    email: string
+                    full_name?: string | null
+                    avatar_url?: string | null
+                    created_at?: string
+                    updated_at?: string
+                    height?: number | null
+                    weight?: number | null
+                    gender?: string | null
+                    birth_date?: string | null
+                    level?: string | null
+                    main_styles?: string[] | null
+                    personal_records?: any | null
+                }
+                Update: {
+                    id?: string
+                    email?: string
+                    full_name?: string | null
+                    avatar_url?: string | null
+                    created_at?: string
+                    updated_at?: string
+                    height?: number | null
+                    weight?: number | null
+                    gender?: string | null
+                    birth_date?: string | null
+                    level?: string | null
+                    main_styles?: string[] | null
+                    personal_records?: any | null
+                }
+                Relationships: []
             }
             contacts: {
                 Row: Contact
                 Insert: ContactInsert
                 Update: ContactUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "contacts_assigned_to_fkey"
+                        columns: ["assigned_to"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "contacts_created_by_fkey"
+                        columns: ["created_by"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             contact_emails: {
                 Row: ContactEmail
                 Insert: ContactEmailInsert
                 Update: ContactEmailUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "contact_emails_contact_id_fkey"
+                        columns: ["contact_id"]
+                        isOneToOne: false
+                        referencedRelation: "contacts"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             projects: {
                 Row: Project
                 Insert: ProjectInsert
                 Update: ProjectUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "projects_contact_id_fkey"
+                        columns: ["contact_id"]
+                        isOneToOne: false
+                        referencedRelation: "contacts"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "projects_created_by_fkey"
+                        columns: ["created_by"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             tasks: {
                 Row: Task
                 Insert: TaskInsert
                 Update: TaskUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "tasks_assigned_to_fkey"
+                        columns: ["assigned_to"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "tasks_contact_id_fkey"
+                        columns: ["contact_id"]
+                        isOneToOne: false
+                        referencedRelation: "contacts"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "tasks_project_id_fkey"
+                        columns: ["project_id"]
+                        isOneToOne: false
+                        referencedRelation: "projects"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             messages: {
                 Row: Message
                 Insert: MessageInsert
                 Update: MessageUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "messages_contact_id_fkey"
+                        columns: ["contact_id"]
+                        isOneToOne: false
+                        referencedRelation: "contacts"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "messages_sent_by_fkey"
+                        columns: ["sent_by"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             invoices: {
                 Row: Invoice
                 Insert: InvoiceInsert
                 Update: InvoiceUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "invoices_contact_id_fkey"
+                        columns: ["contact_id"]
+                        isOneToOne: false
+                        referencedRelation: "contacts"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "invoices_created_by_fkey"
+                        columns: ["created_by"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "invoices_project_id_fkey"
+                        columns: ["project_id"]
+                        isOneToOne: false
+                        referencedRelation: "projects"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             invoice_items: {
                 Row: InvoiceItem
                 Insert: InvoiceItemInsert
                 Update: InvoiceItemUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "invoice_items_invoice_id_fkey"
+                        columns: ["invoice_id"]
+                        isOneToOne: false
+                        referencedRelation: "invoices"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             settings: {
                 Row: Settings
@@ -395,6 +543,15 @@ export interface Database {
                     is_default?: boolean
                     updated_at?: string
                 }
+                Relationships: [
+                    {
+                        foreignKeyName: "email_templates_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             scraper_campaigns: {
                 Row: {
@@ -404,6 +561,8 @@ export interface Database {
                     status: string
                     search_config: any
                     template_id: string | null
+                    leads_count: number
+                    emails_sent: number
                     created_at: string
                     updated_at: string
                 }
@@ -413,13 +572,26 @@ export interface Database {
                     status: string
                     search_config: any
                     template_id?: string | null
+                    leads_count?: number
+                    emails_sent?: number
                 }
                 Update: {
                     name?: string
                     status?: string
                     template_id?: string | null
+                    leads_count?: number
+                    emails_sent?: number
                     updated_at?: string
                 }
+                Relationships: [
+                    {
+                        foreignKeyName: "scraper_campaigns_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             scraper_leads: {
                 Row: {
@@ -461,7 +633,34 @@ export interface Database {
                     email_status?: 'pending' | 'generated' | 'sent' | 'error'
                     sent_at?: string | null
                 }
+                Relationships: [
+                    {
+                        foreignKeyName: "scraper_leads_campaign_id_fkey"
+                        columns: ["campaign_id"]
+                        isOneToOne: false
+                        referencedRelation: "scraper_campaigns"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
+        }
+        Views: {
+            [_ in never]: never
+        }
+        Functions: {
+            [_ in never]: never
+        }
+        Enums: {
+            contact_source: 'inbound_whatsapp' | 'inbound_email' | 'outbound' | 'referral' | 'website' | 'other'
+            contact_status: 'prospect' | 'qualified' | 'proposal' | 'won' | 'active' | 'maintenance' | 'lost'
+            invoice_status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+            message_direction: 'inbound' | 'outbound'
+            message_status: 'sent' | 'delivered' | 'read' | 'failed'
+            project_status: 'pending' | 'active' | 'on_hold' | 'completed' | 'cancelled'
+            task_priority: 'low' | 'medium' | 'high' | 'urgent'
+        }
+        CompositeTypes: {
+            [_ in never]: never
         }
     }
 }

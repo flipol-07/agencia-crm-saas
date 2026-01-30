@@ -16,8 +16,7 @@ export async function GET() {
             return NextResponse.json({ error: 'No autorizado' }, { status: 401 });
         }
 
-        const { data, error } = await supabase
-            .from('scraper_campaigns')
+        const { data, error } = await (supabase.from('scraper_campaigns') as any)
             .select('*')
             .eq('user_id', user.id)
             .order('created_at', { ascending: false });
@@ -67,8 +66,7 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const { data, error } = await supabase
-            .from('scraper_campaigns')
+        const { data, error } = await (supabase.from('scraper_campaigns') as any)
             .insert({
                 user_id: user.id,
                 name,

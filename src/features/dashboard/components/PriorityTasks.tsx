@@ -13,8 +13,7 @@ export function PriorityTasks() {
     useEffect(() => {
         async function fetchTasks() {
             // Fetch tareas de alta prioridad no completadas
-            const { data } = await supabase
-                .from('tasks')
+            const { data } = await (supabase.from('tasks') as any)
                 .select(`
           *,
           projects ( name, contact_id, contacts ( company_name ) )

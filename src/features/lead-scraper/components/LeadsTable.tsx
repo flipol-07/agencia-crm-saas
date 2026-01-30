@@ -8,32 +8,23 @@ interface LeadsTableProps {
     leads: Lead[]
     isLoading: boolean
     onGenerateEmails?: (leadIds: string[]) => Promise<void>
+    onPreviewLead?: (leadId: string) => void
 }
 
-export function LeadsTable({ leads, isLoading, onGenerateEmails }: LeadsTableProps) {
+export function LeadsTable({ leads, isLoading, onGenerateEmails, onPreviewLead }: LeadsTableProps) {
     const { selectedLeads, toggleLeadSelection, selectAllLeads, clearSelection } = useLeadScraperStore()
     const [isGenerating, setIsGenerating] = useState(false)
     const [generateError, setGenerateError] = useState('')
 
     const handleGenerateEmails = async () => {
-        console.log('🔍 handleGenerateEmails called')
-        console.log('📋 selectedLeads:', selectedLeads)
-        console.log('✅ onGenerateEmails exists:', !!onGenerateEmails)
-
-        if (!onGenerateEmails || selectedLeads.length === 0) {
-            console.log('❌ Returning early:', { hasCallback: !!onGenerateEmails, selectedCount: selectedLeads.length })
-            return
-        }
+        if (!onGenerateEmails || selectedLeads.length === 0) return
 
         setIsGenerating(true)
         setGenerateError('')
 
         try {
-            console.log('🚀 Calling onGenerateEmails with:', selectedLeads)
             await onGenerateEmails(selectedLeads)
-            console.log('✅ onGenerateEmails completed successfully')
         } catch (error) {
-            console.error('❌ Error in onGenerateEmails:', error)
             setGenerateError(error instanceof Error ? error.message : 'Error al generar emails')
         } finally {
             setIsGenerating(false)
@@ -44,7 +35,12 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails }: LeadsTablePro
         return (
             <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center">
                 <div className="animate-spin text-4xl mb-4">⏳</div>
-                <p className="text-gray-400">Cargando leads...</p>
+                <p className="text-gray-400">
+                    {isGenerating ? 'Generando emails personalizados...' : 'Cargando leads...'}
+                </p>
+                {isGenerating && (
+                    <p className="text-gray-500 text-sm mt-2">Esto puede tardar unos segundos por lead.</p>
+                )}
             </div>
         )
     }
@@ -90,7 +86,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails }: LeadsTablePro
                             <button
                                 onClick={handleGenerateEmails}
                                 disabled={isGenerating}
-                                className="px-3 py-1.5 bg-[#bfff00]/10 text-[#bfff00] rounded-lg text-sm hover:bg-[#bfff00]/20 transition-colors disabled:opacity-50 disabled:cursor-wait"
+                                className="px-3 py-1.5 bg-[#bfff00]/10 text-[#bfff00] rounded-lg text-sm hover:bg-[#bfff00]/20 transition-colors disabled:opacity-50 disabled:cursor-wait font-medium"
                             >
                                 {isGenerating ? '⏳ Generando...' : '✉️ Generar Emails'}
                             </button>
@@ -110,13 +106,13 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails }: LeadsTablePro
             <div className="bg-white/5 border border-white/10 rounded-xl overflow-hidden">
                 <table className="w-full">
                     <thead>
-                        <tr className="border-b border-white/10">
+                        <tr className="border-b border-white/10 text-left">
                             <th className="w-10 px-4 py-3"></th>
-                            <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Negocio</th>
-                            <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Categoría</th>
-                            <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
-                            <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Rating</th>
-                            <th className="text-left px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
+                            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Negocio</th>
+                            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Categoría</th>
+                            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Email</th>
+                            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Rating</th>
+                            <th className="px-4 py-3 text-xs font-medium text-gray-400 uppercase tracking-wider">Estado</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
@@ -155,7 +151,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails }: LeadsTablePro
                                 <td className="px-4 py-3">
                                     {lead.rating ? (
                                         <div className="flex items-center gap-1">
-                                            <span className="text-yellow-400">⭐</span>
+                                            <span className="text-yellow-400 text-[10px]">⭐</span>
                                             <span className="text-white text-sm">{lead.rating}</span>
                                             <span className="text-gray-500 text-xs">({lead.totalReviews})</span>
                                         </div>
@@ -164,7 +160,18 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails }: LeadsTablePro
                                     )}
                                 </td>
                                 <td className="px-4 py-3">
-                                    <StatusBadge status={lead.emailStatus} />
+                                    <div className="flex items-center gap-2">
+                                        <StatusBadge status={lead.emailStatus} />
+                                        {lead.emailStatus === 'generated' && onPreviewLead && (
+                                            <button
+                                                onClick={() => onPreviewLead(lead.id)}
+                                                className="p-1 hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-[#bfff00]"
+                                                title="Previsualizar Email"
+                                            >
+                                                👁️
+                                            </button>
+                                        )}
+                                    </div>
                                 </td>
                             </tr>
                         ))}
@@ -178,7 +185,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails }: LeadsTablePro
 function StatusBadge({ status }: { status: Lead['emailStatus'] }) {
     const config = {
         pending: { label: 'Pendiente', bg: 'bg-gray-500/20', text: 'text-gray-400' },
-        generated: { label: 'Generado', bg: 'bg-blue-500/20', text: 'text-blue-400' },
+        generated: { label: 'Generado', bg: 'bg-[#bfff00]/20', text: 'text-[#bfff00]' },
         sent: { label: 'Enviado', bg: 'bg-green-500/20', text: 'text-green-400' },
         error: { label: 'Error', bg: 'bg-red-500/20', text: 'text-red-400' },
     }
@@ -186,8 +193,9 @@ function StatusBadge({ status }: { status: Lead['emailStatus'] }) {
     const { label, bg, text } = config[status || 'pending']
 
     return (
-        <span className={`px-2 py-1 rounded-full text-xs font-medium ${bg} ${text}`}>
+        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${bg} ${text}`}>
             {label}
         </span>
     )
 }
+

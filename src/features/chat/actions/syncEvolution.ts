@@ -58,15 +58,14 @@ export async function syncEvolutionData(config: EvolutionConfig) {
 
             // Upsert Contacto
             // Primero miramos si existe para no machacar datos existentes si no queremos
-            const { data: existing } = await supabase
-                .from('contacts')
+            const { data: existing } = await (supabase.from('contacts') as any)
                 .select('id')
                 .eq('phone', phone)
                 .single()
 
             if (!existing) {
                 // Crear nuevo
-                await supabase.from('contacts').insert({
+                await (supabase.from('contacts') as any).insert({
                     company_name: name || `WhatsApp ${phone}`, // Fallback name
                     contact_name: name,
                     phone: phone,

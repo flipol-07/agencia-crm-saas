@@ -62,8 +62,7 @@ export async function analyzeWebsite(url: string, contactId: string): Promise<An
 
         // Guardar en base de datos
         const supabase = await createClient()
-        const { error: dbError } = await supabase
-            .from('contacts')
+        const { error: dbError } = await (supabase.from('contacts') as any)
             .update({ ai_description: aiDescription })
             .eq('id', contactId)
 

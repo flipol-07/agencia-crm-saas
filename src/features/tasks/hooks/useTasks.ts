@@ -11,7 +11,6 @@ import type {
     TaskStatus,
     TaskPriority,
     TaskComment,
-    TaskCommentInsert
 } from '@/types/database'
 
 // Hook para tareas de un proyecto específico
@@ -26,8 +25,7 @@ export function useProjectTasks(projectId: string) {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('tasks')
+        const { data, error } = await (supabase.from('tasks') as any)
             .select('*')
             .eq('project_id', projectId)
             .order('status', { ascending: true })
@@ -49,8 +47,7 @@ export function useProjectTasks(projectId: string) {
     }, [projectId, fetchTasks])
 
     const createTask = async (task: Partial<TaskInsert>) => {
-        const { data, error } = await supabase
-            .from('tasks')
+        const { data, error } = await (supabase.from('tasks') as any)
             .insert({
                 project_id: projectId,
                 title: task.title || 'Nueva tarea',
@@ -83,8 +80,7 @@ export function useProjectTasks(projectId: string) {
             updateData.completed_at = null
         }
 
-        const { data, error } = await supabase
-            .from('tasks')
+        const { data, error } = await (supabase.from('tasks') as any)
             .update(updateData)
             .eq('id', id)
             .select()
@@ -99,8 +95,7 @@ export function useProjectTasks(projectId: string) {
     }
 
     const deleteTask = async (id: string) => {
-        const { error } = await supabase
-            .from('tasks')
+        const { error } = await (supabase.from('tasks') as any)
             .delete()
             .eq('id', id)
 
@@ -134,8 +129,7 @@ export function useTasksWithDetails() {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('tasks')
+        const { data, error } = await (supabase.from('tasks') as any)
             .select(`
                 *,
                 projects (
@@ -179,8 +173,7 @@ export function useTasksWithDetails() {
             updateData.completed_at = null
         }
 
-        const { error } = await supabase
-            .from('tasks')
+        const { error } = await (supabase.from('tasks') as any)
             .update(updateData)
             .eq('id', id)
 
@@ -196,8 +189,7 @@ export function useTasksWithDetails() {
     }
 
     const assignUser = async (taskId: string, userId: string) => {
-        const { data, error } = await supabase
-            .from('task_assignees')
+        const { data, error } = await (supabase.from('task_assignees') as any)
             .insert({ task_id: taskId, user_id: userId })
             .select(`
                 id,
@@ -223,8 +215,7 @@ export function useTasksWithDetails() {
     }
 
     const unassignUser = async (taskId: string, userId: string) => {
-        const { error } = await supabase
-            .from('task_assignees')
+        const { error } = await (supabase.from('task_assignees') as any)
             .delete()
             .eq('task_id', taskId)
             .eq('user_id', userId)
@@ -250,8 +241,7 @@ export function useTasksWithDetails() {
         priority?: TaskPriority
         due_date?: string | null
     }) => {
-        const { data, error } = await supabase
-            .from('tasks')
+        const { data, error } = await (supabase.from('tasks') as any)
             .insert({
                 title,
                 project_id: projectId,
@@ -294,8 +284,7 @@ export function useTasksWithDetails() {
         priority?: TaskPriority
         due_date?: string | null
     }) => {
-        const { error } = await supabase
-            .from('tasks')
+        const { error } = await (supabase.from('tasks') as any)
             .update(updates)
             .eq('id', id)
 
@@ -331,8 +320,7 @@ export function useMyTasks(userId?: string) {
         setLoading(true)
         setError(null)
 
-        let query = supabase
-            .from('tasks')
+        let query = (supabase.from('tasks') as any)
             .select(`
         *,
         projects (
@@ -366,8 +354,7 @@ export function useMyTasks(userId?: string) {
     }, [fetchTasks])
 
     const toggleComplete = async (id: string, completed: boolean) => {
-        const { error } = await supabase
-            .from('tasks')
+        const { error } = await (supabase.from('tasks') as any)
             .update({
                 status: completed ? 'done' : 'todo',
                 is_completed: completed,
@@ -406,8 +393,7 @@ export function useAllTasks() {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('tasks')
+        const { data, error } = await (supabase.from('tasks') as any)
             .select(`
         *,
         projects (
@@ -434,8 +420,7 @@ export function useAllTasks() {
     }, [fetchTasks])
 
     const toggleComplete = async (id: string, completed: boolean) => {
-        const { error } = await supabase
-            .from('tasks')
+        const { error } = await (supabase.from('tasks') as any)
             .update({
                 status: completed ? 'done' : 'todo',
                 is_completed: completed,
@@ -475,8 +460,7 @@ export function useTaskComments(taskId: string) {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('task_comments')
+        const { data, error } = await (supabase.from('task_comments') as any)
             .select(`
                 *,
                 profiles (full_name)
@@ -497,8 +481,7 @@ export function useTaskComments(taskId: string) {
     }, [fetchComments])
 
     const addComment = async (content: string, userId: string) => {
-        const { data, error } = await supabase
-            .from('task_comments')
+        const { data, error } = await (supabase.from('task_comments') as any)
             .insert({
                 task_id: taskId,
                 user_id: userId,
@@ -519,8 +502,7 @@ export function useTaskComments(taskId: string) {
     }
 
     const deleteComment = async (commentId: string) => {
-        const { error } = await supabase
-            .from('task_comments')
+        const { error } = await (supabase.from('task_comments') as any)
             .delete()
             .eq('id', commentId)
 
@@ -550,8 +532,7 @@ export function useTeamMembers() {
 
     useEffect(() => {
         async function fetchMembers() {
-            const { data } = await supabase
-                .from('profiles')
+            const { data } = await (supabase.from('profiles') as any)
                 .select('id, full_name, email, avatar_url')
                 .order('full_name', { ascending: true })
 

@@ -17,8 +17,7 @@ export function useChat(contactId: string, contactPhone: string | null) {
     // Fetch inicial
     const fetchMessages = useCallback(async () => {
         setLoading(true)
-        const { data, error } = await supabase
-            .from('messages')
+        const { data, error } = await (supabase.from('messages') as any)
             .select('*')
             .eq('contact_id', contactId)
             .order('created_at', { ascending: true })
@@ -107,8 +106,7 @@ export function useChat(contactId: string, contactPhone: string | null) {
             }
 
             // 2. Insertar en Supabase
-            const { data, error } = await supabase
-                .from('messages')
+            const { data, error } = await (supabase.from('messages') as any)
                 .insert({
                     contact_id: contactId,
                     content: content,

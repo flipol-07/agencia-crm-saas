@@ -40,8 +40,7 @@ export class EmailSenderService {
         this.aborted = false;
 
         // Obtener leads con email generado
-        const { data: leads, error } = await this.supabase
-            .from('scraper_leads')
+        const { data: leads, error } = await (this.supabase.from('scraper_leads') as any)
             .select('*')
             .eq('campaign_id', campaignId)
             .eq('email_status', 'generated')
@@ -56,8 +55,7 @@ export class EmailSenderService {
         this.notifyProgress();
 
         // Actualizar estado de campaña
-        await this.supabase
-            .from('scraper_campaigns')
+        await (this.supabase.from('scraper_campaigns') as any)
             .update({ status: 'sending', updated_at: new Date().toISOString() })
             .eq('id', campaignId);
 
@@ -76,8 +74,7 @@ export class EmailSenderService {
                 }
 
                 // Marcar como enviado
-                await this.supabase
-                    .from('scraper_leads')
+                await (this.supabase.from('scraper_leads') as any)
                     .update({ email_status: 'sent', sent_at: new Date().toISOString() })
                     .eq('id', lead.id);
 
@@ -85,8 +82,7 @@ export class EmailSenderService {
             } catch (error) {
                 console.error(`Error enviando a ${lead.email}:`, error);
 
-                await this.supabase
-                    .from('scraper_leads')
+                await (this.supabase.from('scraper_leads') as any)
                     .update({ email_status: 'error' })
                     .eq('id', lead.id);
 
@@ -104,8 +100,7 @@ export class EmailSenderService {
 
         // Actualizar conteo en campaña
         const newStatus = this.aborted ? 'ready' : 'completed';
-        await this.supabase
-            .from('scraper_campaigns')
+        await (this.supabase.from('scraper_campaigns') as any)
             .update({
                 status: newStatus,
                 emails_sent: this.progress.sent,

@@ -2,14 +2,19 @@
 import { createClient } from '@/lib/supabase/client'
 import { Settings, SettingsInsert, SettingsUpdate } from '@/types/database'
 
+export interface EvolutionConfig {
+    baseUrl: string;
+    apiKey: string;
+    instanceName: string;
+}
+
 export const getSettings = async (): Promise<Settings | null> => {
     const supabase = createClient()
 
     // Asumimos que solo hay una configuración por proyecto/usuario por ahora.
     // O mejor, cogemos la primera que encontremos si no hay auth multi-tenant complejo aún.
     // En un futuro multi-tenant real, filtraríamos por organization_id.
-    const { data, error } = await supabase
-        .from('settings')
+    const { data, error } = await (supabase.from('settings') as any)
         .select('*')
         .limit(1)
         .single()
@@ -37,8 +42,7 @@ export const upsertSettings = async (settings: SettingsInsert | SettingsUpdate):
     }
 
     if (existingId) {
-        const { data, error } = await supabase
-            .from('settings')
+        const { data, error } = await (supabase.from('settings') as any)
             .update(settings as any)
             .eq('id', existingId)
             .select()
@@ -47,8 +51,7 @@ export const upsertSettings = async (settings: SettingsInsert | SettingsUpdate):
         if (error) throw new Error(error.message)
         return data
     } else {
-        const { data, error } = await supabase
-            .from('settings')
+        const { data, error } = await (supabase.from('settings') as any)
             .insert(settings as any)
             .select()
             .single()

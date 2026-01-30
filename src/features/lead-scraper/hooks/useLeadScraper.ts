@@ -154,7 +154,6 @@ export function useLeadScraper() {
      * Genera emails para leads seleccionados
      */
     const generateEmails = useCallback(async (campaignId: string, leadIds?: string[], templateId?: string) => {
-        console.log('🎯 [useLeadScraper] generateEmails called:', { campaignId, leadIds, templateId });
         setLoading(true);
         setError(null);
 
@@ -164,7 +163,6 @@ export function useLeadScraper() {
                 templateId,
                 leadIds: leadIds || (selectedLeads.length > 0 ? selectedLeads : undefined),
             };
-            console.log('📤 [useLeadScraper] Sending request:', payload);
 
             const response = await fetch('/api/lead-scraper/generate-emails', {
                 method: 'POST',

@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
         // Crear cliente de servidor con cookies (para tener la sesión del usuario)
         const supabase = await createClient();
-        
+
         // Verificar autenticación
         const { data: { user }, error: authError } = await supabase.auth.getUser();
         if (authError || !user) {
@@ -27,10 +27,10 @@ export async function POST(request: NextRequest) {
         }
 
         // Inyectar cliente autenticado al servicio
-        const scraperService = createLeadScraperService(supabase);
-        
+        const scraperService = createLeadScraperService(supabase as any);
+
         console.log(`Iniciando scraping para campaña ${campaignId} usuario ${user.id}`);
-        
+
         const leads = await scraperService.runScraping(campaignId);
 
         console.log(`Scraping completado. ${leads.length} leads encontrados.`);
@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
         if (error instanceof Error) {
             console.error(error.stack);
         }
-        
+
         return NextResponse.json(
             { error: error instanceof Error ? error.message : 'Error desconocido en servidor' },
             { status: 500 }

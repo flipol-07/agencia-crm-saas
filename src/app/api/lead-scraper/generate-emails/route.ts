@@ -8,11 +8,8 @@ import { createClient } from '@/lib/supabase/server';
 import { createAIEmailGenerator, TemplateService } from '@/features/lead-scraper';
 
 export async function POST(request: NextRequest) {
-    console.log('🎯 [GENERATE-EMAILS] Iniciando generación de emails');
-
     try {
         const { campaignId, templateId, leadIds } = await request.json();
-        console.log('📥 [GENERATE-EMAILS] Payload recibido:', { campaignId, templateId, leadIds });
 
         if (!campaignId) {
             return NextResponse.json(
@@ -45,47 +42,42 @@ export async function POST(request: NextRequest) {
 
         // Obtener leads
         console.log('🔍 [GENERATE-EMAILS] Consultando leads...');
-        const { data: allLeads, error } = await supabase
-            .from('scraper_leads')
+        let query = (supabase.from('scraper_leads') as any)
             .select('*')
             .eq('campaign_id', campaignId)
-            .eq('email_status', 'pending')
-            .not('email', 'is', null)
-            .returns<any[]>();
+            .not('email', 'is', null);
+
+        // Si se proporcionan IDs específicos, usarlos
+        if (leadIds && leadIds.length > 0) {
+            query = query.in('id', leadIds);
+        } else {
+            // Si no, buscar solo los pendientes
+            query = query.eq('email_status', 'pending');
+        }
+
+        const { data: leadsToProcess, error } = await query.returns();
 
         if (error) {
             console.error('❌ [GENERATE-EMAILS] Error consultando leads:', error);
             throw error;
         }
 
-        console.log(`📊 [GENERATE-EMAILS] Leads encontrados: ${allLeads?.length || 0}`);
+        console.log(`📊 [GENERATE-EMAILS] Leads encontrados para procesar: ${leadsToProcess?.length || 0}`);
 
-        if (!allLeads || allLeads.length === 0) {
+        if (!leadsToProcess || leadsToProcess.length === 0) {
+            const msg = leadIds && leadIds.length > 0
+                ? 'Los leads seleccionados no tienen email válido o no existen'
+                : 'No hay leads pendientes con email en esta campaña';
+
             return NextResponse.json(
-                { error: 'No hay leads pendientes para generar' },
+                { error: msg },
                 { status: 404 }
             );
         }
 
-        let leadsToProcess = allLeads;
-
-        // Filtrar por IDs seleccionados si se proporcionan
-        if (leadIds && leadIds.length > 0) {
-            leadsToProcess = allLeads.filter(l => leadIds.includes(l.id));
-            console.log(`🎯 [GENERATE-EMAILS] Filtrando por IDs seleccionados: ${leadIds.length} → ${leadsToProcess.length}`);
-
-            if (leadsToProcess.length === 0) {
-                return NextResponse.json(
-                    { error: 'Los leads seleccionados no están pendientes o no tienen email' },
-                    { status: 404 }
-                );
-            }
-        }
-
         // Actualizar estado de campaña
         console.log('📝 [GENERATE-EMAILS] Actualizando estado de campaña a "generating"');
-        await supabase
-            .from('scraper_campaigns')
+        await (supabase.from('scraper_campaigns') as any)
             .update({ status: 'generating', updated_at: new Date().toISOString() } as any)
             .eq('id', campaignId);
 
@@ -118,8 +110,7 @@ export async function POST(request: NextRequest) {
                     htmlLength: email.htmlContent.length
                 });
 
-                const { error: updateError } = await supabase
-                    .from('scraper_leads')
+                const { error: updateError } = await (supabase.from('scraper_leads') as any)
                     .update({
                         email_subject: email.subject,
                         email_html: email.htmlContent,
@@ -142,8 +133,7 @@ export async function POST(request: NextRequest) {
 
         // Actualizar estado final
         console.log('📝 [GENERATE-EMAILS] Actualizando estado de campaña a "ready"');
-        await supabase
-            .from('scraper_campaigns')
+        await (supabase.from('scraper_campaigns') as any)
             .update({ status: 'ready', updated_at: new Date().toISOString() } as any)
             .eq('id', campaignId);
 

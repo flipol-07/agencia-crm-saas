@@ -16,8 +16,7 @@ export function useContactProjects(contactId: string) {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('projects')
+        const { data, error } = await (supabase.from('projects') as any)
             .select('*')
             .eq('contact_id', contactId)
             .order('created_at', { ascending: false })
@@ -37,8 +36,7 @@ export function useContactProjects(contactId: string) {
     }, [contactId, fetchProjects])
 
     const createProject = async (project: Partial<ProjectInsert>): Promise<Project> => {
-        const { data, error } = await (supabase as any)
-            .from('projects')
+        const { data, error } = await (supabase.from('projects') as any)
             .insert({
                 contact_id: contactId,
                 name: project.name || 'Nuevo Proyecto',
@@ -60,8 +58,7 @@ export function useContactProjects(contactId: string) {
     }
 
     const updateProject = async (id: string, updates: ProjectUpdate): Promise<Project> => {
-        const { data, error } = await (supabase as any)
-            .from('projects')
+        const { data, error } = await (supabase.from('projects') as any)
             .update(updates)
             .eq('id', id)
             .select()
@@ -98,8 +95,7 @@ export function useProjects() {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('projects')
+        const { data, error } = await (supabase.from('projects') as any)
             .select(`
         *,
         contacts (id, company_name, contact_name)

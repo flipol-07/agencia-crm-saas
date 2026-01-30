@@ -48,7 +48,7 @@ SALIDA (JSON estricto):
 {
   "subject": "Asunto profesional y específico al negocio (máx 50 chars)",
   "parrafo_problema": "2-3 frases identificando UN problema o reto específico de su sector. Demuestra conocimiento de su industria. Ejemplo: 'Gestionar certificaciones ISO y mantener toda la documentación actualizada consume recursos valiosos de vuestro equipo.'",
-  "parrafo_oferta": "La propuesta comercial profesional. Menciona el nombre de la empresa. Usa highlights con <span style='color: #bfff00;'>texto</span>. Ejemplo: 'Existe una oportunidad con el <span style=\"color: #bfff00;\">Decreto 173/2025</span> que cubre el <span style=\"color: #bfff00;\">85%</span> del coste de implementar IA en vuestros procesos. <span style=\"color: #bfff00;\">{{nombre}} solo aportaría el 15%</span>.'",
+  "parrafo_beneficio": "La propuesta comercial profesional. Menciona el nombre de la empresa. Usa highlights con <span style='color: #bfff00;'>texto</span>. Ejemplo: 'Existe una oportunidad con el <span style=\"color: #bfff00;\">Decreto 173/2025</span> que cubre el <span style=\"color: #bfff00;\">85%</span> del coste de implementar IA en vuestros procesos. <span style=\"color: #bfff00;\">{{nombre}} solo aportaría el 15%</span>.'",
   "parrafo_cierre": "Cierre profesional. Reconoce que es una hipótesis basada en tu análisis y propón una consultoría para validar. Ejemplo: 'Esta es una primera valoración basada en lo que he observado. Os propongo una breve consultoría con mi equipo para analizar vuestro caso concreto y ver si realmente podemos aportaros valor.'"
 }
 
@@ -247,10 +247,14 @@ Genera el JSON con asunto y variables personalizadas.`;
             htmlContent = htmlContent.replace(/\{\{ubicacion\}\}/g, lead.ubicacion);
 
             // Variables generadas por IA
-            if (parsed.variables) {
-                for (const [key, value] of Object.entries(parsed.variables)) {
-                    htmlContent = htmlContent.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value as string);
-                }
+            // El prompt devuelve un JSON plano: { subject, parrafo_problema, ... }
+            const variablesToReplace = parsed.variables || parsed;
+
+            for (const [key, value] of Object.entries(variablesToReplace)) {
+                // Ignorar 'subject' ya que no es una variable del body
+                if (key === 'subject') continue;
+
+                htmlContent = htmlContent.replace(new RegExp(`\\{\\{${key}\\}\\}`, 'g'), value as string);
             }
 
             return {

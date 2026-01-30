@@ -20,8 +20,8 @@ export function useInvoices(contactId?: string) {
         setError(null)
 
         try {
-            let query = supabase
-                .from('invoices')
+            let query = (supabase
+                .from('invoices') as any)
                 .select(`
                     *,
                     contacts (
@@ -57,8 +57,8 @@ export function useInvoices(contactId?: string) {
     }, [fetchInvoices])
 
     const deleteInvoice = async (id: string) => {
-        const { error } = await supabase
-            .from('invoices')
+        const { error } = await (supabase
+            .from('invoices') as any)
             .delete()
             .eq('id', id)
 

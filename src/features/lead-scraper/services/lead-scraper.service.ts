@@ -20,7 +20,7 @@ import type {
 } from '../types/lead-scraper.types';
 
 export class LeadScraperService {
-    private supabase: SupabaseClient;
+    private supabase: SupabaseClient<any>;
     private placesService: GooglePlacesService;
     private emailFinder: EmailFinderService;
     private progress: ScrapingProgress | null = null;
@@ -29,9 +29,9 @@ export class LeadScraperService {
     /**
      * @param supabaseClient Cliente de Supabase opcional (necesario para Server Side con auth)
      */
-    constructor(supabaseClient?: SupabaseClient) {
+    constructor(supabaseClient?: SupabaseClient<any>) {
         // Usar cliente inyectado o crear cliente default (browser/anon)
-        this.supabase = supabaseClient || createClient();
+        this.supabase = supabaseClient || (createClient() as any);
 
         this.placesService = createGooglePlacesService();
         this.emailFinder = createEmailFinder();
@@ -68,8 +68,7 @@ export class LeadScraperService {
         const { data: { user } } = await this.supabase.auth.getUser();
         if (!user) throw new Error('Usuario no autenticado');
 
-        const { data, error } = await this.supabase
-            .from('scraper_campaigns')
+        const { data, error } = await (this.supabase.from('scraper_campaigns') as any)
             .insert({
                 user_id: user.id,
                 name,
@@ -88,8 +87,7 @@ export class LeadScraperService {
      */
     async runScraping(campaignId: string): Promise<Lead[]> {
         // Obtener campaña
-        const { data: campaignData, error } = await this.supabase
-            .from('scraper_campaigns')
+        const { data: campaignData, error } = await (this.supabase.from('scraper_campaigns') as any)
             .select('*')
             .eq('id', campaignId)
             .single();
@@ -183,8 +181,7 @@ export class LeadScraperService {
             }
 
             // Actualizar campaña final
-            await this.supabase
-                .from('scraper_campaigns')
+            await (this.supabase.from('scraper_campaigns') as any)
                 .update({
                     status: 'ready',
                     leads_count: finalLeads.length,
@@ -220,8 +217,7 @@ export class LeadScraperService {
             email_status: 'pending',
         }));
 
-        const { data, error } = await this.supabase
-            .from('scraper_leads')
+        const { data, error } = await (this.supabase.from('scraper_leads') as any)
             .insert(leadsToInsert)
             .select();
 
@@ -233,8 +229,7 @@ export class LeadScraperService {
      * Obtiene leads de una campaña
      */
     async getLeads(campaignId: string): Promise<Lead[]> {
-        const { data, error } = await this.supabase
-            .from('scraper_leads')
+        const { data, error } = await (this.supabase.from('scraper_leads') as any)
             .select('*')
             .eq('campaign_id', campaignId)
             .order('created_at', { ascending: false });
@@ -247,8 +242,7 @@ export class LeadScraperService {
      * Obtiene campañas del usuario
      */
     async getCampaigns(): Promise<Campaign[]> {
-        const { data, error } = await this.supabase
-            .from('scraper_campaigns')
+        const { data, error } = await (this.supabase.from('scraper_campaigns') as any)
             .select('*')
             .order('created_at', { ascending: false });
 
@@ -260,8 +254,7 @@ export class LeadScraperService {
      * Actualiza estado de campaña
      */
     private async updateCampaignStatus(campaignId: string, status: Campaign['status']) {
-        await this.supabase
-            .from('scraper_campaigns')
+        await (this.supabase.from('scraper_campaigns') as any)
             .update({ status, updated_at: new Date().toISOString() })
             .eq('id', campaignId);
     }
@@ -310,6 +303,6 @@ export class LeadScraperService {
     }
 }
 
-export function createLeadScraperService(supabaseClient?: SupabaseClient): LeadScraperService {
+export function createLeadScraperService(supabaseClient?: SupabaseClient<any>): LeadScraperService {
     return new LeadScraperService(supabaseClient);
 }

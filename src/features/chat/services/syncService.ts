@@ -42,8 +42,7 @@ export const syncService = {
 
             // Upsert Contacto
             // Buscamos primero si existe por teléfono
-            const { data: existing } = await supabase
-                .from('contacts')
+            const { data: existing } = await (supabase.from('contacts') as any)
                 .select('id')
                 .eq('phone', phone)
                 .single()
@@ -51,8 +50,7 @@ export const syncService = {
             let contactId = existing?.id
 
             if (!contactId) {
-                const { data: newContact, error } = await supabase
-                    .from('contacts')
+                const { data: newContact, error } = await (supabase.from('contacts') as any)
                     .insert({
                         company_name: name, // Usamos nombre como empresa por defecto
                         contact_name: name,

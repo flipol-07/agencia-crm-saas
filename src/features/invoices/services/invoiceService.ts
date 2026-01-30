@@ -9,8 +9,7 @@ import {
 
 export const getInvoices = async (): Promise<InvoiceWithDetails[]> => {
     const supabase = createClient()
-    const { data, error } = await supabase
-        .from('invoices')
+    const { data, error } = await (supabase.from('invoices') as any)
         .select(`
             *,
             contacts (
@@ -37,8 +36,7 @@ export const createInvoiceWithItems = async (
     const supabase = createClient()
 
     // 1. Crear Factura
-    const { data: newInvoice, error: invoiceError } = await supabase
-        .from('invoices')
+    const { data: newInvoice, error: invoiceError } = await (supabase.from('invoices') as any)
         .insert(invoice as any)
         .select()
         .single()
@@ -52,8 +50,7 @@ export const createInvoiceWithItems = async (
             invoice_id: (newInvoice as any).id
         }))
 
-        const { error: itemsError } = await supabase
-            .from('invoice_items')
+        const { error: itemsError } = await (supabase.from('invoice_items') as any)
             .insert(itemsWithId)
 
         if (itemsError) {
@@ -73,12 +70,10 @@ export const generateInvoiceNumber = async (): Promise<string> => {
     const supabase = createClient()
 
     // Obtener última factura del año para incrementar
-    const { data } = await supabase
-        .from('invoices')
+    const { data } = await (supabase.from('invoices') as any)
         .select('invoice_number')
         .ilike('invoice_number', `INV-${year}-%`)
         .order('created_at', { ascending: false })
-        .limit(1)
         .limit(1)
         .maybeSingle()
 
@@ -100,8 +95,7 @@ export const updateInvoiceWithItems = async (
     const supabase = createClient()
 
     // 1. Actualizar Factura
-    const { error: invoiceError } = await supabase
-        .from('invoices')
+    const { error: invoiceError } = await (supabase.from('invoices') as any)
         .update(invoice as any)
         .eq('id', id)
 
@@ -109,8 +103,7 @@ export const updateInvoiceWithItems = async (
 
     // 2. Gestionar Items: Borrar antiguos e insertar nuevos
     // (En un entorno con transacciones reales usaríamos RPC o una sola transacción)
-    const { error: deleteError } = await supabase
-        .from('invoice_items')
+    const { error: deleteError } = await (supabase.from('invoice_items') as any)
         .delete()
         .eq('invoice_id', id)
 
@@ -122,8 +115,7 @@ export const updateInvoiceWithItems = async (
             invoice_id: id
         }))
 
-        const { error: itemsError } = await supabase
-            .from('invoice_items')
+        const { error: itemsError } = await (supabase.from('invoice_items') as any)
             .insert(itemsWithId)
 
         if (itemsError) throw new Error(itemsError.message)

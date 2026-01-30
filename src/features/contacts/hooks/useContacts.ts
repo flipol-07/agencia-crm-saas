@@ -15,8 +15,7 @@ export function useContacts() {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await supabase
-            .from('contacts')
+        const { data, error } = await (supabase.from('contacts') as any)
             .select('*')
             .order('created_at', { ascending: false })
 
@@ -33,8 +32,7 @@ export function useContacts() {
     }, [fetchContacts])
 
     const createContact = async (contact: Partial<ContactInsert>): Promise<Contact | null> => {
-        const { data, error } = await supabase
-            .from('contacts')
+        const { data, error } = await (supabase.from('contacts') as any)
             .insert({
                 company_name: contact.company_name || 'Sin nombre',
                 contact_name: contact.contact_name,
@@ -63,8 +61,7 @@ export function useContacts() {
     }
 
     const updateContact = async (id: string, updates: ContactUpdate) => {
-        const { data, error } = await supabase
-            .from('contacts')
+        const { data, error } = await (supabase.from('contacts') as any)
             .update(updates as any)
             .eq('id', id)
             .select()
@@ -79,8 +76,7 @@ export function useContacts() {
     }
 
     const deleteContact = async (id: string) => {
-        const { error } = await supabase
-            .from('contacts')
+        const { error } = await (supabase.from('contacts') as any)
             .delete()
             .eq('id', id)
 
@@ -112,8 +108,7 @@ export function useContact(id: string) {
 
     const fetchContact = useCallback(async () => {
         setLoading(true)
-        const { data, error } = await supabase
-            .from('contacts')
+        const { data, error } = await (supabase.from('contacts') as any)
             .select('*')
             .eq('id', id)
             .single()
@@ -133,8 +128,7 @@ export function useContact(id: string) {
     }, [id, fetchContact])
 
     const updateContact = async (updates: ContactUpdate) => {
-        const { data, error } = await supabase
-            .from('contacts')
+        const { data, error } = await (supabase.from('contacts') as any)
             .update(updates as any)
             .eq('id', id)
             .select()
@@ -166,8 +160,7 @@ export function useContactEmails(contactId: string, shouldSync: boolean = false,
     const fetchEmails = useCallback(async () => {
         if (!contactId) return
         setLoading(true)
-        const { data } = await supabase
-            .from('contact_emails')
+        const { data } = await (supabase.from('contact_emails') as any)
             .select('*')
             .eq('contact_id', contactId)
             .order('received_at', { ascending: false })

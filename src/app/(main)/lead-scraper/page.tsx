@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from 'react'
 import { useLeadScraper } from '@/features/lead-scraper/hooks/useLeadScraper'
-import { SearchConfigurator } from '@/features/lead-scraper/components/SearchConfigurator'
-import { LeadsTable } from '@/features/lead-scraper/components/LeadsTable'
-import { CampaignsList } from '@/features/lead-scraper/components/CampaignsList'
-import { ScrapingProgress } from '@/features/lead-scraper/components/ScrapingProgress'
-import { TemplateEditor } from '@/features/lead-scraper/components/TemplateEditor'
-import { EmailPreview } from '@/features/lead-scraper/components/EmailPreview'
+import {
+    SearchConfigurator,
+    LeadsTable,
+    CampaignsList,
+    ScrapingProgress,
+    TemplateEditor,
+    EmailPreview,
+    SendingPanel
+} from '@/features/lead-scraper/components'
 import type { Lead } from '@/features/lead-scraper/types/lead-scraper.types'
 
 export default function LeadScraperPage() {
@@ -143,12 +146,8 @@ export default function LeadScraperPage() {
                         leads={leads}
                         isLoading={isLoading}
                         onGenerateEmails={async (leadIds) => {
-                            console.log('🕹️ Page handler triggered for leads:', leadIds);
-                            console.log('📊 Current campaign:', currentCampaign);
-
                             if (currentCampaign) {
                                 try {
-                                    console.log('🎯 Starting email generation for:', leadIds)
                                     await generateEmails(currentCampaign.id, leadIds)
 
                                     // Marcar estos IDs como pendientes de preview
@@ -159,6 +158,9 @@ export default function LeadScraperPage() {
                                 }
                             }
                         }}
+                        onPreviewLead={(leadId) => {
+                            setPendingPreviewLeadIds([leadId])
+                        }}
                     />
                 )}
 
@@ -166,10 +168,23 @@ export default function LeadScraperPage() {
                     <TemplateEditor />
                 )}
 
-                {activeTab === 'send' && (
-                    <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center text-gray-400">
-                        <span className="text-4xl mb-4 block">🚧</span>
-                        <p>Panel de Envío - Próximamente</p>
+                {activeTab === 'send' && currentCampaign && (
+                    <SendingPanel
+                        campaign={currentCampaign}
+                        leads={leads}
+                    />
+                )}
+
+                {activeTab === 'send' && !currentCampaign && (
+                    <div className="bg-white/5 border border-white/10 rounded-xl p-12 text-center text-gray-400">
+                        <span className="text-4xl mb-4 block">📁</span>
+                        <p>Selecciona una campaña para gestionar el envío.</p>
+                        <button
+                            onClick={() => setShowCampaigns(true)}
+                            className="mt-4 px-4 py-2 bg-[#bfff00]/10 text-[#bfff00] rounded-lg hover:bg-[#bfff00]/20 transition-colors"
+                        >
+                            Ver Campañas
+                        </button>
                     </div>
                 )}
             </div>
