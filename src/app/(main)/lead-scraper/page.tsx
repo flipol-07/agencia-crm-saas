@@ -72,7 +72,7 @@ export default function LeadScraperPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white tracking-tight">Lead Scraper</h1>
                     <p className="text-gray-400 mt-1">
@@ -81,7 +81,7 @@ export default function LeadScraperPage() {
                 </div>
                 <button
                     onClick={() => setShowCampaigns(!showCampaigns)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white transition-colors"
+                    className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-white transition-colors"
                 >
                     <span>📁</span>
                     <span>Campañas ({campaigns.length})</span>
@@ -117,12 +117,12 @@ export default function LeadScraperPage() {
             )}
 
             {/* Tabs */}
-            <div className="flex gap-2 border-b border-white/10 pb-2">
+            <div className="flex gap-2 border-b border-white/10 pb-2 overflow-x-auto scrollbar-hide">
                 {tabs.map(tab => (
                     <button
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-colors ${activeTab === tab.id
+                        className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
                             ? 'bg-[#bfff00]/10 text-[#bfff00] border-b-2 border-[#bfff00]'
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}

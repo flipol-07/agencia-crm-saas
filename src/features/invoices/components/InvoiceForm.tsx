@@ -2,6 +2,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useSettings } from '@/features/settings/hooks/useSettings'
@@ -74,7 +75,7 @@ export function InvoiceForm({
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!selectedContactId) return alert('Selecciona un cliente')
+        if (!selectedContactId) return toast.error('Selecciona un cliente')
 
         setLoading(true)
         try {
@@ -104,16 +105,16 @@ export function InvoiceForm({
 
             if (initialData) {
                 await updateInvoiceWithItems(initialData.id, invoicePayload, itemsPayload)
-                alert('Factura actualizada correctamente')
+                toast.success('Factura actualizada correctamente')
             } else {
                 await createInvoiceWithItems(invoicePayload, itemsPayload)
-                alert('Factura creada correctamente')
+                toast.success('Factura creada correctamente')
             }
 
             if (onSuccess) onSuccess()
         } catch (error) {
             console.error(error)
-            alert('Error al guardar factura')
+            toast.error('Error al guardar factura')
         } finally {
             setLoading(false)
         }

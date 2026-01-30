@@ -158,16 +158,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                     placeholder="0.00"
                                 />
                             </div>
-                            <div>
-                                <label className="text-xs text-gray-500">Valor Estimado (Pipeline) €</label>
-                                <input
-                                    type="number"
-                                    value={detailsData.estimated_value}
-                                    onChange={e => setDetailsData(prev => ({ ...prev, estimated_value: Number(e.target.value) }))}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
-                                    placeholder="0.00"
-                                />
-                            </div>
+
 
                             <div>
                                 <label className="text-xs text-gray-500">Servicios (Tags)</label>

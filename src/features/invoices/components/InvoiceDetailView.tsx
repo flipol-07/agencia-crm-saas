@@ -132,18 +132,18 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
     const client = invoice.contacts
 
     return (
-        <div id="invoice-root" className="min-h-screen bg-[#0b141a] text-white p-8 pb-32">
+        <div id="invoice-root" className="min-h-screen bg-[#0b141a] text-white p-4 md:p-8 pb-32">
             {/* Toolbar Superior */}
-            <div className="max-w-5xl mx-auto mb-8 flex justify-between items-center print:hidden border-b border-white/10 pb-4">
-                <div className="flex items-center gap-6">
+            <div className="max-w-5xl mx-auto mb-8 flex flex-col md:flex-row justify-between items-center gap-4 print:hidden border-b border-white/10 pb-4">
+                <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6 w-full md:w-auto">
                     <Link
                         href={`/contacts/${client?.id}`}
-                        className="text-gray-400 hover:text-white flex items-center gap-2 transition-colors"
+                        className="text-gray-400 hover:text-white flex items-center gap-2 transition-colors self-start md:self-auto"
                     >
                         ← Volver
                     </Link>
-                    <div className="h-6 w-px bg-white/10" />
-                    <div className="flex gap-2">
+                    <div className="hidden md:block h-6 w-px bg-white/10" />
+                    <div className="flex gap-2 self-start md:self-auto">
                         <button
                             onClick={() => setLogoAlign('left')}
                             className={`p-2 rounded ${logoAlign === 'left' ? 'bg-lime-400 text-black' : 'bg-white/5 hover:bg-white/10 text-white'}`}
@@ -168,11 +168,11 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                     </div>
                 </div>
 
-                <div className="flex gap-3">
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto justify-end">
                     <button
                         onClick={handleSave}
                         disabled={!hasChanges || loading}
-                        className={`px-6 py-2 rounded-lg font-bold transition-all flex items-center gap-2 ${hasChanges ? 'bg-lime-400 text-black hover:scale-105' : 'bg-white/5 text-gray-500 cursor-default'}`}
+                        className={`px-4 md:px-6 py-2 rounded-lg font-bold transition-all flex-1 md:flex-none justify-center flex items-center gap-2 text-sm md:text-base ${hasChanges ? 'bg-lime-400 text-black hover:scale-105' : 'bg-white/5 text-gray-500 cursor-default'}`}
                     >
                         {isSaving ? (
                             <span className="flex items-center gap-2">
@@ -180,37 +180,39 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                             </span>
                         ) : 'Guardar Cambios'}
                     </button>
-                    <SendInvoiceButton invoice={{ ...invoice, invoice_items: items }} settings={initialSettings} />
-                    <PrintButton />
+                    <div className="flex gap-2">
+                        <SendInvoiceButton invoice={{ ...invoice, invoice_items: items }} settings={initialSettings} />
+                        <PrintButton />
+                    </div>
                 </div>
             </div>
 
             {/* Hoja de Factura (Editor) */}
-            <div className="invoice-print-container max-w-4xl mx-auto bg-white text-black shadow-2xl rounded-lg p-16 print:p-0 print:shadow-none min-h-[1100px] print:min-h-0 border border-white/5 relative">
+            <div className="invoice-print-container max-w-4xl mx-auto bg-white text-black shadow-2xl rounded-lg p-6 md:p-16 print:p-0 print:shadow-none min-h-0 md:min-h-[1100px] print:min-h-0 border border-white/5 relative overflow-hidden">
 
                 {/* Logo y Encabezado */}
-                <div className={`flex flex-col mb-16 ${logoAlign === 'center' ? 'items-center text-center' : logoAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
+                <div className={`flex flex-col mb-8 md:mb-16 ${logoAlign === 'center' ? 'items-center text-center' : logoAlign === 'right' ? 'items-end text-right' : 'items-start text-left'}`}>
                     {initialSettings?.logo_url ? (
-                        <img src={initialSettings.logo_url} alt="Logo" className="h-20 mb-6 object-contain cursor-move" />
+                        <img src={initialSettings.logo_url} alt="Logo" className="h-16 md:h-20 mb-4 md:mb-6 object-contain cursor-move" />
                     ) : (
-                        <div className="h-20 w-20 bg-gray-100 rounded flex items-center justify-center mb-6 text-gray-400 border-2 border-dashed border-gray-200">
+                        <div className="h-16 w-16 md:h-20 md:w-20 bg-gray-100 rounded flex items-center justify-center mb-4 md:mb-6 text-gray-400 border-2 border-dashed border-gray-200 text-xs md:text-base">
                             LOGO
                         </div>
                     )}
                     <input
-                        className="text-gray-900 text-4xl font-black italic tracking-tighter mb-1 border-b-2 border-lime-400 inline-block bg-transparent border-none outline-none focus:ring-0 w-auto"
+                        className="text-gray-900 text-3xl md:text-4xl font-black italic tracking-tighter mb-1 border-b-2 border-lime-400 inline-block bg-transparent border-none outline-none focus:ring-0 w-auto p-0"
                         defaultValue="FACTURA"
                     />
-                    <p className="text-gray-400 font-mono text-sm mt-2">#{invoice.invoice_number}</p>
+                    <p className="text-gray-400 font-mono text-xs md:text-sm mt-2">#{invoice.invoice_number}</p>
                 </div>
 
-                <div className="grid grid-cols-2 gap-20 mb-20">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-20 mb-12 md:mb-20">
                     {/* Emisor (Editable) */}
                     <div>
-                        <h3 className="text-xs font-bold uppercase text-gray-300 tracking-widest mb-4">Emisor</h3>
+                        <h3 className="text-xs font-bold uppercase text-gray-300 tracking-widest mb-2 md:mb-4">Emisor</h3>
                         <div className="space-y-1">
                             <input
-                                className="font-bold text-xl w-full hover:bg-gray-50 p-1 rounded transition-colors border-none outline-none focus:ring-1 focus:ring-lime-400"
+                                className="font-bold text-lg md:text-xl w-full hover:bg-gray-50 p-1 rounded transition-colors border-none outline-none focus:ring-1 focus:ring-lime-400"
                                 defaultValue={initialSettings?.company_name || 'Mi Empresa'}
                                 onChange={(e) => handleUpdateInvoiceField('emitter_name_placeholder', e.target.value)}
                             />
@@ -223,28 +225,28 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                     </div>
 
                     {/* Receptor y Fechas */}
-                    <div className="text-right">
-                        <h3 className="text-xs font-bold uppercase text-gray-300 tracking-widest mb-4">Cliente</h3>
-                        <p className="font-bold text-xl">{client?.company_name}</p>
+                    <div className="text-left md:text-right">
+                        <h3 className="text-xs font-bold uppercase text-gray-300 tracking-widest mb-2 md:mb-4">Cliente</h3>
+                        <p className="font-bold text-lg md:text-xl">{client?.company_name}</p>
                         <p className="text-gray-500 text-sm">{client?.tax_address}</p>
 
                         <div className="mt-8 space-y-2">
-                            <div className="flex justify-end items-center gap-3">
-                                <span className="text-xs uppercase text-gray-400 font-bold">Fecha:</span>
+                            <div className="flex flex-row md:justify-end items-center gap-3">
+                                <span className="text-xs uppercase text-gray-400 font-bold min-w-[60px] md:min-w-0">Fecha:</span>
                                 <input
                                     type="date"
                                     value={invoice.issue_date}
                                     onChange={(e) => handleUpdateInvoiceField('issue_date', e.target.value)}
-                                    className="text-right border-none outline-none p-1 rounded hover:bg-gray-50 focus:ring-1 focus:ring-lime-400"
+                                    className="text-left md:text-right border-none outline-none p-1 rounded hover:bg-gray-50 focus:ring-1 focus:ring-lime-400 bg-transparent flex-1 md:flex-none w-full md:w-auto"
                                 />
                             </div>
-                            <div className="flex justify-end items-center gap-3">
-                                <span className="text-xs uppercase text-gray-400 font-bold">Vence:</span>
+                            <div className="flex flex-row md:justify-end items-center gap-3">
+                                <span className="text-xs uppercase text-gray-400 font-bold min-w-[60px] md:min-w-0">Vence:</span>
                                 <input
                                     type="date"
                                     value={invoice.due_date || ''}
                                     onChange={(e) => handleUpdateInvoiceField('due_date', e.target.value)}
-                                    className="text-right border-none outline-none p-1 rounded hover:bg-gray-50 focus:ring-1 focus:ring-lime-400"
+                                    className="text-left md:text-right border-none outline-none p-1 rounded hover:bg-gray-50 focus:ring-1 focus:ring-lime-400 bg-transparent flex-1 md:flex-none w-full md:w-auto"
                                 />
                             </div>
                         </div>
@@ -252,8 +254,8 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                 </div>
 
                 {/* Tabla de Conceptos (Edición Directa) */}
-                <div className="mb-12">
-                    <table className="w-full">
+                <div className="mb-12 overflow-x-auto">
+                    <table className="w-full min-w-[600px]">
                         <thead>
                             <tr className="border-b-2 border-black">
                                 <th className="text-left py-4 w-1/2">
@@ -327,8 +329,8 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                 </div>
 
                 {/* Totales con Diseño Premium */}
-                <div className="flex justify-end mt-20">
-                    <div className="w-72 space-y-4">
+                <div className="flex justify-end mt-12 md:mt-20">
+                    <div className="w-full md:w-72 space-y-4">
                         <div className="flex justify-between items-center text-gray-400 font-medium">
                             <span className="uppercase text-xs tracking-widest leading-none">Subtotal</span>
                             <span className="text-lg">{invoice.subtotal.toFixed(2)} €</span>
@@ -346,14 +348,14 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                             <span className="text-lg">{invoice.tax_amount.toFixed(2)} €</span>
                         </div>
                         <div className="flex justify-between items-center pt-2">
-                            <span className="text-2xl font-black italic tracking-tighter text-gray-900">TOTAL</span>
-                            <span className="text-4xl font-black text-lime-500 tracking-tighter">{invoice.total.toFixed(2)} €</span>
+                            <span className="text-xl md:text-2xl font-black italic tracking-tighter text-gray-900">TOTAL</span>
+                            <span className="text-3xl md:text-4xl font-black text-lime-500 tracking-tighter">{invoice.total.toFixed(2)} €</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Footer del Editor - Dinámico */}
-                <div className="invoice-footer mt-32 pt-10 border-t-4 border-black text-center">
+                <div className="invoice-footer mt-20 md:mt-32 pt-10 border-t-4 border-black text-center">
                     <textarea
                         className="w-full h-24 text-center border-none outline-none text-gray-400 text-sm hover:bg-gray-50 focus:ring-1 focus:ring-lime-400 rounded p-2 transition-all resize-none"
                         defaultValue={`Términos de pago: Transferencia bancaria\nIBAN: ES00 0000 0000 0000 0000 0000\n¡Gracias por tu negocio!`}
@@ -362,7 +364,7 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                 </div>
 
                 {/* Marca de agua de edición in-place */}
-                <div className="marca-agua absolute top-4 right-4 text-[8px] uppercase tracking-[0.2em] text-gray-200 font-bold pointer-events-none select-none print:hidden">
+                <div className="marca-agua absolute top-4 right-4 text-[6px] md:text-[8px] uppercase tracking-[0.2em] text-gray-200 font-bold pointer-events-none select-none print:hidden">
                     Editor Dinámico v1.0
                 </div>
             </div>
@@ -378,7 +380,7 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
             <style>{`
                 @media print {
                     @page { margin: 0; size: A4; }
-                    
+                    /* ... (rest of print styles logic kept same by context of this replacement, but ensure correctness) */
                     /* Reset Total e Inmediato */
                     *, *::before, *::after {
                         background: transparent !important;

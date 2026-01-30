@@ -130,7 +130,7 @@ function PipelineColumn({
     return (
         <div
             ref={setNodeRef}
-            className={`flex flex-col flex-1 min-w-[160px] border rounded-xl ${colorClasses[color]} h-full`}
+            className={`flex flex-col flex-1 min-w-[85vw] md:min-w-[320px] snap-center border rounded-xl ${colorClasses[color]} h-full`}
         >
             <div className="p-4 border-b border-white/10">
                 <div className="flex items-center justify-between mb-1">
@@ -243,10 +243,18 @@ export function PipelineKanban() {
     return (
         <DndContext
             sensors={sensors}
+            autoScroll={{
+                acceleration: 0,
+                interval: 5,
+                layoutShiftCompensation: {
+                    x: false,
+                    y: false
+                }
+            }}
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-2 overflow-x-auto pb-4 min-h-[calc(100vh-200px)] w-full">
+            <div className="flex gap-4 overflow-x-scroll snap-x snap-mandatory px-4 pb-4 min-h-[calc(100vh-200px)] w-full scrollbar-hide">
                 {PIPELINE_STAGES.map(stage => (
                     <PipelineColumn
                         key={stage.id}

@@ -6,6 +6,7 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: 'Aurie',
         description: 'The ultimate CRM for your agency',
         start_url: '/',
+        orientation: 'portrait',
         display: 'standalone',
         background_color: '#000000',
         theme_color: '#000000',
@@ -14,11 +15,13 @@ export default function manifest(): MetadataRoute.Manifest {
                 src: '/icons/icon-192x192.png',
                 sizes: '192x192',
                 type: 'image/png',
+                purpose: 'maskable',
             },
             {
                 src: '/icons/icon-512x512.png',
                 sizes: '512x512',
                 type: 'image/png',
+                purpose: 'maskable',
             },
             {
                 src: '/icons/apple-icon.png',

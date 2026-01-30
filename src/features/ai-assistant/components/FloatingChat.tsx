@@ -27,10 +27,10 @@ export function FloatingChat() {
     };
 
     return (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        <div className="fixed bottom-0 right-0 md:bottom-6 md:right-6 z-50 flex flex-col items-end p-4 pb-safe">
             {/* Chat Window */}
             {isOpen && (
-                <div className="mb-4 flex h-[500px] w-[380px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a]/90 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
+                <div className="mb-4 flex h-[60dvh] md:h-[500px] w-[90vw] max-w-[380px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a]/90 shadow-2xl backdrop-blur-xl animate-in fade-in slide-in-from-bottom-4 duration-300">
                     {/* Header */}
                     <div className="flex items-center justify-between bg-gradient-to-r from-[#bfff00]/20 to-transparent p-4 border-b border-white/5">
                         <div className="flex items-center gap-3">

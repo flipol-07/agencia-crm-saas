@@ -73,6 +73,19 @@ export function useContactProjects(contactId: string) {
         return updatedProject
     }
 
+    const deleteProject = async (id: string) => {
+        const { error } = await supabase
+            .from('projects')
+            .delete()
+            .eq('id', id)
+
+        if (error) {
+            throw new Error(error.message)
+        }
+
+        setProjects(prev => prev.filter(p => p.id !== id))
+    }
+
     return {
         projects,
         loading,
@@ -80,6 +93,7 @@ export function useContactProjects(contactId: string) {
         refetch: fetchProjects,
         createProject,
         updateProject,
+        deleteProject,
     }
 }
 
