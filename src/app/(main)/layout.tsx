@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { signout } from '@/actions/auth'
 import { Sidebar } from '@/shared/components/layout/Sidebar'
+import { FloatingChat } from '@/features/ai-assistant/components/FloatingChat'
+import Image from 'next/image'
+import { Suspense } from 'react'
 
 async function UserNav() {
   const supabase = await createClient()
@@ -38,11 +41,16 @@ export default function MainLayout({
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl">
         <div className="flex items-center justify-between px-6 py-4">
           <Link href="/dashboard" className="flex items-center gap-2">
+            <div className="relative w-10 h-10">
+              <Image src="/aurie-official-logo.png" alt="Aura" fill className="object-contain" />
+            </div>
             <h1 className="text-2xl font-black tracking-tight text-white uppercase">
-              CRM
+              AURIE
             </h1>
           </Link>
-          <UserNav />
+          <Suspense fallback={<div className="h-10 w-32 animate-pulse bg-white/5 rounded-lg border border-white/10" />}>
+            <UserNav />
+          </Suspense>
         </div>
       </header>
 
@@ -54,6 +62,7 @@ export default function MainLayout({
         {/* Content */}
         <main className="flex-1 p-6 lg:p-8 min-w-0 overflow-x-hidden">
           {children}
+          <FloatingChat />
         </main>
       </div>
     </div>

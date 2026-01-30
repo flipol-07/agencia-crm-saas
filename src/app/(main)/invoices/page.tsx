@@ -1,4 +1,6 @@
 import { InvoiceList } from '@/features/invoices/components/InvoiceList'
+import { getInvoicesCached } from '@/features/invoices/services/invoiceService.server'
+import { Suspense } from 'react'
 
 export const metadata = {
     title: 'Facturas | CRM',
@@ -19,7 +21,24 @@ export default function InvoicesPage() {
                 </div>
             </div>
 
-            <InvoiceList />
+            <Suspense fallback={<InvoiceListSkeleton />}>
+                <InvoicesListSection />
+            </Suspense>
+        </div>
+    )
+}
+
+async function InvoicesListSection() {
+    const invoices = await getInvoicesCached()
+    return <InvoiceList initialInvoices={invoices} />
+}
+
+function InvoiceListSkeleton() {
+    return (
+        <div className="space-y-4">
+            {[1, 2, 3].map(i => (
+                <div key={i} className="h-20 bg-white/5 rounded-xl animate-pulse border border-white/5" />
+            ))}
         </div>
     )
 }

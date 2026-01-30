@@ -214,6 +214,7 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
     const [expandedProject, setExpandedProject] = useState<string | null>(null)
     const [isCreating, setIsCreating] = useState(false)
     const [newProjectName, setNewProjectName] = useState('')
+    const [newProjectBudget, setNewProjectBudget] = useState('')
 
     const handleCreateProject = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -221,9 +222,13 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
 
         setIsCreating(true)
         try {
-            const newProject = await createProject({ name: newProjectName.trim() })
+            const newProject = await createProject({
+                name: newProjectName.trim(),
+                budget: newProjectBudget ? Number(newProjectBudget) : 0
+            })
             setExpandedProject(newProject.id)
             setNewProjectName('')
+            setNewProjectBudget('')
         } catch (error) {
             console.error('Error creating project:', error)
         } finally {
@@ -283,6 +288,14 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
                         onChange={(e) => setNewProjectName(e.target.value)}
                         placeholder="Nombre del nuevo proyecto..."
                         className="flex-1 bg-transparent border-none text-white placeholder-zinc-600 focus:outline-none py-2 text-sm"
+                    />
+                    <div className="w-px h-6 bg-white/10 mx-2" />
+                    <input
+                        type="number"
+                        value={newProjectBudget}
+                        onChange={(e) => setNewProjectBudget(e.target.value)}
+                        placeholder="Presupuesto €"
+                        className="w-32 bg-transparent border-none text-white placeholder-zinc-600 focus:outline-none py-2 text-sm text-right"
                     />
                 </div>
                 <button

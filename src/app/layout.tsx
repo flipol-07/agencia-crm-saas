@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'SaaS Factory App',
-  description: 'Built with SaaS Factory',
+  title: 'Aura CRM',
+  description: 'Sistema de gestión integral para agencias',
 }
 
 export default function RootLayout({

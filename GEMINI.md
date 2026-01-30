@@ -160,6 +160,13 @@ list_tables → Ver estructura de BD
 get_advisors → Detectar tablas sin RLS
 ```
 
+### 📱 WhatsApp Notifier Skill - Tu Voz (Notificaciones)
+Informa al usuario al teléfono +34 693482385 cuando terminas.
+
+```bash
+/home/plore/.gemini/antigravity/skills/whatsapp-notifier/scripts/notify.sh "Mensaje del diagnóstico"
+```
+
 ---
 
 ## 📋 Sistema PRP (Blueprints)
@@ -183,6 +190,9 @@ Ver `.claude/prompts/bucle-agentico-blueprint.md` para el proceso completo:
 3. **Ejecutar** → Subtareas con MCPs según juicio
 4. **Auto-Blindaje** → Documentar errores
 5. **Transicionar** → Siguiente fase con contexto actualizado
+6. **Notificar (OBLIGATORIO)**:
+   - **Al terminar**: SIEMPRE que se termine una tarea o fase, enviar diagnóstico por WhatsApp.
+   - **Al requerir permiso**: Si una tarea requiere aprobación del usuario (ej: `run_command` no seguro), avisar por WhatsApp con el mensaje: "⚠️ Espero tu aprobación en la terminal para continuar".
 
 ---
 
@@ -304,10 +314,15 @@ test('should calculate total with tax', () => {
 - **Fix**: Siempre usar `npm run dev` (auto-detecta puerto)
 - **Aplicar en**: Todos los proyectos
 
-### 2026-01-20: Variables de Entorno en Vercel
-- **Error**: Build falla en CI/CD con "@supabase/ssr: URL and API key required" durante prerenderizado estático.
-- **Fix**: Copiar variables de `.env.local` a Settings > Environment Variables en Vercel antes del primer deploy.
-- **Aplicar en**: Todos los proyectos Next.js + Supabase en Vercel.
+### 2026-01-30: Optimización Masiva del Dashboard (Next.js 16)
+- **Error**: Consultas secuenciales y falta de caché causan 3-5s de latencia.
+- **Fix**: 
+    1. Habilitar `cacheComponents` y usar `"use cache"` con `cacheLife` en servicios.
+    2. Paralelizar todas las promesas con `Promise.all` para reducir latencia al `max(t)`.
+    3. Refactorizar a Server Components con `Suspense` para streaming de shell instantánea.
+    4. Indexar `updated_at` y crear índices compuestos para filtros de fecha/tipo.
+    5. **Hotfix Cookies**: No usar `cookies()` dentro de `"use cache"`. Pasar `userId` como argumento y usar un cliente stateless (`createAdminClient`).
+- **Aplicar en**: Todos los dashboards con múltiples fuentes de datos.
 
 ---
 

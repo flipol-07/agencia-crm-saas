@@ -36,6 +36,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
         tax_address: contact.tax_address || '',
         website: contact.website || '',
         services: contact.services || [],
+        estimated_value: contact.estimated_value || 0,
     })
 
     const [saving, setSaving] = useState(false)
@@ -72,8 +73,8 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
             phone: detailsData.phone || null,
             tax_id: detailsData.tax_id || null,
             tax_address: detailsData.tax_address || null,
-            website: detailsData.website || null,
             services: detailsData.services || null,
+            estimated_value: Number(detailsData.estimated_value) || 0,
         })
         setSaving(false)
         setIsEditingDetails(false)
@@ -147,6 +148,27 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                     className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
                                 />
                             </div>
+                            <div>
+                                <label className="text-xs text-gray-500">Valor Estimado (Pipeline) €</label>
+                                <input
+                                    type="number"
+                                    value={detailsData.estimated_value}
+                                    onChange={e => setDetailsData(prev => ({ ...prev, estimated_value: Number(e.target.value) }))}
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                    placeholder="0.00"
+                                />
+                            </div>
+                            <div>
+                                <label className="text-xs text-gray-500">Valor Estimado (Pipeline) €</label>
+                                <input
+                                    type="number"
+                                    value={detailsData.estimated_value}
+                                    onChange={e => setDetailsData(prev => ({ ...prev, estimated_value: Number(e.target.value) }))}
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                    placeholder="0.00"
+                                />
+                            </div>
+
                             <div>
                                 <label className="text-xs text-gray-500">Servicios (Tags)</label>
                                 <div className="mt-1">

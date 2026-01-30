@@ -178,12 +178,13 @@ export function SettingsForm() {
                             name="currency"
                             value={formData.currency}
                             onChange={handleChange}
-                            className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white focus:border-lime-400 outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white focus:border-lime-400 outline-none [&>option]:bg-zinc-900 [&>option]:text-white"
                         >
                             <option value="EUR">EUR (€)</option>
                             <option value="USD">USD ($)</option>
                             <option value="GBP">GBP (£)</option>
                         </select>
+
                     </div>
                 </div>
             </div>

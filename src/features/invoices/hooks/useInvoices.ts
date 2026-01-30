@@ -67,11 +67,25 @@ export function useInvoices(contactId?: string) {
         setInvoices(prev => prev.filter(i => i.id !== id))
     }
 
+    const updateInvoiceStatus = async (id: string, status: string) => {
+        const { error } = await (supabase
+            .from('invoices') as any)
+            .update({ status })
+            .eq('id', id)
+
+        if (error) throw new Error(error.message)
+
+        setInvoices(prev => prev.map(inv =>
+            inv.id === id ? { ...inv, status: status as any } : inv
+        ))
+    }
+
     return {
         invoices,
         loading,
         error,
         deleteInvoice,
+        updateInvoiceStatus,
         refetch: fetchInvoices
     }
 }

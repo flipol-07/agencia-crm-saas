@@ -5,8 +5,14 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { useSettings } from '@/features/settings/hooks/useSettings'
-import { createInvoiceWithItems, updateInvoiceWithItems, generateInvoiceNumber } from '../services/invoiceService'
+import {
+    createInvoiceWithItemsAction as createInvoiceWithItems,
+    updateInvoiceWithItemsAction as updateInvoiceWithItems,
+    generateInvoiceNumberAction as generateInvoiceNumber
+} from '../actions/invoiceActions'
 import { InvoiceItemInsert, InvoiceWithDetails } from '@/types/database'
+import { InfoTooltip } from '@/shared/components/ui/Tooltip'
+import { CopyButton } from '@/shared/components/ui/CopyButton'
 
 export function InvoiceForm({
     initialContactId,
@@ -135,7 +141,10 @@ export function InvoiceForm({
                     <h2 className="text-2xl font-bold text-white mb-1">
                         {initialData ? 'Editar Factura' : 'Nueva Factura'}
                     </h2>
-                    <p className="text-lime-400 font-mono text-lg">{invoiceNumber}</p>
+                    <div className="flex items-center gap-2">
+                        <p className="text-lime-400 font-mono text-lg">{invoiceNumber}</p>
+                        <CopyButton textToCopy={invoiceNumber} label="Copiar Nº Factura" iconColor="text-lime-400/50" />
+                    </div>
                 </div>
                 <div>
                     <label className="text-xs text-gray-500 block mb-1">Fecha Emisión</label>
@@ -162,7 +171,7 @@ export function InvoiceForm({
                         <select
                             value={selectedContactId}
                             onChange={e => setSelectedContactId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white outline-none focus:border-lime-400"
+                            className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white outline-none focus:border-lime-400 [&>option]:bg-zinc-900 [&>option]:text-white"
                         >
                             <option value="">Seleccionar Cliente...</option>
                             {contacts.map(contact => (
@@ -171,6 +180,7 @@ export function InvoiceForm({
                                 </option>
                             ))}
                         </select>
+
 
                         {selectedContact && (
                             <div className="text-sm text-gray-300 pl-1 border-l-2 border-white/10 mt-2">
@@ -258,7 +268,10 @@ export function InvoiceForm({
                         <span>{subtotal.toFixed(2)} {settings?.currency}</span>
                     </div>
                     <div className="flex justify-between text-gray-400">
-                        <span>IVA ({taxRate}%)</span>
+                        <span className="flex items-center gap-1">
+                            IVA ({taxRate}%)
+                            <InfoTooltip content="Este porcentaje se configura en Ajustes > Valores por Defecto" position="left" />
+                        </span>
                         <span>{taxAmount.toFixed(2)} {settings?.currency}</span>
                     </div>
                     <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-white/10">

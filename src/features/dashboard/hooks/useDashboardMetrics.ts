@@ -2,24 +2,36 @@
 
 import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { subDays, startOfMonth, formatISO } from 'date-fns'
 
 export interface DashboardMetrics {
-    totalLeads: number
-    pipelineValue: number
-    invoicedThisMonth: number
-    pendingPayment: number
-    pendingTasks: number
-    overdueTasks: number
+    // The Engine (Activity)
+    outreachVolume: number        // Scraper leads sent last 30 days
+    responseRate: number          // % (Inbound Emails / Outreach Volume) - Approximate
+
+    // The Pipeline (Health)
+    activeLeads: number           // Total active leads (not won/lost)
+    pipelineValue: number         // Estimated value of active leads
+    avgDealValue: number          // Average value per deal
+
+    // The Harvest (Results)
+    invoicedMonth: number         // Total invoiced this month
+    cashVelocity: number          // Paid invoices last 30 days
+
+    // Actionables
+    stalledDealsCount: number     // Deals with no interaction > 7 days
 }
 
 export function useDashboardMetrics() {
     const [metrics, setMetrics] = useState<DashboardMetrics>({
-        totalLeads: 0,
+        outreachVolume: 0,
+        responseRate: 0,
+        activeLeads: 0,
         pipelineValue: 0,
-        invoicedThisMonth: 0,
-        pendingPayment: 0,
-        pendingTasks: 0,
-        overdueTasks: 0,
+        avgDealValue: 0,
+        invoicedMonth: 0,
+        cashVelocity: 0,
+        stalledDealsCount: 0
     })
     const [loading, setLoading] = useState(true)
 
@@ -29,53 +41,69 @@ export function useDashboardMetrics() {
         async function fetchMetrics() {
             try {
                 const now = new Date()
-                const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
-                const todayStr = now.toISOString().split('T')[0]
+                const thirtyDaysAgo = formatISO(subDays(now, 30))
+                const firstDayOfMonth = formatISO(startOfMonth(now))
+                const sevenDaysAgo = formatISO(subDays(now, 7))
 
-                // 1. Leads: Activos (no ganados/perdidos) y Valor Pipeline
+                // 1. Outreach Volume (Last 30d)
+                const { count: outreachCount } = await supabase
+                    .from('scraper_leads')
+                    .select('*', { count: 'exact', head: true })
+                    .gte('created_at', thirtyDaysAgo)
+                // .eq('email_status', 'sent') // Uncomment if status tracking is reliable
+
+                const outreachVolume = outreachCount || 0
+
+                // 2. Response Rate (Approximate: Inbound Emails vs Outreach)
+                // Getting unique leads who responded would be better but expensive without specialized table
+                const { count: inboundCount } = await supabase
+                    .from('contact_emails')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('direction', 'inbound')
+                    .gte('received_at', thirtyDaysAgo)
+
+                const responseRate = outreachVolume > 0
+                    ? Math.round(((inboundCount || 0) / outreachVolume) * 100)
+                    : 0
+
+                // 3. Pipeline Health
                 const { data: leadsData } = await (supabase.from('contacts') as any)
-                    .select('estimated_value, status')
-                    .not('status', 'in', '("won","lost")') // Excluir cerrados para "Activos"
+                    .select('estimated_value, status, last_interaction')
+                    .not('status', 'in', '("won","lost","archived")')
 
-                const activeLeads = leadsData || []
-                const totalLeads = activeLeads.length
-                const pipelineValue = activeLeads.reduce((sum: number, lead: any) => sum + (lead.estimated_value || 0), 0)
+                const activeLeads = leadsData?.length || 0
+                const pipelineValue = leadsData?.reduce((sum: number, lead: any) => sum + (lead.estimated_value || 0), 0) || 0
+                const avgDealValue = activeLeads > 0 ? Math.round(pipelineValue / activeLeads) : 0
 
-                // 2. Facturación: Mes actual y Pendiente
+                const stalledDealsCount = leadsData?.filter((lead: any) =>
+                    !lead.last_interaction || lead.last_interaction < sevenDaysAgo
+                ).length || 0
+
+                // 4. Financials
                 const { data: invoicesData } = await (supabase.from('invoices') as any)
-                    .select('total, status, issue_date')
+                    .select('total, status, issue_date, paid_date')
 
                 const invoices = invoicesData || []
 
-                // Facturado este mes (basado en fecha emisión)
-                const invoicedThisMonth = invoices
+                // Invoiced This Month
+                const invoicedMonth = invoices
                     .filter((inv: any) => inv.issue_date >= firstDayOfMonth && inv.status !== 'cancelled' && inv.status !== 'draft')
                     .reduce((sum: number, inv: any) => sum + (inv.total || 0), 0)
 
-                // Pendiente de cobro (sent, overdue)
-                const pendingPayment = invoices
-                    .filter((inv: any) => ['sent', 'overdue'].includes(inv.status))
+                // Cash Velocity (Paid Last 30d)
+                const cashVelocity = invoices
+                    .filter((inv: any) => inv.status === 'paid' && inv.paid_date >= thirtyDaysAgo)
                     .reduce((sum: number, inv: any) => sum + (inv.total || 0), 0)
 
-                // 3. Operativo: Tareas pendientes y vencidas
-                const { data: tasksData } = await (supabase.from('tasks') as any)
-                    .select('due_date, is_completed')
-                    .eq('is_completed', false)
-
-                const pendingTasksList = tasksData || []
-                const pendingTasks = pendingTasksList.length
-
-                const overdueTasks = pendingTasksList.filter((t: any) =>
-                    t.due_date && t.due_date < todayStr
-                ).length
-
                 setMetrics({
-                    totalLeads,
+                    outreachVolume,
+                    responseRate,
+                    activeLeads,
                     pipelineValue,
-                    invoicedThisMonth,
-                    pendingPayment,
-                    pendingTasks,
-                    overdueTasks
+                    avgDealValue,
+                    invoicedMonth,
+                    cashVelocity,
+                    stalledDealsCount
                 })
             } catch (error) {
                 console.error('Error fetching dashboard metrics:', error)

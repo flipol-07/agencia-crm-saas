@@ -2,8 +2,8 @@
 
 import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
-import { PrintButton } from '@/features/invoices/components'
-import { updateInvoiceWithItems } from '@/features/invoices/services/invoiceService'
+import { PrintButton, SendInvoiceButton } from '@/features/invoices/components'
+import { updateInvoiceWithItemsAction as updateInvoiceWithItems } from '@/features/invoices/actions/invoiceActions'
 import type { InvoiceItem, Settings } from '@/types/database'
 
 interface InvoiceWithClientAndItems {
@@ -180,6 +180,7 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                             </span>
                         ) : 'Guardar Cambios'}
                     </button>
+                    <SendInvoiceButton invoice={{ ...invoice, invoice_items: items }} settings={initialSettings} />
                     <PrintButton />
                 </div>
             </div>

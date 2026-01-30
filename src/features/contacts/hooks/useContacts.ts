@@ -3,6 +3,11 @@
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { Contact, ContactInsert, ContactUpdate } from '@/types/database'
+import {
+    createContactAction,
+    updateContactAction,
+    deleteContactAction
+} from '../actions/contactActions'
 
 export function useContacts() {
     const [contacts, setContacts] = useState<Contact[]>([])
@@ -32,58 +37,35 @@ export function useContacts() {
     }, [fetchContacts])
 
     const createContact = async (contact: Partial<ContactInsert>): Promise<Contact | null> => {
-        const { data, error } = await (supabase.from('contacts') as any)
-            .insert({
-                company_name: contact.company_name || 'Sin nombre',
-                contact_name: contact.contact_name,
-                email: contact.email,
-                phone: contact.phone,
-                status: contact.status || 'prospect',
-                pipeline_stage: contact.pipeline_stage || 'nuevo',
-                source: contact.source || 'outbound',
-                pain_points: contact.pain_points || [],
-                requirements: contact.requirements || [],
-                notes: contact.notes,
-                website: contact.website,
-                tax_id: contact.tax_id,
-                tax_address: contact.tax_address,
-                services: contact.services || [],
-            } as any)
-            .select()
-            .single()
-
-        if (error) {
-            throw new Error(error.message)
-        }
+        const data = await createContactAction({
+            company_name: contact.company_name || 'Sin nombre',
+            contact_name: contact.contact_name,
+            email: contact.email,
+            phone: contact.phone,
+            status: contact.status || 'prospect',
+            pipeline_stage: contact.pipeline_stage || 'nuevo',
+            source: contact.source || 'outbound',
+            pain_points: contact.pain_points || [],
+            requirements: contact.requirements || [],
+            notes: contact.notes,
+            website: contact.website,
+            tax_id: contact.tax_id,
+            tax_address: contact.tax_address,
+            services: contact.services || [],
+        } as any)
 
         setContacts(prev => [data, ...prev])
         return data
     }
 
     const updateContact = async (id: string, updates: ContactUpdate) => {
-        const { data, error } = await (supabase.from('contacts') as any)
-            .update(updates as any)
-            .eq('id', id)
-            .select()
-            .single()
-
-        if (error) {
-            throw new Error(error.message)
-        }
-
+        const data = await updateContactAction(id, updates)
         setContacts(prev => prev.map(c => c.id === id ? data : c))
         return data
     }
 
     const deleteContact = async (id: string) => {
-        const { error } = await (supabase.from('contacts') as any)
-            .delete()
-            .eq('id', id)
-
-        if (error) {
-            throw new Error(error.message)
-        }
-
+        await deleteContactAction(id)
         setContacts(prev => prev.filter(c => c.id !== id))
     }
 

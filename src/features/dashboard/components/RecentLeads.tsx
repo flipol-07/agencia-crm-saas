@@ -1,32 +1,11 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 import type { Contact } from '@/types/database'
 import { Card } from '@/shared/components/ui/Card'
-import { Badge } from '@/shared/components/ui/Badge'
+import { CopyButton } from '@/shared/components/ui/CopyButton'
+import { getRecentLeads } from '../services/dashboard.service'
 
-export function RecentLeads() {
-    const [leads, setLeads] = useState<Contact[]>([])
-    const [loading, setLoading] = useState(true)
-    const supabase = createClient()
-
-    useEffect(() => {
-        async function fetchLeads() {
-            const { data } = await supabase
-                .from('contacts')
-                .select('*')
-                .order('updated_at', { ascending: false })
-                .limit(5)
-
-            if (data) setLeads(data)
-            setLoading(false)
-        }
-        fetchLeads()
-    }, [supabase])
-
-    if (loading) return <div className="h-48 animate-pulse bg-white/5 rounded-xl" />
+export async function RecentLeads({ userId }: { userId: string }) {
+    const leads = await getRecentLeads(userId) as Contact[]
 
     return (
         <Card className="p-6 h-full flex flex-col">
@@ -65,11 +44,16 @@ export function RecentLeads() {
                                     <p className="font-medium text-text-primary group-hover:text-brand transition-colors text-sm">
                                         {lead.company_name}
                                     </p>
-                                    <p className="text-xs text-text-muted flex items-center gap-1">
+                                    <div className="text-xs text-text-muted flex items-center gap-1">
                                         {lead.contact_name}
                                         <span className="w-1 h-1 rounded-full bg-white/20"></span>
                                         {new Date(lead.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                                    </p>
+                                        {lead.email && (
+                                            <div className="opacity-0 group-hover:opacity-100 transition-opacity ml-2">
+                                                <CopyButton textToCopy={lead.email} label="Copiar Email" className="w-4 h-4" />
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
                             </div>
                             <span className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-1 rounded-lg bg-black/50 text-text-muted border border-white/5 group-hover:border-white/10`}>

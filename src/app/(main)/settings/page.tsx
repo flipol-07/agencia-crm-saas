@@ -1,7 +1,6 @@
 
 import { SettingsForm } from '@/features/settings/components/SettingsForm'
 
-export const dynamic = 'force-dynamic'
 
 export default function SettingsPage() {
     return (

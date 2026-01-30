@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
   experimental: {
     mcpServer: true,
   },
+  cacheComponents: true,
 }
 
 export default nextConfig

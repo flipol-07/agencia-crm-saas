@@ -1,13 +1,26 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Link from 'next/link'
 import { useInvoices } from '../hooks/useInvoices'
-import type { InvoiceStatus } from '@/types/database'
+import type { InvoiceStatus, InvoiceWithDetails } from '@/types/database'
 import { InvoiceForm } from './InvoiceForm'
 
-export function InvoiceList({ contactId }: { contactId?: string }) {
-    const { invoices, loading, deleteInvoice, refetch } = useInvoices(contactId)
+interface InvoiceListProps {
+    contactId?: string
+    initialInvoices?: InvoiceWithDetails[]
+}
+
+export function InvoiceList({ contactId, initialInvoices }: InvoiceListProps) {
+    const { invoices: fetchedInvoices, loading, deleteInvoice, refetch, updateInvoiceStatus } = useInvoices(contactId)
+
+    // Usar initialInvoices si están presentes y todavía estamos cargando los datos frescos
+    const invoices = useMemo(() => {
+        if (fetchedInvoices.length > 0) return fetchedInvoices
+        return (initialInvoices || []) as InvoiceWithDetails[]
+    }, [fetchedInvoices, initialInvoices])
+
+    const isInitialLoading = loading && invoices.length === 0
     const [creating, setCreating] = useState(false)
 
     const statusColors: Record<InvoiceStatus, string> = {
@@ -26,7 +39,7 @@ export function InvoiceList({ contactId }: { contactId?: string }) {
         cancelled: 'Cancelada',
     }
 
-    if (loading && !creating) {
+    if (isInitialLoading && !creating) {
         return (
             <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
@@ -109,9 +122,27 @@ export function InvoiceList({ contactId }: { contactId?: string }) {
                                 </div>
 
                                 <div className="flex items-center gap-4 sm:gap-6 z-20 pointer-events-none">
-                                    <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border ${statusColors[invoice.status].replace('bg-', 'bg-opacity-10 bg-')}`}>
-                                        {statusLabels[invoice.status]}
-                                    </span>
+                                    <div
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="relative group/select pointer-events-auto"
+                                    >
+                                        <select
+                                            value={invoice.status}
+                                            onChange={(e) => updateInvoiceStatus(invoice.id, e.target.value)}
+                                            className={`appearance-none cursor-pointer text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border ${statusColors[invoice.status].replace('bg-', 'bg-opacity-10 bg-')} pr-6`}
+                                        >
+                                            {Object.entries(statusLabels).map(([key, label]) => (
+                                                <option key={key} value={key} className="bg-zinc-900 text-zinc-200">
+                                                    {label}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 pointer-events-none text-current opacity-50">
+                                            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </div>
+                                    </div>
 
                                     <div className="text-right min-w-[80px] sm:min-w-[100px]">
                                         <span className="text-sm font-bold text-zinc-200 block group-hover:scale-105 transition-transform origin-right">

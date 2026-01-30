@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Badge } from '../ui/Badge'
 
 export function Sidebar() {
     const pathname = usePathname()
@@ -56,9 +55,17 @@ export function Sidebar() {
             )
         },
         {
+            href: '/expenses',
+            label: 'Economía',
+            icon: (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            )
+        },
+        {
             href: '/lead-scraper',
             label: 'Lead Scraper',
-            badge: 'NEW',
             icon: (
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
@@ -77,33 +84,48 @@ export function Sidebar() {
         },
     ]
 
+    const mainLinks = links.filter(l => l.href !== '/settings')
+    const settingsLink = links.find(l => l.href === '/settings')
+
     return (
         <aside className="hidden lg:flex w-64 flex-col border-r border-white/10 min-h-[calc(100vh-73px)]">
             <nav className="flex-1 p-4 space-y-1">
-                {links.map((link) => {
+                {mainLinks.map((link) => {
                     const active = isActive(link.href)
                     return (
                         <Link
                             key={link.href}
                             href={link.href}
                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${active
-                                    ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
                                 }`}
                         >
                             <div className={`transition-colors ${active ? 'text-brand' : 'text-current group-hover:text-white'}`}>
                                 {link.icon}
                             </div>
                             <span className="font-medium flex-1">{link.label}</span>
-                            {link.badge && (
-                                <Badge variant="brand" className="text-[10px] px-2 py-0.5 ml-auto">
-                                    {link.badge}
-                                </Badge>
-                            )}
                         </Link>
                     )
                 })}
             </nav>
+
+            {settingsLink && (
+                <div className="p-4 border-t border-white/10 mt-auto">
+                    <Link
+                        href={settingsLink.href}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${isActive(settingsLink.href)
+                            ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                            }`}
+                    >
+                        <div className={`transition-colors ${isActive(settingsLink.href) ? 'text-brand' : 'text-current group-hover:text-white'}`}>
+                            {settingsLink.icon}
+                        </div>
+                        <span className="font-medium flex-1">Ajustes</span>
+                    </Link>
+                </div>
+            )}
         </aside>
     )
 }

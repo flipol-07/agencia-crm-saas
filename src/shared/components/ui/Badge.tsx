@@ -1,7 +1,7 @@
 import * as React from 'react'
 
 interface BadgeProps extends React.HTMLAttributes<HTMLSpanElement> {
-    variant?: 'default' | 'outline' | 'success' | 'warning' | 'error' | 'brand'
+    variant?: 'default' | 'outline' | 'success' | 'warning' | 'error' | 'brand' | 'info'
 }
 
 export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
@@ -13,7 +13,9 @@ export const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
             warning: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
             error: 'bg-red-500/10 text-red-400 border border-red-500/20',
             brand: 'bg-brand/10 text-brand border border-brand/20',
+            info: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
         }
+
 
         const classes = `inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${variants[variant]} ${className}`
 
