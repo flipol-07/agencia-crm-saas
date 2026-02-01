@@ -32,7 +32,7 @@ function PipelineCard({ contact, isOverlay = false }: { contact: Contact, isOver
     }
 
     return (
-        <div className={`bg-white/5 border border-white/10 rounded-lg p-4 hover:border-lime-400/30 transition-all cursor-pointer group select-none ${isOverlay ? 'shadow-2xl bg-[#1a1a1a] border-lime-500/50' : ''}`}>
+        <div className={`bg-white/5 border border-white/10 rounded-lg p-4 hover:border-lime-400/30 transition-all cursor-pointer group select-none overflow-hidden ${isOverlay ? 'shadow-2xl bg-[#1a1a1a] border-lime-500/50' : ''}`}>
             <div className="flex items-start justify-between mb-2">
                 <Link href={`/contacts/${contact.id}`} className="flex-1 min-w-0" onClick={e => e.stopPropagation()}>
                     <h4 className="font-medium text-white group-hover:text-lime-400 transition-colors truncate">
@@ -146,7 +146,7 @@ function PipelineColumn({
                 )}
             </div>
 
-            <div className="flex-1 p-3 space-y-3 overflow-y-auto min-h-[150px]">
+            <div className="flex-1 p-3 space-y-3 overflow-y-auto overflow-x-hidden min-h-[150px] scrollbar-hide">
                 {children}
                 {contacts.length === 0 && (
                     <div className="h-full flex items-center justify-center text-gray-600/50 text-xs border border-dashed border-white/5 rounded-lg py-8">
@@ -254,7 +254,7 @@ export function PipelineKanban() {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
         >
-            <div className="flex gap-4 overflow-x-scroll snap-x snap-mandatory px-4 pb-4 min-h-[calc(100vh-200px)] w-full scrollbar-hide">
+            <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory px-4 pb-4 min-h-[calc(100vh-200px)] w-full scrollbar-hide">
                 {PIPELINE_STAGES.map(stage => (
                     <PipelineColumn
                         key={stage.id}
@@ -270,9 +270,9 @@ export function PipelineKanban() {
                 ))}
             </div>
 
-            <DragOverlay>
+            <DragOverlay dropAnimation={null}>
                 {activeContact ? (
-                    <div className="w-[280px] opacity-90 rotate-3 cursor-grabbing">
+                    <div className="w-[280px] opacity-90 rotate-3 cursor-grabbing scrollbar-hide overflow-hidden">
                         <PipelineCard contact={activeContact} isOverlay />
                     </div>
                 ) : null}

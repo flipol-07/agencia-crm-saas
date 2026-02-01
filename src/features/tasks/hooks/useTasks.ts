@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type {
     Task,
@@ -19,7 +19,7 @@ export function useProjectTasks(projectId: string) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     const fetchTasks = useCallback(async () => {
         setLoading(true)
@@ -123,7 +123,7 @@ export function useContactTasks(contactId: string) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     const fetchTasks = useCallback(async () => {
         setLoading(true)
@@ -227,7 +227,7 @@ export function useTasksWithDetails() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     const fetchTasks = useCallback(async () => {
         setLoading(true)
@@ -411,6 +411,17 @@ export function useTasksWithDetails() {
         unassignUser,
         createQuickTask,
         updateTaskDetails,
+        deleteTask: async (id: string) => {
+            const { error } = await (supabase.from('tasks') as any)
+                .delete()
+                .eq('id', id)
+
+            if (error) {
+                throw new Error(error.message)
+            }
+
+            setTasks(prev => prev.filter(t => t.id !== id))
+        }
     }
 }
 
@@ -420,7 +431,7 @@ export function useMyTasks(userId?: string) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     const fetchTasks = useCallback(async () => {
         setLoading(true)
@@ -493,7 +504,7 @@ export function useAllTasks() {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     const fetchTasks = useCallback(async () => {
         setLoading(true)
@@ -558,7 +569,7 @@ export function useTaskComments(taskId: string) {
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     const fetchComments = useCallback(async () => {
         if (!taskId) return
@@ -634,7 +645,7 @@ export function useTeamMembers() {
     const [members, setMembers] = useState<{ id: string; full_name: string | null; email: string; avatar_url: string | null }[]>([])
     const [loading, setLoading] = useState(true)
 
-    const supabase = createClient()
+    const supabase = useMemo(() => createClient(), [])
 
     useEffect(() => {
         async function fetchMembers() {

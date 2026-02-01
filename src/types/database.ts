@@ -12,6 +12,14 @@ export type Profile = {
     level?: string | null
     main_styles?: string[] | null
     personal_records?: any | null
+    billing_name?: string | null
+    billing_tax_id?: string | null
+    billing_address?: string | null
+    invoice_prefix?: string | null
+    next_invoice_number?: number | null
+    billing_email?: string | null
+    billing_phone?: string | null
+    billing_iban?: string | null
 }
 
 // Enums de Contact
@@ -145,7 +153,7 @@ export type TaskStatus = 'todo' | 'in_progress' | 'in_review' | 'blocked' | 'don
 
 export interface Task {
     id: string
-    project_id: string
+    project_id: string | null
     title: string
     description: string | null
     priority: TaskPriority
@@ -164,9 +172,9 @@ export type TaskUpdate = Partial<Omit<Task, 'id' | 'created_at'>>
 
 // Task con datos del proyecto y cliente (para joins)
 export interface TaskWithProject extends Task {
-    projects: Pick<Project, 'id' | 'name' | 'contact_id'> & {
+    projects: (Pick<Project, 'id' | 'name' | 'contact_id'> & {
         contacts: Pick<Contact, 'id' | 'company_name'>
-    }
+    }) | null
 }
 
 // Task con asignado (para joins)
@@ -214,9 +222,9 @@ export interface TaskAssignee {
 
 // Task with assignees and comments
 export interface TaskWithDetails extends Task {
-    projects: Pick<Project, 'id' | 'name' | 'contact_id'> & {
+    projects: (Pick<Project, 'id' | 'name' | 'contact_id'> & {
         contacts: Pick<Contact, 'id' | 'company_name'>
-    }
+    }) | null
     task_assignees: (TaskAssignee & {
         profiles: Pick<Profile, 'id' | 'full_name' | 'email' | 'avatar_url'>
     })[]
@@ -281,6 +289,7 @@ export interface Invoice {
     created_at: string
     updated_at: string
     created_by: string | null
+    issuer_profile_id: string | null
 }
 
 export type InvoiceInsert = Omit<Invoice, 'id' | 'created_at' | 'updated_at'>
@@ -327,6 +336,39 @@ export interface Settings {
 export type SettingsInsert = Omit<Settings, 'id' | 'created_at' | 'updated_at'>
 export type SettingsUpdate = Partial<Omit<Settings, 'id' | 'created_at'>>
 
+// ============================================
+// Team Chat Types
+// ============================================
+
+export interface TeamChat {
+    id: string
+    created_at: string
+    updated_at: string
+    last_message_preview: string | null
+    is_group: boolean
+}
+
+export interface TeamChatParticipant {
+    chat_id: string
+    user_id: string
+    joined_at: string
+}
+
+export interface TeamMessage {
+    id: string
+    chat_id: string
+    sender_id: string | null
+    content: string
+    created_at: string
+    read_at: string | null
+}
+
+export interface TeamChatWithMembers extends TeamChat {
+    participants: {
+        profiles: Pick<Profile, 'id' | 'full_name' | 'email' | 'avatar_url'> | null
+    }[]
+}
+
 // Database type para Supabase
 export type Database = {
     public: {
@@ -347,6 +389,14 @@ export type Database = {
                     level?: string | null
                     main_styles?: string[] | null
                     personal_records?: any | null
+                    billing_name?: string | null
+                    billing_tax_id?: string | null
+                    billing_address?: string | null
+                    invoice_prefix?: string | null
+                    next_invoice_number?: number | null
+                    billing_email?: string | null
+                    billing_phone?: string | null
+                    billing_iban?: string | null
                 }
                 Update: {
                     id?: string
@@ -362,6 +412,14 @@ export type Database = {
                     level?: string | null
                     main_styles?: string[] | null
                     personal_records?: any | null
+                    billing_name?: string | null
+                    billing_tax_id?: string | null
+                    billing_address?: string | null
+                    invoice_prefix?: string | null
+                    next_invoice_number?: number | null
+                    billing_email?: string | null
+                    billing_phone?: string | null
+                    billing_iban?: string | null
                 }
                 Relationships: []
             }
@@ -472,8 +530,8 @@ export type Database = {
             }
             invoices: {
                 Row: Invoice
-                Insert: InvoiceInsert
-                Update: InvoiceUpdate
+                Insert: InvoiceInsert & { issuer_profile_id?: string | null }
+                Update: InvoiceUpdate & { issuer_profile_id?: string | null }
                 Relationships: [
                     {
                         foreignKeyName: "invoices_contact_id_fkey"
@@ -639,6 +697,90 @@ export type Database = {
                         columns: ["campaign_id"]
                         isOneToOne: false
                         referencedRelation: "scraper_campaigns"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            team_chats: {
+                Row: {
+                    id: string
+                    created_at: string
+                    updated_at: string
+                    last_message_preview: string | null
+                    is_group: boolean
+                }
+                Insert: {
+                    last_message_preview?: string | null
+                    is_group?: boolean
+                }
+                Update: {
+                    updated_at?: string
+                    last_message_preview?: string | null
+                    is_group?: boolean
+                }
+            }
+            team_chat_participants: {
+                Row: {
+                    chat_id: string
+                    user_id: string
+                    joined_at: string
+                }
+                Insert: {
+                    chat_id: string
+                    user_id: string
+                }
+                Update: {
+                    joined_at?: string
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "team_chat_participants_chat_id_fkey"
+                        columns: ["chat_id"]
+                        isOneToOne: false
+                        referencedRelation: "team_chats"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "team_chat_participants_user_id_fkey"
+                        columns: ["user_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            team_messages: {
+                Row: {
+                    id: string
+                    chat_id: string
+                    sender_id: string | null
+                    content: string
+                    created_at: string
+                    read_at: string | null
+                }
+                Insert: {
+                    chat_id: string
+                    sender_id?: string | null
+                    content: string
+                    read_at?: string | null
+                }
+                Update: {
+                    content?: string
+                    read_at?: string | null
+                }
+                Relationships: [
+                    {
+                        foreignKeyName: "team_messages_chat_id_fkey"
+                        columns: ["chat_id"]
+                        isOneToOne: false
+                        referencedRelation: "team_chats"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "team_messages_sender_id_fkey"
+                        columns: ["sender_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
                         referencedColumns: ["id"]
                     }
                 ]

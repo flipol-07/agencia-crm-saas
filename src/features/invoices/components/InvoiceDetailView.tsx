@@ -4,34 +4,10 @@ import { useState, useRef, useEffect } from 'react'
 import Link from 'next/link'
 import { PrintButton, SendInvoiceButton } from '@/features/invoices/components'
 import { updateInvoiceWithItemsAction as updateInvoiceWithItems } from '@/features/invoices/actions/invoiceActions'
-import type { InvoiceItem, Settings } from '@/types/database'
-
-interface InvoiceWithClientAndItems {
-    id: string
-    contact_id: string
-    invoice_number: string | null
-    status: any
-    issue_date: string
-    due_date: string | null
-    subtotal: number
-    tax_rate: number
-    tax_amount: number
-    total: number
-    currency: string
-    contacts: {
-        id: string
-        company_name: string
-        contact_name: string | null
-        email: string | null
-        phone: string | null
-        tax_id: string | null
-        tax_address: string | null
-    } | null
-    invoice_items: InvoiceItem[]
-}
+import type { InvoiceItem, Settings, InvoiceWithDetails } from '@/types/database'
 
 interface Props {
-    initialInvoice: InvoiceWithClientAndItems
+    initialInvoice: InvoiceWithDetails
     settings: Settings | null
 }
 
@@ -207,28 +183,30 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-20 mb-12 md:mb-20">
-                    {/* Emisor (Editable) */}
+                    {/* Emisor (Read-Only from Profile/Settings) */}
                     <div>
-                        <h3 className="text-xs font-bold uppercase text-gray-300 tracking-widest mb-2 md:mb-4">Emisor</h3>
+                        <div className="flex items-center gap-2 mb-2 md:mb-4">
+                            <h3 className="text-xs font-bold uppercase text-gray-300 tracking-widest">Emisor</h3>
+                            <Link href="/settings" className="text-[10px] text-lime-500 hover:text-lime-600 print:hidden opacity-50 hover:opacity-100 transition-opacity">
+                                (Editar en Ajustes)
+                            </Link>
+                        </div>
                         <div className="space-y-1">
-                            <input
-                                className="font-bold text-lg md:text-xl w-full hover:bg-gray-50 p-1 rounded transition-colors border-none outline-none focus:ring-1 focus:ring-lime-400"
-                                defaultValue={initialSettings?.company_name || 'Mi Empresa'}
-                                onChange={(e) => handleUpdateInvoiceField('emitter_name_placeholder', e.target.value)}
-                            />
-                            <textarea
-                                className="text-gray-500 text-sm w-full h-20 hover:bg-gray-50 p-1 rounded transition-colors border-none outline-none resize-none focus:ring-1 focus:ring-lime-400"
-                                defaultValue={`${initialSettings?.address || 'Dirección'}\nNIF: ${initialSettings?.tax_id || ''}`}
-                                onChange={(e) => handleUpdateInvoiceField('emitter_info_placeholder', e.target.value)}
-                            />
+                            <div className="font-bold text-lg md:text-xl p-1 border border-transparent">
+                                {initialSettings?.company_name || 'Mi Empresa'}
+                            </div>
+                            <div className="text-gray-500 text-sm whitespace-pre-line p-1 border border-transparent">
+                                {initialSettings?.address || 'Dirección'}
+                                {initialSettings?.tax_id && `\nNIF: ${initialSettings.tax_id}`}
+                            </div>
                         </div>
                     </div>
 
                     {/* Receptor y Fechas */}
                     <div className="text-left md:text-right">
                         <h3 className="text-xs font-bold uppercase text-gray-300 tracking-widest mb-2 md:mb-4">Cliente</h3>
-                        <p className="font-bold text-lg md:text-xl">{client?.company_name}</p>
-                        <p className="text-gray-500 text-sm">{client?.tax_address}</p>
+                        <div className="font-bold text-lg md:text-xl">{client?.company_name}</div>
+                        <div className="text-gray-500 text-sm">{client?.tax_address}</div>
 
                         <div className="mt-8 space-y-2">
                             <div className="flex flex-row md:justify-end items-center gap-3">

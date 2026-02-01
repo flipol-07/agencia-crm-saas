@@ -5,6 +5,26 @@
 @tailwind components;
 @tailwind utilities;
 
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  /* Ocultar barra de desplazamiento para Chrome, Safari y Opera */
+  .scrollbar-hide::-webkit-scrollbar {
+      display: none;
+  }
+
+  /* Ocultar barra de desplazamiento para IE, Edge y Firefox */
+  .scrollbar-hide {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+  }
+}
+
+/* * Aurie Design System 
+ ... resto de tu código
+*/
 /*
  * Aurie Design System
  * Colores: Negro profundo, acentos lime/verde neón, púrpura atmosférico
@@ -54,6 +74,15 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+body.scrollbar-hide, body {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+body::-webkit-scrollbar {
+  display: none !important;
 }
 
 /* Safe area utilities */

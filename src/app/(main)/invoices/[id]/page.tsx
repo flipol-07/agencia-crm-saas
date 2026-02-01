@@ -1,25 +1,12 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { InvoiceDetailView } from '@/features/invoices/components'
-import type { Invoice, InvoiceItem, Settings } from '@/types/database'
+import type { InvoiceItem, Settings, InvoiceWithDetails } from '@/types/database'
 
 // Habilitar PPR (Partial Prerendering) si estamos en canary, sino omitir
 // export const experimental_ppr = true
 
-interface InvoiceWithClientAndItems extends Invoice {
-    contacts: {
-        id: string
-        company_name: string
-        contact_name: string | null
-        email: string | null
-        phone: string | null
-        tax_id: string | null
-        tax_address: string | null
-    } | null
-    invoice_items: InvoiceItem[]
-}
-
-async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithClientAndItems, settings: Settings | null } | null> {
+async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithDetails, settings: Settings | null } | null> {
     const supabase = await createClient()
 
     const { data, error: invoiceError } = await (supabase.from('invoices') as any)
@@ -36,14 +23,55 @@ async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithClientA
 
     if (invoiceError || !data) return null
 
-    const invoice = data as unknown as InvoiceWithClientAndItems
+    const invoice = data as unknown as InvoiceWithDetails
 
-    const { data: settings } = await (supabase.from('settings') as any)
+    // 1. Fetch Global Settings (Always needed for defaults like Logo, Currency)
+    const { data: globalSettings } = await (supabase.from('settings') as any)
         .select('*')
         .limit(1)
         .single()
 
-    return { invoice, settings: settings as Settings | null }
+    let effectiveSettings = globalSettings as Settings | null
+
+    // 2. If Invoice has an Issuer, fetch Profile and Override
+    if (invoice.issuer_profile_id) {
+        const { data: profile } = await (supabase.from('profiles') as any)
+            .select('*')
+            .eq('id', invoice.issuer_profile_id)
+            .single()
+
+        if (profile && effectiveSettings) {
+            effectiveSettings = {
+                ...effectiveSettings,
+                company_name: profile.billing_name || profile.full_name || effectiveSettings.company_name,
+                tax_id: profile.billing_tax_id || effectiveSettings.tax_id,
+                address: profile.billing_address || effectiveSettings.address,
+                email: profile.billing_email || effectiveSettings.email,
+                phone: profile.billing_phone || effectiveSettings.phone,
+                // If profile has IBAN, we might want to append it to defaults or notes? 
+                // InvoiceDetailView uses `notes` field from invoice usually for IBAN.
+                // But let's stick to the basic company info overrides for now.
+            }
+        } else if (profile && !effectiveSettings) {
+            // Edge case: No global settings but we have a profile. Construct minimal settings.
+            effectiveSettings = {
+                id: 'generated-from-profile',
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+                company_name: profile.billing_name || profile.full_name || 'Sin Nombre',
+                tax_id: profile.billing_tax_id || '',
+                address: profile.billing_address || '',
+                email: profile.billing_email || '',
+                phone: profile.billing_phone || '',
+                logo_url: profile.avatar_url || null, // Use avatar as fallback if no global settings
+                currency: 'EUR',
+                default_tax_rate: 21,
+                website: null
+            }
+        }
+    }
+
+    return { invoice, settings: effectiveSettings }
 }
 
 export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {

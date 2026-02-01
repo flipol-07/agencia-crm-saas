@@ -9,6 +9,7 @@ import Image from 'next/image'
 import { Suspense } from 'react'
 import { RealtimeNotifications } from '@/shared/components/providers/RealtimeNotifications'
 import { Toaster } from 'sonner'
+import { ProfileCompletionCheck } from '@/shared/components/features/ProfileCompletionCheck'
 
 async function UserNav() {
   const supabase = await createClient()
@@ -47,6 +48,11 @@ export default function MainLayout({
     <div className="min-h-screen bg-black">
       <RealtimeNotifications />
       <Toaster position="top-right" theme="dark" richColors />
+
+      <Suspense fallback={null}>
+        <ProfileCompletionCheck />
+      </Suspense>
+
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl pt-safe">
         <div className="flex items-center justify-between px-4 lg:px-6 py-4">
@@ -56,7 +62,7 @@ export default function MainLayout({
             </Suspense>
             <Link href="/dashboard" className="flex items-center gap-2">
               <div className="relative w-8 h-8 lg:w-10 lg:h-10">
-                <Image src="/aurie-official-logo.png" alt="Aura" fill className="object-contain" />
+                <Image src="/aurie-official-logo.png" alt="Aura" fill className="object-contain" sizes="(max-width: 768px) 32px, 40px" />
               </div>
               <h1 className="text-xl lg:text-2xl font-black tracking-tight text-white uppercase hidden sm:block">
                 AURIE
@@ -78,7 +84,7 @@ export default function MainLayout({
         </Suspense>
 
         {/* Content */}
-        <main className="flex-1 p-4 lg:p-8 min-w-0 overflow-x-hidden">
+        <main className="flex-1 p-4 lg:p-8 min-w-0 overflow-x-hidden scrollbar-hide">
           <Suspense fallback={<div className="animate-pulse bg-white/5 h-screen rounded-xl" />}>
             {children}
           </Suspense>

@@ -376,7 +376,7 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
                     onDelete={async () => { }} // No eliminable
                     // Sobrescribimos el comportamiento para usar Tareas del Contacto directamente
                     _customTasks={generalTasks}
-                    _customCreateTask={(task) => createContactTask({ ...task, project_id: null })}
+                    _customCreateTask={(task) => createContactTask({ ...task, project_id: undefined })}
                     _customUpdateTask={updateContactTask}
                     _customDeleteTask={deleteContactTask}
                     _isGeneral={true}

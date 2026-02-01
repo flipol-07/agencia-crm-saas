@@ -1,0 +1,169 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { teamChatService } from '../services/chatService'
+import { TeamChatWithMembers } from '@/types/database'
+import { useAuth } from '@/hooks/useAuth'
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+import { UserSelectorModal } from './UserSelectorModal'
+import { createClient } from '@/lib/supabase/client'
+import { formatDistanceToNow } from 'date-fns'
+import { es } from 'date-fns/locale'
+
+export function ChatList() {
+    const { user } = useAuth()
+    const params = useParams()
+    const activeChatId = params?.chatId as string
+
+    const [chats, setChats] = useState<TeamChatWithMembers[]>([])
+    const [loading, setLoading] = useState(true)
+    const [showNewChat, setShowNewChat] = useState(false)
+
+    const fetchChats = async () => {
+        // Don't set loading true if refreshing?
+        const data = await teamChatService.getChats()
+        setChats(data)
+        setLoading(false)
+    }
+
+    useEffect(() => {
+        if (user) {
+            fetchChats()
+
+            // Subscribe to new chats or updates
+            const supabase = createClient()
+            const channel = supabase
+                .channel('chat_list_updates')
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'team_chats' // We should filter by participation ideally, but RLS on Select helps. Realtime filter is limited.
+                }, () => {
+                    fetchChats()
+                })
+                .on('postgres_changes', {
+                    event: '*',
+                    schema: 'public',
+                    table: 'team_chat_participants',
+                    filter: `user_id=eq.${user.id}`
+                }, () => fetchChats())
+                .on('postgres_changes', {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'team_messages'
+                }, () => {
+                    fetchChats() // Update last message preview
+                })
+                .subscribe()
+
+            return () => {
+                supabase.removeChannel(channel)
+            }
+        }
+    }, [user])
+
+    const getOtherParticipant = (chat: TeamChatWithMembers) => {
+        if (!user) return null
+        return chat.participants.find(p => p.profiles?.id !== user.id)?.profiles
+    }
+
+    // Helper to get self if chat has no other participant (e.g. self chat)
+    // Or handle groups later.
+    const getChatDisplayInfo = (chat: TeamChatWithMembers) => {
+        const other = getOtherParticipant(chat)
+        if (other) return {
+            name: other.full_name || other.email || 'Usuario',
+            avatar: other.avatar_url,
+            initial: (other.full_name || other.email || '?')[0].toUpperCase()
+        }
+        return { name: 'Chat Personal', avatar: null, initial: 'YO' }
+    }
+
+    return (
+        <div className="flex flex-col h-full bg-zinc-950 border-r border-white/5">
+            {/* Header */}
+            <div className="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
+                <h1 className="font-bold text-lg text-white">Chats</h1>
+                <button
+                    onClick={() => setShowNewChat(true)}
+                    className="p-2 bg-lime-500 text-black rounded-lg hover:bg-lime-400 transition-colors"
+                >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                </button>
+            </div>
+
+            {/* List */}
+            <div className="flex-1 overflow-y-auto">
+                {loading ? (
+                    <div className="p-4 space-y-4">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="animate-pulse flex items-center gap-3">
+                                <div className="w-12 h-12 bg-white/5 rounded-full" />
+                                <div className="flex-1 space-y-2">
+                                    <div className="h-4 bg-white/5 rounded w-1/2" />
+                                    <div className="h-3 bg-white/5 rounded w-3/4" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : chats.length === 0 ? (
+                    <div className="p-8 text-center text-gray-500">
+                        <p>No tienes conversaciones activas.</p>
+                        <button
+                            onClick={() => setShowNewChat(true)}
+                            className="text-lime-500 hover:underline mt-2 text-sm"
+                        >
+                            Comenzar un chat
+                        </button>
+                    </div>
+                ) : (
+                    <div className="divide-y divide-white/5">
+                        {chats.map(chat => {
+                            const info = getChatDisplayInfo(chat)
+                            const isActive = activeChatId === chat.id
+
+                            return (
+                                <Link
+                                    key={chat.id}
+                                    href={`/team-chat/${chat.id}`}
+                                    className={`block p-4 hover:bg-white/5 transition-colors ${isActive ? 'bg-white/10 border-l-2 border-lime-500' : ''}`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative">
+                                            <div className="w-12 h-12 rounded-full bg-zinc-800 text-gray-400 flex items-center justify-center font-bold text-lg overflow-hidden border border-white/10">
+                                                {info.avatar ? (
+                                                    <img src={info.avatar} alt="" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    info.initial
+                                                )}
+                                            </div>
+                                            {/* Online status indicator could go here */}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-baseline mb-0.5">
+                                                <h3 className={`font-semibold truncate ${isActive ? 'text-white' : 'text-gray-200'}`}>
+                                                    {info.name}
+                                                </h3>
+                                                <span className="text-[10px] text-gray-500 whitespace-nowrap ml-2">
+                                                    {chat.updated_at && formatDistanceToNow(new Date(chat.updated_at), { addSuffix: false, locale: es })}
+                                                </span>
+                                            </div>
+                                            <p className={`text-sm truncate ${isActive ? 'text-gray-300' : 'text-gray-500'}`}>
+                                                {chat.last_message_preview || 'Nueva conversación'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </Link>
+                            )
+                        })}
+                    </div>
+                )}
+            </div>
+
+            <UserSelectorModal isOpen={showNewChat} onClose={() => setShowNewChat(false)} />
+        </div>
+    )
+}

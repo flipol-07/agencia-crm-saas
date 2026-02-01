@@ -95,6 +95,41 @@ export function RealtimeNotifications() {
                     }
                 }
             )
+            // Subscribe to Team Chat Messages
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'team_messages'
+                },
+                async (payload) => {
+                    const newMsg = payload.new as any
+
+                    // Filter out own messages
+                    const { data: { user } } = await supabase.auth.getUser()
+                    if (user && newMsg.sender_id !== user.id) {
+                        const title = 'Nuevo mensaje de equipo'
+                        const body = newMsg.content || 'Imagen/Archivo'
+
+                        toast.info(title, {
+                            description: body,
+                            duration: 5000,
+                            action: {
+                                label: 'Responder',
+                                onClick: () => router.push(`/team-chat/${newMsg.chat_id}`)
+                            }
+                        })
+
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification(title, {
+                                body: body,
+                                icon: '/aurie-official-logo.png'
+                            })
+                        }
+                    }
+                }
+            )
             .subscribe((status) => {
                 console.log('RealtimeNotifications: [4/4] Subscription status:', status)
                 if (status === 'SUBSCRIBED') {

@@ -18,8 +18,6 @@ import type { TaskWithDetails, TaskStatus, TaskPriority } from '@/types/database
 type ViewMode = 'list' | 'kanban'
 type FilterMode = 'all' | 'mine'
 
-// TaskCard local eliminado - Usando importado
-
 // ============ LIST VIEW ============
 function TasksListView({
     tasks,
@@ -71,12 +69,10 @@ function TasksListView({
     )
 }
 
-// TasksKanbanView local eliminado - Usando KanbanBoard importado con DnD
-
 // ============ MAIN PAGE ============
 export default function TasksPage() {
     const { user } = useAuth()
-    const { tasks, loading, updateTaskStatus, assignUser, unassignUser, updateTaskDetails, createQuickTask, refetch } = useTasksWithDetails()
+    const { tasks, loading, updateTaskStatus, assignUser, unassignUser, updateTaskDetails, createQuickTask, deleteTask, refetch } = useTasksWithDetails()
     const { members } = useTeamMembers()
 
     const [viewMode, setViewMode] = useState<ViewMode>('list')
@@ -204,7 +200,7 @@ export default function TasksPage() {
             {/* Header */}
             <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-tight">Gestión de Tareas</h1>
+                    <h1 className="text-3xl font-black uppercase tracking-tight text-white">Gestión de Tareas</h1>
                     <p className="text-gray-400 mt-1">
                         {loading ? 'Cargando...' : `${filteredTasks.length} tareas pendientes`}
                         {hasFilters && tasks.length !== filteredTasks.length && ` (de ${tasks.length})`}
@@ -396,6 +392,10 @@ export default function TasksPage() {
                     onAssign={handleAssign}
                     onUnassign={handleUnassign}
                     onUpdateDetails={handleUpdateDetails}
+                    onDelete={async () => {
+                        await deleteTask(selectedTask.id)
+                        setSelectedTask(null)
+                    }}
                 />
             )}
 
