@@ -13,11 +13,11 @@ export function RealtimeNotifications() {
     const router = useRouter()
 
     useEffect(() => {
-        console.log('RealtimeNotifications: Initializing listener...')
+        console.log('RealtimeNotifications: [1/4] Initializing global listener...')
 
         // 1. Fetch initial counts
         const fetchInitialCounts = async () => {
-            console.log('RealtimeNotifications: Fetching initial unread counts...')
+            console.log('RealtimeNotifications: [2/4] Fetching initial unread counts...')
             const { data, error } = await (supabase.from('contact_emails') as any)
                 .select('contact_id')
                 .eq('is_read', false)
@@ -41,44 +41,51 @@ export function RealtimeNotifications() {
         fetchInitialCounts()
 
         // 2. Subscribe to new emails
-        console.log('RealtimeNotifications: Subscribing to contact_emails table...')
+        console.log('RealtimeNotifications: [3/4] Subscribing to ALL contact_emails changes...')
         const channel = supabase
-            .channel('realtime_emails_channel')
+            .channel('realtime_emails_global')
             .on(
                 'postgres_changes',
                 {
-                    event: 'INSERT',
+                    event: '*', // Listen to everything (INSERT/UPDATE/DELETE) for total visibility
                     schema: 'public',
                     table: 'contact_emails'
                 },
                 (payload) => {
-                    console.log('RealtimeNotifications: New event received!', payload)
-                    const newEmail = payload.new as any
+                    console.log('RealtimeNotifications: 🔔 DB Event Received:', payload.eventType, payload)
 
-                    // Filter in JS for reliability
-                    if (newEmail.direction === 'inbound' && newEmail.contact_id) {
-                        console.log('RealtimeNotifications: Processing inbound email for contact:', newEmail.contact_id)
-                        increment(newEmail.contact_id)
+                    if (payload.eventType === 'INSERT') {
+                        const newEmail = payload.new as any
 
-                        // Show toast
-                        toast.success('Nuevo mensaje recibido', {
-                            description: newEmail.subject || 'Sin asunto',
-                            duration: 8000,
-                            action: {
-                                label: 'Ver',
-                                onClick: () => router.push(`/contacts/${newEmail.contact_id}`)
+                        if (newEmail.direction === 'inbound') {
+                            console.log('RealtimeNotifications: ✅ Inbound verified from:', newEmail.from_email)
+
+                            if (newEmail.contact_id) {
+                                increment(newEmail.contact_id)
                             }
-                        })
 
-                        // Refresh router to update any server components
-                        router.refresh()
+                            const title = newEmail.contact_id ? 'Nuevo mensaje de contacto' : 'Mensaje (Remitente desconocido)'
+
+                            // Show toast
+                            toast.success(title, {
+                                description: `${newEmail.from_email}: ${newEmail.subject || 'Sin asunto'}`,
+                                duration: 10000,
+                                action: newEmail.contact_id ? {
+                                    label: 'Ver Contacto',
+                                    onClick: () => router.push(`/contacts/${newEmail.contact_id}`)
+                                } : undefined
+                            })
+
+                            // Refresh router
+                            router.refresh()
+                        }
                     }
                 }
             )
             .subscribe((status) => {
-                console.log('RealtimeNotifications: Subscription status:', status)
+                console.log('RealtimeNotifications: [4/4] Subscription status:', status)
                 if (status === 'SUBSCRIBED') {
-                    console.log('RealtimeNotifications: Listening for live updates!')
+                    console.log('RealtimeNotifications: 🚀 CRM is LIVE for all incoming mail!')
                 }
                 if (status === 'CHANNEL_ERROR') {
                     console.error('RealtimeNotifications: Error connecting to Realtime channel')
