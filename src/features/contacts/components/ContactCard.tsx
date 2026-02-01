@@ -3,12 +3,15 @@
 import Link from 'next/link'
 import type { Contact } from '@/types/database'
 import { PIPELINE_STAGES } from '@/types/database'
+import { useNotificationStore } from '@/shared/store/useNotificationStore'
 
 interface ContactCardProps {
     contact: Contact
 }
 
 export function ContactCard({ contact }: ContactCardProps) {
+    const { unreadCounts } = useNotificationStore()
+    const unreadCount = unreadCounts[contact.id] || 0
     const stage = PIPELINE_STAGES.find(s => s.id === contact.pipeline_stage) || PIPELINE_STAGES[0]
 
     const getStatusColor = (status: string) => {
@@ -44,9 +47,16 @@ export function ContactCard({ contact }: ContactCardProps) {
 
                 <div className="flex items-start justify-between mb-4 mt-2">
                     <div className="flex-1 min-w-0">
-                        <h3 className="text-xl font-bold text-zinc-100 truncate group-hover:text-lime-400 transition-colors tracking-tight">
-                            {contact.company_name}
-                        </h3>
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-xl font-bold text-zinc-100 truncate group-hover:text-lime-400 transition-colors tracking-tight">
+                                {contact.company_name}
+                            </h3>
+                            {unreadCount > 0 && (
+                                <span className="flex-shrink-0 bg-red-500 text-white text-[10px] font-bold h-5 w-5 rounded-full flex items-center justify-center animate-bounce shadow-[0_0_10px_rgba(239,68,68,0.5)]">
+                                    {unreadCount}
+                                </span>
+                            )}
+                        </div>
                         {contact.contact_name && (
                             <p className="text-sm text-zinc-500 truncate mt-1 flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-zinc-700"></span>

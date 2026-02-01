@@ -3,6 +3,9 @@
 import Link from 'next/link'
 import { useContact } from '@/features/contacts/hooks'
 import { ContactDetail360 } from '@/features/contacts/components'
+import { useNotificationStore } from '@/shared/store/useNotificationStore'
+import { createClient } from '@/lib/supabase/client'
+import { useEffect } from 'react'
 
 interface Props {
     id: string
@@ -11,6 +14,23 @@ interface Props {
 
 export function ContactDetailPageClient({ id, initialContact }: Props) {
     const { contact, loading, error, updateContact } = useContact(id)
+    const { clear } = useNotificationStore()
+    const supabase = createClient()
+
+    useEffect(() => {
+        const markAsRead = async () => {
+            await (supabase
+                .from('contact_emails')
+                .update({ is_read: true } as any)
+                .eq('contact_id', id)
+                .eq('direction', 'inbound')
+                .eq('is_read', false) as any)
+
+            clear(id)
+        }
+
+        markAsRead()
+    }, [id, supabase, clear])
 
     // Merge initial contact with real-time contact
     const currentContact = contact || initialContact

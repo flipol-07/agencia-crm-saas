@@ -7,6 +7,8 @@ import { MobileNav } from '@/shared/components/layout/MobileNav'
 import { FloatingChat } from '@/features/ai-assistant/components/FloatingChat'
 import Image from 'next/image'
 import { Suspense } from 'react'
+import { RealtimeNotifications } from '@/shared/components/providers/RealtimeNotifications'
+import { Toaster } from 'sonner'
 
 async function UserNav() {
   const supabase = await createClient()
@@ -43,6 +45,8 @@ export default function MainLayout({
 }) {
   return (
     <div className="min-h-screen bg-black">
+      <RealtimeNotifications />
+      <Toaster position="top-right" theme="dark" richColors />
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/80 backdrop-blur-xl pt-safe">
         <div className="flex items-center justify-between px-4 lg:px-6 py-4">
