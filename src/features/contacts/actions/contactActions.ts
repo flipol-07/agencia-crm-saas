@@ -19,7 +19,7 @@ export async function createContactAction(contact: any): Promise<{ data: Contact
         return { data: null, error: error.message }
     }
 
-    revalidateTag('contacts')
+    revalidateTag('contacts', 'max')
     return { data: data as Contact, error: null }
 }
 
@@ -39,7 +39,7 @@ export async function updateContactAction(id: string, contact: any): Promise<{ d
         return { data: null, error: error.message }
     }
 
-    revalidateTag('contacts')
+    revalidateTag('contacts', 'max')
     return { data: data as Contact, error: null }
 }
 
@@ -51,6 +51,6 @@ export async function deleteContactAction(id: string): Promise<{ success: boolea
 
     if (error) return { success: false, error: error.message }
 
-    revalidateTag('contacts')
+    revalidateTag('contacts', 'max')
     return { success: true, error: null }
 }
