@@ -25,7 +25,7 @@ export function ProjectProgress({ projects, loading }: ProjectProgressProps) {
                     <span className="w-2 h-2 rounded-full bg-blue-400 shadow-[0_0_10px_rgba(59,130,246,0.5)]"></span>
                     Proyectos Activos
                 </h3>
-                <Link href="/projects" className="text-xs text-text-muted hover:text-brand transition-colors">
+                <Link href="#" className="text-xs text-text-muted hover:text-brand transition-colors cursor-default">
                     Ver todos →
                 </Link>
             </div>
