@@ -4,8 +4,7 @@ import { useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useNotificationStore } from '@/shared/store/useNotificationStore'
 import { toast } from 'sonner'
-import { useRouter }
-import 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 export function RealtimeNotifications() {
     // Memoize client to avoid recreation on every render
