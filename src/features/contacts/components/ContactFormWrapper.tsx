@@ -8,6 +8,7 @@ import {
     updateContactAction as updateContact
 } from '../actions/contactActions'
 import { analyzeWebsite } from '../actions/analyze-website'
+import { toast } from 'sonner'
 
 export function ContactFormWrapper() {
     const [showForm, setShowForm] = useState(false)
@@ -16,7 +17,7 @@ export function ContactFormWrapper() {
     const handleCreateContact = async (data: ContactFormData) => {
         setIsCreating(true)
         try {
-            const newContact = await createContact({
+            const { data: newContact, error } = await createContact({
                 company_name: data.company_name,
                 contact_name: data.contact_name || null,
                 email: data.email || null,
@@ -27,7 +28,13 @@ export function ContactFormWrapper() {
                 services: data.services || [],
             })
 
+            if (error) {
+                toast.error(error)
+                return
+            }
+
             if (newContact) {
+                toast.success('Contacto creado correctamente')
                 const promises = []
                 if (data.website) {
                     promises.push(analyzeWebsite(data.website, newContact.id))
@@ -42,8 +49,9 @@ export function ContactFormWrapper() {
             }
 
             setShowForm(false)
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error creating contact:', error)
+            toast.error('Error inesperado al crear el contacto')
         } finally {
             setIsCreating(false)
         }
