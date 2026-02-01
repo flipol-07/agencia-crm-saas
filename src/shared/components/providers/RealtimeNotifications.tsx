@@ -56,7 +56,7 @@ export function RealtimeNotifications() {
                     schema: 'public',
                     table: 'contact_emails'
                 },
-                (payload) => {
+                (payload: any) => {
                     console.log('RealtimeNotifications: 🔔 DB Event Received:', payload.eventType, payload)
 
                     const newEmail = payload.new as any
@@ -103,7 +103,7 @@ export function RealtimeNotifications() {
                     schema: 'public',
                     table: 'team_messages'
                 },
-                async (payload) => {
+                async (payload: any) => {
                     const newMsg = payload.new as any
 
                     // Filter out own messages
@@ -130,7 +130,7 @@ export function RealtimeNotifications() {
                     }
                 }
             )
-            .subscribe((status) => {
+            .subscribe((status: string) => {
                 console.log('RealtimeNotifications: [4/4] Subscription status:', status)
                 if (status === 'SUBSCRIBED') {
                     console.log('RealtimeNotifications: 🚀 CRM is LIVE for all incoming mail!')
