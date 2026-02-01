@@ -19,12 +19,11 @@ export function ContactDetailPageClient({ id, initialContact }: Props) {
 
     useEffect(() => {
         const markAsRead = async () => {
-            await (supabase
-                .from('contact_emails')
-                .update({ is_read: true } as any)
+            await (supabase.from('contact_emails') as any)
+                .update({ is_read: true })
                 .eq('contact_id', id)
                 .eq('direction', 'inbound')
-                .eq('is_read', false) as any)
+                .eq('is_read', false)
 
             clear(id)
         }

@@ -14,11 +14,10 @@ export function RealtimeNotifications() {
     useEffect(() => {
         // 1. Fetch initial counts
         const fetchInitialCounts = async () => {
-            const { data, error } = await (supabase
-                .from('contact_emails')
+            const { data, error } = await (supabase.from('contact_emails') as any)
                 .select('contact_id')
                 .eq('is_read', false)
-                .eq('direction', 'inbound') as any)
+                .eq('direction', 'inbound')
 
             if (data) {
                 const counts: Record<string, number> = {}
