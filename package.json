@@ -16,6 +16,7 @@
     "@supabase/ssr": "^0.6.0",
     "@supabase/supabase-js": "^2.49.0",
     "date-fns": "^4.1.0",
+    "form-data": "^4.0.5",
     "imap-simple": "^5.1.0",
     "mailparser": "^3.9.3",
     "next": "^16.0.0",

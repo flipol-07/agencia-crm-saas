@@ -114,4 +114,71 @@ export class EmailService {
             connection.end()
         }
     }
+
+    // === GLOBAL SYNC (CRON) ===
+    static async fetchGlobalUnread(limit: number = 20): Promise<EmailMessage[]> {
+        if (!EMAIL_CONFIG.user || !EMAIL_CONFIG.password) {
+            console.warn('Credenciales de email no configuradas. Saltando sync.')
+            return []
+        }
+
+        const connection = await imap.connect({
+            imap: EMAIL_CONFIG as any,
+        })
+
+        try {
+            await connection.openBox('INBOX')
+
+            // Fetch recent messages (not necessarily unseen, we'll handle duplicates in DB)
+            const searchCriteria = ['ALL']
+            const fetchOptions = {
+                bodies: ['HEADER', 'TEXT', ''],
+                markSeen: false,
+                struct: true
+            }
+
+            const messages = await connection.search(searchCriteria, fetchOptions)
+            const recentMessages = messages.slice(-limit)
+
+            const parsedEmails: EmailMessage[] = []
+
+            for (const item of recentMessages) {
+                const all = item.parts.find((part: any) => part.which === '')
+                const id = item.attributes.uid
+
+                if (all && all.body) {
+                    const parsed = await simpleParser(all.body)
+
+                    const fromAddr = parsed.from?.value[0]?.address || ''
+
+                    let toAddr = ''
+                    if (Array.isArray(parsed.to)) {
+                        toAddr = parsed.to[0]?.text || ''
+                    } else if (parsed.to && 'text' in parsed.to) {
+                        toAddr = (parsed.to as any).text || ''
+                    }
+
+                    parsedEmails.push({
+                        messageId: parsed.messageId || `imap-${id}-${parsed.date?.getTime()}`,
+                        subject: parsed.subject || '(Sin asunto)',
+                        from: fromAddr,
+                        to: toAddr,
+                        date: parsed.date || new Date(),
+                        text: parsed.text || '',
+                        html: parsed.html || '',
+                        snippet: (parsed.text || '').substring(0, 150),
+                        direction: 'inbound' // In global sync, we assume everything in INBOX is inbound
+                    })
+                }
+            }
+
+            return parsedEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
+
+        } catch (error) {
+            console.error('Error in fetchGlobalUnread:', error)
+            return []
+        } finally {
+            connection.end()
+        }
+    }
 }

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { createClient } from '@/lib/supabase/client'
 import { syncContactEmails } from '@/features/emails/actions/sync'
 import type { ContactEmail } from '@/types/database'
 
@@ -16,12 +18,42 @@ interface EmailListProps {
 export function EmailList({ contactId, contactEmail, emails, onRefresh }: EmailListProps) {
     const [loading, setLoading] = useState(false)
 
+    const router = useRouter()
+
+    useEffect(() => {
+        if (!contactId) return
+
+        const supabase = createClient()
+        const channel = supabase
+            .channel('contact_emails_changes')
+            .on(
+                'postgres_changes',
+                {
+                    event: '*',
+                    schema: 'public',
+                    table: 'contact_emails',
+                    filter: `contact_id=eq.${contactId}`,
+                },
+                () => {
+                    console.log('Realtime update received, refreshing...')
+                    router.refresh()
+                    onRefresh?.()
+                }
+            )
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [contactId, router, onRefresh])
+
     const handleSync = async () => {
         if (!contactEmail) return
         setLoading(true)
         try {
             await syncContactEmails(contactId, contactEmail)
             onRefresh?.()
+            router.refresh()
         } catch (error) {
             console.error(error)
             alert('Error al sincronizar correos')
