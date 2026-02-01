@@ -37,7 +37,7 @@ export function useContacts() {
     }, [fetchContacts])
 
     const createContact = async (contact: Partial<ContactInsert>): Promise<Contact | null> => {
-        const data = await createContactAction({
+        const { data, error: actionError } = await createContactAction({
             company_name: contact.company_name || 'Sin nombre',
             contact_name: contact.contact_name,
             email: contact.email,
@@ -54,13 +54,28 @@ export function useContacts() {
             services: contact.services || [],
         } as any)
 
-        setContacts(prev => [data, ...prev])
+        if (actionError) {
+            setError(actionError)
+            return null
+        }
+
+        if (data) {
+            setContacts(prev => [data, ...prev])
+        }
         return data
     }
 
     const updateContact = async (id: string, updates: ContactUpdate) => {
-        const data = await updateContactAction(id, updates)
-        setContacts(prev => prev.map(c => c.id === id ? data : c))
+        const { data, error: actionError } = await updateContactAction(id, updates)
+
+        if (actionError) {
+            setError(actionError)
+            return null
+        }
+
+        if (data) {
+            setContacts(prev => prev.map(c => c.id === id ? data : c))
+        }
         return data
     }
 
