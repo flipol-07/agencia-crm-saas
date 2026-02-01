@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { EmailService } from '@/lib/email/service'
 import { createClient } from '@/lib/supabase/server'
+import { WhatsAppService } from '@/shared/lib/whatsapp'
 
 
 export async function GET(req: Request) {
@@ -36,6 +37,11 @@ export async function GET(req: Request) {
             const contactId = contact?.id || null
 
             // Upsert email
+            const { data: existing } = await (supabase.from('contact_emails') as any)
+                .select('id')
+                .eq('message_id', email.messageId)
+                .single()
+
             const { error: upsertError } = await (supabase.from('contact_emails') as any).upsert({
                 contact_id: contactId,
                 message_id: email.messageId,
@@ -53,7 +59,12 @@ export async function GET(req: Request) {
             })
 
             if (!upsertError) {
-                syncedCount++
+                // If it's a NEW email (not previously in DB), notify via WhatsApp
+                if (!existing) {
+                    syncedCount++
+                    console.log(`[Sync] Nuevo email de ${email.from}, notificando...`)
+                    await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
+                }
 
                 // Update contact last interaction if exists
                 if (contactId) {
@@ -64,7 +75,7 @@ export async function GET(req: Request) {
             }
         }
 
-        console.log(`[Sync] Sincronización completada. ${syncedCount} correos procesados.`)
+        console.log(`[Sync] Sincronización completada. ${syncedCount} correos nuevos notificados.`)
 
         return NextResponse.json({
             success: true,
