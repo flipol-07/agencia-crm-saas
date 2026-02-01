@@ -4,9 +4,11 @@ import { createClient } from '@/lib/supabase/server'
 
 
 export async function GET(req: Request) {
-    // Security check for Vercel Cron
-    const authHeader = req.headers.get('authorization')
-    if (process.env.NODE_ENV === 'production' && authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    // Security check (only in production)
+    const { searchParams } = new URL(req.url)
+    const secret = searchParams.get('secret') || req.headers.get('authorization')?.split(' ')[1]
+
+    if (process.env.NODE_ENV === 'production' && secret !== process.env.CRON_SECRET) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
