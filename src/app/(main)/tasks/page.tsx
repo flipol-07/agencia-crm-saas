@@ -182,15 +182,17 @@ export default function TasksPage() {
 
     const handleCreateTask = async (taskData: {
         title: string
-        project_id: string
+        project_id?: string | null
+        contact_id?: string | null
         description?: string
         priority: TaskPriority
         due_date?: string | null
     }) => {
-        await createQuickTask(taskData.title, taskData.project_id, {
+        await createQuickTask(taskData.title, taskData.project_id || '', {
             description: taskData.description,
             priority: taskData.priority,
             due_date: taskData.due_date || null,
+            contact_id: taskData.contact_id || null
         })
         await refetch()
     }

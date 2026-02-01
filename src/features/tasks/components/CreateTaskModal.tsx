@@ -1,7 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useProjects } from '@/features/projects/hooks'
+import { useContacts } from '@/features/contacts/hooks/useContacts'
 import { TASK_PRIORITIES } from '@/types/database'
 import type { TaskPriority } from '@/types/database'
 
@@ -10,23 +11,42 @@ interface CreateTaskModalProps {
     onClose: () => void
     onCreateTask: (task: {
         title: string
-        project_id: string
+        project_id?: string | null
+        contact_id?: string | null
         description?: string
         priority: TaskPriority
         due_date?: string | null
     }) => Promise<void>
+    initialProjectId?: string | null
+    initialContactId?: string | null
 }
 
-export function CreateTaskModal({ isOpen, onClose, onCreateTask }: CreateTaskModalProps) {
+export function CreateTaskModal({
+    isOpen,
+    onClose,
+    onCreateTask,
+    initialProjectId = '',
+    initialContactId = ''
+}: CreateTaskModalProps) {
     const { projects, loading: loadingProjects } = useProjects()
+    const { contacts, loading: loadingContacts } = useContacts()
 
     const [title, setTitle] = useState('')
-    const [projectId, setProjectId] = useState('')
+    const [projectId, setProjectId] = useState(initialProjectId || '')
+    const [contactId, setContactId] = useState(initialContactId || '')
     const [description, setDescription] = useState('')
     const [priority, setPriority] = useState<TaskPriority>('medium')
     const [dueDate, setDueDate] = useState('')
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
+
+    // Reset pre-selections when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setProjectId(initialProjectId || '')
+            setContactId(initialContactId || '')
+        }
+    }, [isOpen, initialProjectId, initialContactId])
 
     if (!isOpen) return null
 
@@ -38,16 +58,13 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }: CreateTaskMod
             setError('El título es obligatorio')
             return
         }
-        if (!projectId) {
-            setError('Selecciona un proyecto')
-            return
-        }
 
         setSaving(true)
         try {
             await onCreateTask({
                 title: title.trim(),
-                project_id: projectId,
+                project_id: projectId || null,
+                contact_id: contactId || null,
                 description: description.trim() || undefined,
                 priority,
                 due_date: dueDate || null,
@@ -55,6 +72,7 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }: CreateTaskMod
             // Reset form
             setTitle('')
             setProjectId('')
+            setContactId('')
             setDescription('')
             setPriority('medium')
             setDueDate('')
@@ -84,7 +102,7 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }: CreateTaskMod
                 {/* Header */}
                 <div className="p-6 border-b border-white/5">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-xl font-bold text-white">Nueva Tarea</h2>
+                        <h2 className="text-xl font-bold text-white uppercase tracking-wider">Nueva Tarea</h2>
                         <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg transition-colors">
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -116,24 +134,48 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }: CreateTaskMod
                         />
                     </div>
 
-                    {/* Proyecto */}
-                    <div>
-                        <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
-                            Proyecto *
-                        </label>
-                        <select
-                            value={projectId}
-                            onChange={(e) => setProjectId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-lime-400"
-                            disabled={loadingProjects}
-                        >
-                            <option value="" className="bg-gray-900">Seleccionar proyecto...</option>
-                            {projects.map(p => (
-                                <option key={p.id} value={p.id} className="bg-gray-900">
-                                    {p.contacts?.company_name} → {p.name}
-                                </option>
-                            ))}
-                        </select>
+                    <div className="grid grid-cols-2 gap-4">
+                        {/* Cliente */}
+                        <div>
+                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
+                                Cliente (opcional)
+                            </label>
+                            <select
+                                value={contactId}
+                                onChange={(e) => setContactId(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-lime-400"
+                                disabled={loadingContacts}
+                            >
+                                <option value="" className="bg-gray-900 text-gray-500">Ninguno</option>
+                                {contacts.map(c => (
+                                    <option key={c.id} value={c.id} className="bg-gray-900">
+                                        {c.company_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        {/* Proyecto */}
+                        <div>
+                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
+                                Proyecto (opcional)
+                            </label>
+                            <select
+                                value={projectId}
+                                onChange={(e) => setProjectId(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-lime-400"
+                                disabled={loadingProjects}
+                            >
+                                <option value="" className="bg-gray-900 text-gray-500">Ninguno</option>
+                                {projects
+                                    .filter(p => !contactId || p.contact_id === contactId)
+                                    .map(p => (
+                                        <option key={p.id} value={p.id} className="bg-gray-900">
+                                            {p.name}
+                                        </option>
+                                    ))}
+                            </select>
+                        </div>
                     </div>
 
                     {/* Prioridad y Fecha */}
@@ -149,8 +191,8 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }: CreateTaskMod
                                         type="button"
                                         onClick={() => setPriority(p.id as TaskPriority)}
                                         className={`flex-1 px-2 py-2 text-xs rounded-lg border transition-all ${priority === p.id
-                                                ? priorityColors[p.id as TaskPriority]
-                                                : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20'
+                                            ? priorityColors[p.id as TaskPriority]
+                                            : 'bg-white/5 border-white/10 text-gray-500 hover:border-white/20'
                                             }`}
                                     >
                                         {p.label.charAt(0)}
@@ -194,14 +236,14 @@ export function CreateTaskModal({ isOpen, onClose, onCreateTask }: CreateTaskMod
                         <button
                             type="button"
                             onClick={onClose}
-                            className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-colors"
+                            className="flex-1 px-4 py-3 bg-white/5 hover:bg-white/10 text-white rounded-lg font-medium transition-colors uppercase tracking-wider text-xs"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
-                            disabled={saving || !title.trim() || !projectId}
-                            className="flex-1 px-4 py-3 bg-lime-500 hover:bg-lime-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold rounded-lg transition-colors"
+                            disabled={saving || !title.trim()}
+                            className="flex-1 px-4 py-3 bg-lime-500 hover:bg-lime-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold rounded-lg transition-colors uppercase tracking-wider text-xs"
                         >
                             {saving ? 'Creando...' : 'Crear Tarea'}
                         </button>

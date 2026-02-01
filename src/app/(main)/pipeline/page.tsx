@@ -9,7 +9,7 @@ export default function PipelinePage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-tight">Pipeline</h1>
+                    <h1 className="text-3xl font-black uppercase tracking-wider">Pipeline</h1>
                     <p className="text-gray-400 mt-1">Vista de embudo de ventas</p>
                 </div>
                 <Link

@@ -74,7 +74,7 @@ export default function LeadScraperPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-white tracking-tight">Lead Scraper</h1>
+                    <h1 className="text-3xl font-bold text-white uppercase tracking-wider">Lead Scraper</h1>
                     <p className="text-gray-400 mt-1">
                         Genera leads, encuentra emails y envía campañas personalizadas.
                     </p>

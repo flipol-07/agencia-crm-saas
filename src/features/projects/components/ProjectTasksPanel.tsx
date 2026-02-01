@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { toast } from 'sonner'
 import { useContactProjects } from '@/features/projects/hooks'
-import { useProjectTasks } from '@/features/tasks/hooks'
+import { useProjectTasks, useContactTasks } from '@/features/tasks/hooks'
 import type { Project, Task, TaskPriority } from '@/types/database'
 import { TASK_PRIORITIES } from '@/types/database'
 
@@ -76,13 +76,18 @@ function TaskItem({
     )
 }
 
-interface ProjectCardProps { // Restored TaskItem above
-
+interface ProjectCardProps {
     project: Project
     isExpanded: boolean
     onToggle: () => void
     onRename: (newName: string) => Promise<void>
     onDelete: () => Promise<void>
+    // Props opcionales para manejar tareas fuera de proyectos (Tareas Generales)
+    _customTasks?: Task[]
+    _customCreateTask?: (task: Partial<Task>) => Promise<any>
+    _customUpdateTask?: (id: string, task: any) => Promise<any>
+    _customDeleteTask?: (id: string) => Promise<any>
+    _isGeneral?: boolean
 }
 
 function ProjectCard({
@@ -90,9 +95,22 @@ function ProjectCard({
     isExpanded,
     onToggle,
     onRename,
-    onDelete
+    onDelete,
+    _customTasks,
+    _customCreateTask,
+    _customUpdateTask,
+    _customDeleteTask,
+    _isGeneral = false
 }: ProjectCardProps) {
-    const { tasks, loading, createTask, updateTask, deleteTask } = useProjectTasks(project.id)
+    const projectTasksApi = useProjectTasks(project.id)
+
+    // Si se proveen tareas personalizadas, las usamos, si no las del proyecto
+    const tasks = _customTasks || projectTasksApi.tasks
+    const loading = _customTasks ? false : projectTasksApi.loading
+    const createTask = _customCreateTask || projectTasksApi.createTask
+    const updateTask = _customUpdateTask || projectTasksApi.updateTask
+    const deleteTask = _customDeleteTask || projectTasksApi.deleteTask
+
     const [newTaskTitle, setNewTaskTitle] = useState('')
     const [isAdding, setIsAdding] = useState(false)
     const [isEditing, setIsEditing] = useState(false)
@@ -169,23 +187,29 @@ function ProjectCard({
                             </form>
                         ) : (
                             <div className="flex items-center gap-2 group/title">
-                                <h4 onClick={onToggle} className="font-semibold text-zinc-100 cursor-pointer">{project.name}</h4>
-                                <button
-                                    onClick={() => setIsEditing(true)}
-                                    className="opacity-0 group-hover/title:opacity-100 p-1 text-zinc-500 hover:text-lime-400 transition-opacity"
-                                >
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                    </svg>
-                                </button>
-                                <button
-                                    onClick={onDelete}
-                                    className="opacity-0 group-hover/title:opacity-100 p-1 text-zinc-500 hover:text-red-400 transition-opacity"
-                                >
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                                <h4 onClick={onToggle} className={`font-semibold uppercase tracking-wider cursor-pointer ${_isGeneral ? 'text-lime-400' : 'text-zinc-100'}`}>
+                                    {project.name}
+                                </h4>
+                                {!_isGeneral && (
+                                    <>
+                                        <button
+                                            onClick={() => setIsEditing(true)}
+                                            className="opacity-0 group-hover/title:opacity-100 p-1 text-zinc-500 hover:text-lime-400 transition-opacity"
+                                        >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                            </svg>
+                                        </button>
+                                        <button
+                                            onClick={onDelete}
+                                            className="opacity-0 group-hover/title:opacity-100 p-1 text-zinc-500 hover:text-red-400 transition-opacity"
+                                        >
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </>
+                                )}
                             </div>
                         )}
                         <div className="flex items-center gap-2 mt-1">
@@ -263,7 +287,15 @@ function ProjectCard({
 
 export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
     const { projects, loading, createProject, updateProject, deleteProject } = useContactProjects(contactId)
-    const [expandedProject, setExpandedProject] = useState<string | null>(null)
+    const {
+        tasks: contactTasks,
+        loading: loadingTasks,
+        createTask: createContactTask,
+        updateTask: updateContactTask,
+        deleteTask: deleteContactTask
+    } = useContactTasks(contactId)
+
+    const [expandedProject, setExpandedProject] = useState<string | null>('general')
     const [isCreating, setIsCreating] = useState(false)
     const [newProjectName, setNewProjectName] = useState('')
     const [newProjectBudget, setNewProjectBudget] = useState('')
@@ -307,7 +339,7 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
         }
     }
 
-    if (loading) {
+    if (loading || loadingTasks) {
         return (
             <div className="space-y-4">
                 {[...Array(2)].map((_, i) => (
@@ -320,34 +352,50 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
         )
     }
 
+    // Tareas que pertenecen al contacto pero NO a un proyecto específico
+    const generalTasks = contactTasks.filter(t => !t.project_id)
+
     return (
         <div className="space-y-6">
-            {projects.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-12 px-4 border-2 border-dashed border-white/5 rounded-2xl bg-zinc-900/10">
-                    <div className="w-16 h-16 mb-4 bg-zinc-800/50 rounded-2xl flex items-center justify-center text-zinc-600 group hover:bg-lime-400/10 hover:text-lime-400 transition-all duration-500">
-                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                        </svg>
-                    </div>
-                    <p className="text-zinc-400 font-semibold tracking-tight">Sin proyectos activos</p>
-                    <p className="text-zinc-600 text-xs mt-1">Crea un proyecto para empezar a organizar las tareas.</p>
-                </div>
-            ) : (
-                <div className="space-y-3">
-                    {projects.map(project => (
-                        <ProjectCard
-                            key={project.id}
-                            project={project}
-                            isExpanded={expandedProject === project.id}
-                            onToggle={() => setExpandedProject(
-                                expandedProject === project.id ? null : project.id
-                            )}
-                            onRename={(newName) => handleRenameProject(project.id, newName)}
-                            onDelete={() => handleDeleteProject(project.id)}
-                        />
-                    ))}
-                </div>
-            )}
+            <div className="space-y-3">
+                {/* SECCIÓN: TAREAS GENERALES (Sin proyecto) */}
+                <ProjectCard
+                    project={{
+                        id: 'general',
+                        name: 'TAREAS GENERALES',
+                        status: 'active',
+                        contact_id: contactId,
+                        created_at: '',
+                        updated_at: '',
+                        description: null,
+                        budget: 0,
+                    } as any}
+                    isExpanded={expandedProject === 'general'}
+                    onToggle={() => setExpandedProject(expandedProject === 'general' ? null : 'general')}
+                    onRename={async () => { }} // No renombrable
+                    onDelete={async () => { }} // No eliminable
+                    // Sobrescribimos el comportamiento para usar Tareas del Contacto directamente
+                    _customTasks={generalTasks}
+                    _customCreateTask={(task) => createContactTask({ ...task, project_id: null })}
+                    _customUpdateTask={updateContactTask}
+                    _customDeleteTask={deleteContactTask}
+                    _isGeneral={true}
+                />
+
+                {/* PROYECTOS */}
+                {projects.map(project => (
+                    <ProjectCard
+                        key={project.id}
+                        project={project}
+                        isExpanded={expandedProject === project.id}
+                        onToggle={() => setExpandedProject(
+                            expandedProject === project.id ? null : project.id
+                        )}
+                        onRename={(newName) => handleRenameProject(project.id, newName)}
+                        onDelete={() => handleDeleteProject(project.id)}
+                    />
+                ))}
+            </div>
 
             {/* Create project form */}
             <form onSubmit={handleCreateProject} className="flex flex-col md:flex-row gap-3 group/panel p-2 bg-zinc-950/30 rounded-2xl border border-white/5 focus-within:border-lime-400/20 transition-all shadow-inner">
@@ -361,17 +409,9 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
                             value={newProjectName}
                             onChange={(e) => setNewProjectName(e.target.value)}
                             placeholder="Nombre del nuevo proyecto..."
-                            className="flex-1 bg-transparent border-none text-white placeholder-zinc-600 focus:outline-none py-2 text-sm w-full"
+                            className="flex-1 bg-transparent border-none text-white placeholder-zinc-600 focus:outline-none py-2 text-sm w-full uppercase tracking-wider"
                         />
                     </div>
-                    <div className="hidden md:block w-px h-6 bg-white/10 mx-2" />
-                    <input
-                        type="number"
-                        value={newProjectBudget}
-                        onChange={(e) => setNewProjectBudget(e.target.value)}
-                        placeholder="Presupuesto €"
-                        className="w-full md:w-32 bg-transparent border-none text-white placeholder-zinc-600 focus:outline-none py-2 text-sm text-left md:text-right pl-8 md:pl-0"
-                    />
                 </div>
                 <button
                     type="submit"

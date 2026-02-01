@@ -1,5 +1,6 @@
 export {
     useProjectTasks,
+    useContactTasks,
     useTasksWithDetails,
     useMyTasks,
     useAllTasks,
