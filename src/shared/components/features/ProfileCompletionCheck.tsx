@@ -3,9 +3,10 @@ import { ProfileCompletionModal } from '@/shared/components/features/ProfileComp
 
 export async function ProfileCompletionCheck() {
     const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
+    const { data, error } = await supabase.auth.getUser()
+    if (error || !data?.user) return null
 
-    if (!user) return null
+    const user = data.user
 
     const { data: profile } = await (supabase.from('profiles') as any)
         .select('full_name')

@@ -13,9 +13,10 @@ import { ProfileCompletionCheck } from '@/shared/components/features/ProfileComp
 
 async function UserNav() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data, error } = await supabase.auth.getUser()
+  const user = data?.user
 
-  if (!user) {
+  if (error || !user) {
     redirect('/login')
   }
 

@@ -341,6 +341,12 @@ test('should calculate total with tax', () => {
 - **Fix**: Añadir `NODE_OPTIONS='--no-deprecation'` al script `dev`.
 - **Aplicar en**: Proyectos que usen clientes IMAP antiguos.
 
+### 2026-02-02: React Error 419 por Auth Destructuring
+- **Error**: `Minified React error #419` y Server crashes.
+- **Causa**: Destructurar `{ data: { user } }` falla si Supabase devuelve error (data es null).
+- **Fix**: Validar `error` y `data` antes de acceder a property. `if (error || !data?.user)`.
+- **Aplicar en**: Todas las llamadas a `supabase.auth.getUser()` en Server Components.
+
 ---
 
 *Este archivo es el cerebro de la fábrica. Cada error documentado la hace más fuerte.*
