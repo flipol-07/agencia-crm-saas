@@ -22,6 +22,8 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
     const [contactId, setContactId] = useState('')
     const [uploading, setUploading] = useState(false)
     const [progress, setProgress] = useState('')
+    const [uploadMode, setUploadMode] = useState<'file' | 'text'>('file')
+    const [transcriptText, setTranscriptText] = useState('')
     const ffmpegRef = useRef<FFmpeg | null>(null)
 
     if (!isOpen) return null
@@ -60,42 +62,63 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        if (!file || !title) return
+
+        if (uploadMode === 'file' && !file) return
+        if (uploadMode === 'text' && !transcriptText) return
+        if (!title) return
 
         setUploading(true)
         const toastId = toast.loading('Iniciando proceso...')
 
         try {
-            // 1. Extraer Audio en el Cliente (Navegador)
-            let fileToUpload = file
-            if (file.type.startsWith('video/')) {
-                toast.loading('Extrayendo audio del video para optimizar subida...', { id: toastId })
-                try {
-                    fileToUpload = await extractAudio(file)
-                    console.log(`Video original: ${file.size} bytes -> Audio extraído: ${fileToUpload.size} bytes`)
-                } catch (ffmpegError) {
-                    console.error('Error ffmpeg wasm:', ffmpegError)
-                    toast.warning('No se pudo extraer audio en el cliente. Se subirá el original.', { id: toastId })
+            let filePath = ''
+
+            // 1. Process or Upload
+            if (uploadMode === 'text') {
+                // If it's text, we DON'T upload to Supabase, we send it directly in FormData
+                // This avoids MIME type restrictions on the storage bucket
+            } else {
+                if (!file) return
+                let fileToUpload = file
+
+                // 1.1 Extraer Audio en el Cliente (Navegador) - Solo para videos
+                if (file.type.startsWith('video/')) {
+                    toast.loading('Extrayendo audio del video para optimizar subida...', { id: toastId })
+                    try {
+                        fileToUpload = await extractAudio(file)
+                        console.log(`Video original: ${file.size} bytes -> Audio extraído: ${fileToUpload.size} bytes`)
+                    } catch (ffmpegError) {
+                        console.error('Error ffmpeg wasm:', ffmpegError)
+                        toast.warning('No se pudo extraer audio en el cliente. Se subirá el original.', { id: toastId })
+                    }
                 }
+
+                // 2. Upload to Supabase Storage
+                toast.loading('Subiendo archivo optimizado...', { id: toastId })
+                const supabaseClient = createClient()
+                const fileExt = fileToUpload.name.split('.').pop() || 'mp3'
+                const fileName = `${crypto.randomUUID()}.${fileExt}`
+                filePath = `${fileName}`
+
+                const contentType = fileToUpload.type || 'application/octet-stream'
+                const { error: uploadError } = await supabaseClient.storage
+                    .from('meetings-temp')
+                    .upload(filePath, fileToUpload, {
+                        contentType: contentType === 'text/plain' ? 'application/octet-stream' : contentType
+                    })
+
+                if (uploadError) throw new Error(`Error subiendo archivo: ${uploadError.message}`)
             }
-
-            // 2. Upload to Supabase Storage
-            toast.loading('Subiendo archivo optimizado...', { id: toastId })
-            const supabase = createClient()
-            const fileExt = fileToUpload.name.split('.').pop() || 'mp3'
-            const fileName = `${crypto.randomUUID()}.${fileExt}`
-            const filePath = `${fileName}`
-
-            const { error: uploadError } = await supabase.storage
-                .from('meetings-temp')
-                .upload(filePath, fileToUpload)
-
-            if (uploadError) throw new Error(`Error subiendo archivo: ${uploadError.message}`)
 
             // 3. Process with Server Action
             toast.loading('Analizando con IA...', { id: toastId })
             const formData = new FormData()
-            formData.append('filePath', filePath)
+            if (uploadMode === 'text') {
+                formData.append('transcriptText', transcriptText)
+            } else {
+                formData.append('filePath', filePath)
+            }
+
             formData.append('title', title)
             formData.append('date', date)
             formData.append('contactId', contactId)
@@ -167,31 +190,60 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                         </select>
                     </div>
 
-                    <div>
-                        <label className="block text-sm text-gray-400 mb-1">Video/Audio de la reunión</label>
-                        <div className="border-2 border-dashed border-white/10 rounded-lg p-4 text-center hover:bg-white/5 transition-colors cursor-pointer relative">
-                            <input
-                                type="file"
-                                accept="video/*,audio/*,.txt"
-                                onChange={e => setFile(e.target.files?.[0] || null)}
-                                className="absolute inset-0 opacity-0 cursor-pointer"
+                    <div className="flex bg-white/5 p-1 rounded-lg border border-white/10">
+                        <button
+                            type="button"
+                            onClick={() => setUploadMode('file')}
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${uploadMode === 'file' ? 'bg-lime-500 text-black' : 'text-gray-400 hover:text-white'}`}
+                        >
+                            Subir Archivo
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setUploadMode('text')}
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${uploadMode === 'text' ? 'bg-lime-500 text-black' : 'text-gray-400 hover:text-white'}`}
+                        >
+                            Pegar Texto
+                        </button>
+                    </div>
+
+                    {uploadMode === 'file' ? (
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-1">Video/Audio/TXT de la reunión</label>
+                            <div className="border-2 border-dashed border-white/10 rounded-lg p-4 text-center hover:bg-white/5 transition-colors cursor-pointer relative">
+                                <input
+                                    type="file"
+                                    accept="video/*,audio/*,.txt"
+                                    onChange={e => setFile(e.target.files?.[0] || null)}
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                />
+                                {file ? (
+                                    <div className="text-center">
+                                        <p className="text-lime-400 text-sm font-medium break-all">{file.name}</p>
+                                        <p className="text-xs text-gray-500 mt-1">{(file.size / (1024 * 1024)).toFixed(1)} MB</p>
+                                    </div>
+                                ) : (
+                                    <p className="text-gray-500 text-sm">Arrastra o selecciona un archivo</p>
+                                )}
+                            </div>
+                            <p className="text-xs text-gray-600 mt-1">
+                                {uploading && progress ? (
+                                    <span className="text-lime-400 animate-pulse">{progress}</span>
+                                ) : "Soporta Video, Audio o Transcripciones (TXT de Fathom)."}
+                            </p>
+                        </div>
+                    ) : (
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-1">Transcripción (Ctrl+V)</label>
+                            <textarea
+                                value={transcriptText}
+                                onChange={e => setTranscriptText(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none min-h-[150px] text-sm font-mono"
+                                placeholder="Pega aquí la transcripción de Fathom..."
                                 required
                             />
-                            {file ? (
-                                <div className="text-center">
-                                    <p className="text-lime-400 text-sm font-medium break-all">{file.name}</p>
-                                    <p className="text-xs text-gray-500 mt-1">{(file.size / (1024 * 1024)).toFixed(1)} MB</p>
-                                </div>
-                            ) : (
-                                <p className="text-gray-500 text-sm">Arrastra o selecciona un archivo</p>
-                            )}
                         </div>
-                        <p className="text-xs text-gray-600 mt-1">
-                            {uploading && progress ? (
-                                <span className="text-lime-400 animate-pulse">{progress}</span>
-                            ) : "Soporta Video, Audio o Transcripciones (TXT de Fathom)."}
-                        </p>
-                    </div>
+                    )}
 
                     <div className="flex gap-3 pt-4">
                         <button

@@ -61,70 +61,76 @@ Responde ÚNICAMENTE con el objeto JSON.`
 
 export async function processMeeting(formData: FormData) {
     const filePath = formData.get('filePath') as string
+    const transcriptTextDirect = formData.get('transcriptText') as string
     const title = formData.get('title') as string
     const date = formData.get('date') as string
     const contactId = formData.get('contactId') as string || null
 
-    if (!filePath || !title || !date) {
-        return { error: 'Faltan datos requeridos' }
+    if ((!filePath && !transcriptTextDirect) || !title || !date) {
+        return { error: 'Faltan datos requeridos (archivo o texto)' }
     }
 
     const supabase = await createClient()
     const tempDir = os.tmpdir()
-    const inputPath = path.join(tempDir, `input-${Date.now()}-${filePath}`)
+    const inputPath = path.join(tempDir, `input-${Date.now()}-${filePath || 'direct-text.txt'}`)
     const outputPath = path.join(tempDir, `output-${Date.now()}.mp3`)
 
     try {
-        console.log('1. Descargando archivo...')
-        const { data: fileBlob, error: downloadError } = await supabase
-            .storage
-            .from('meetings-temp')
-            .download(filePath)
-
-        if (downloadError) throw new Error(`Error descargando archivo: ${downloadError.message}`)
-
-        const buffer = Buffer.from(await fileBlob.arrayBuffer())
-        fs.writeFileSync(inputPath, buffer)
-
-        const isText = filePath.toLowerCase().endsWith('.txt')
         let transcriptionText = ''
-
-        if (isText) {
-            console.log('2. El archivo es de texto (Transcripción directa).')
-            transcriptionText = fs.readFileSync(inputPath, 'utf8')
+        if (transcriptTextDirect) {
+            console.log('2. Usando texto enviado directamente.')
+            transcriptionText = transcriptTextDirect
         } else {
-            // Lógica para Video/Audio
-            const isAudio = fileBlob.type.startsWith('audio/') || filePath.endsWith('.mp3')
-            let finalAudioPath = inputPath
+            console.log('1. Descargando archivo...')
+            const { data: fileBlob, error: downloadError } = await supabase
+                .storage
+                .from('meetings-temp')
+                .download(filePath)
 
-            if (!isAudio) {
-                console.log('2. Extrayendo audio con FFmpeg...')
-                try {
-                    await new Promise((resolve, reject) => {
-                        ffmpeg(inputPath)
-                            .toFormat('mp3')
-                            .audioChannels(1)
-                            .audioBitrate('32k')
-                            .on('end', () => resolve(null))
-                            .on('error', (err) => reject(err))
-                            .save(outputPath)
-                    })
-                    finalAudioPath = outputPath
-                } catch (ffmpegErr) {
-                    console.warn('FFmpeg falló, intentando transcripción directa...')
+            if (downloadError) throw new Error(`Error descargando archivo: ${downloadError.message}`)
+
+            const buffer = Buffer.from(await fileBlob.arrayBuffer())
+            fs.writeFileSync(inputPath, buffer)
+
+            const isText = filePath.toLowerCase().endsWith('.txt')
+
+            if (isText) {
+                console.log('2. El archivo es de texto (Transcripción directa).')
+                transcriptionText = fs.readFileSync(inputPath, 'utf8')
+            } else {
+                // Lógica para Video/Audio
+                const isAudio = fileBlob.type.startsWith('audio/') || filePath.endsWith('.mp3')
+                let finalAudioPath = inputPath
+
+                if (!isAudio) {
+                    console.log('2. Extrayendo audio con FFmpeg...')
+                    try {
+                        await new Promise((resolve, reject) => {
+                            ffmpeg(inputPath)
+                                .toFormat('mp3')
+                                .audioChannels(1)
+                                .audioBitrate('32k')
+                                .on('end', () => resolve(null))
+                                .on('error', (err) => reject(err))
+                                .save(outputPath)
+                        })
+                        finalAudioPath = outputPath
+                    } catch (ffmpegErr) {
+                        console.warn('FFmpeg falló, intentando transcripción directa...')
+                    }
                 }
-            }
 
-            console.log(`3. Enviando a Whisper...`)
-            const audioStream = fs.createReadStream(finalAudioPath)
-            const transcriptionResponse = await openai.audio.transcriptions.create({
-                file: audioStream,
-                model: 'whisper-1',
-                response_format: 'text',
-            })
-            transcriptionText = typeof transcriptionResponse === 'string'
-                ? transcriptionResponse
-                : (transcriptionResponse as any).text || JSON.stringify(transcriptionResponse)
+                console.log(`3. Enviando a Whisper...`)
+                const audioStream = fs.createReadStream(finalAudioPath)
+                const transcriptionResponse = await openai.audio.transcriptions.create({
+                    file: audioStream,
+                    model: 'whisper-1',
+                    response_format: 'text',
+                })
+                transcriptionText = typeof transcriptionResponse === 'string'
+                    ? transcriptionResponse
+                    : (transcriptionResponse as any).text || JSON.stringify(transcriptionResponse)
+            }
         }
 
         // Cleanup temp files
