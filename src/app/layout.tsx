@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import { Toaster } from 'sonner'
+import { DevServiceWorkerCleaner } from '@/shared/components/devtools/DevServiceWorkerCleaner'
 
 export const metadata: Metadata = {
   title: 'Aurie CRM',
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body>
         {children}
         <Toaster richColors position="top-center" />
+        <DevServiceWorkerCleaner />
       </body>
     </html>
   )
