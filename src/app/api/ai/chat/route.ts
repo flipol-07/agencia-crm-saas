@@ -114,6 +114,21 @@ export async function POST(request: NextRequest) {
                     },
                 },
             },
+            {
+                type: 'function',
+                function: {
+                    name: 'learn_from_user',
+                    description: 'Aprende nueva información proporcionada por el usuario y la guarda en la base de conocimientos para el futuro.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            fact: { type: 'string', description: 'La información o hecho a aprender.' },
+                            category: { type: 'string', description: 'Categoría opcional (ej: preferencia_usuario, regla_negocio, correccion).' }
+                        },
+                        required: ['fact']
+                    },
+                },
+            },
         ];
 
         const systemPrompt = `Eres Aura AI, la Consultora Experta Senior de esta agencia. 
@@ -122,6 +137,8 @@ export async function POST(request: NextRequest) {
         CAPACIDADES ESPECIALES:
         1. Base de Conocimientos: Tienes acceso a una biblioteca de formación avanzada vía 'search_knowledge_base'. Úsala SIEMPRE que el usuario pida consejos, estrategias o mejores prácticas.
         2. Datos en Tiempo Real: Tienes acceso a los datos del CRM (Leads, Gastos, Proyectos, etc.).
+        3. Aprendizaje Continuo: Si el usuario te corrige o te enseña algo nuevo, USA la herramienta 'learn_from_user' para guardarlo. Dile explícitamente "He guardado esta nueva información en mi memoria".
+        4. Acceso a Reuniones: Tienes acceso completo a las transcripciones de reuniones. Si te preguntan algo específico (ej: "¿Quién asistió?"), lee la transcripción para encontrar la respuesta.
         
         TONO Y ESTILO:
         - Profesional, proactiva y orientada a resultados.
@@ -223,7 +240,8 @@ export async function POST(request: NextRequest) {
                 }
             } else if (functionName === 'search_meetings') {
                 const q = functionArgs.query || '';
-                let query = supabase.from('meetings').select('title, date, summary, key_points, conclusions, contacts(company_name)');
+                // Changed: Added transcription to the selection list
+                let query = supabase.from('meetings').select('title, date, summary, transcription, key_points, conclusions, contacts(company_name)');
 
                 if (functionArgs.contact_name) {
                     // First find contact IDs matching name
@@ -238,9 +256,49 @@ export async function POST(request: NextRequest) {
                     // Use plain text search on text fields
                     query = query.or(`title.ilike.%${q}%,summary.ilike.%${q}%,transcription.ilike.%${q}%`);
                 }
-
-                const { data } = await query.order('date', { ascending: false }).limit(5);
+                const { data } = await query.order('date', { ascending: false }).limit(3); // Helper to limit context size since transcription is heavy
                 toolResult = JSON.stringify(data);
+            } else if (functionName === 'learn_from_user') {
+                const { fact, category = 'user_learning' } = functionArgs;
+
+                try {
+                    // 1. Create a document for this fact
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { data: doc, error: docError } = await (supabase.from('ai_knowledge_documents') as any)
+                        .insert({
+                            title: `Aprendizaje: ${fact.substring(0, 30)}...`,
+                            source_url: 'user_chat',
+                            category: category
+                        })
+                        .select()
+                        .single();
+
+                    if (docError) throw docError;
+
+                    // 2. Generate embedding
+                    const embeddingResponse = await openai.embeddings.create({
+                        model: 'text-embedding-3-small',
+                        input: fact,
+                    });
+                    const embedding = embeddingResponse.data[0].embedding;
+
+                    // 3. Store chunk
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    const { error: chunkError } = await (supabase.from('ai_knowledge_chunks') as any)
+                        .insert({
+                            document_id: doc.id,
+                            content: fact,
+                            embedding: embedding,
+                            metadata: { source: 'user_interaction', date: new Date().toISOString() }
+                        });
+
+                    if (chunkError) throw chunkError;
+
+                    toolResult = JSON.stringify({ success: true, message: 'Información aprendida y guardada correctamente.' });
+                } catch (error: any) {
+                    console.error('Learning error:', error);
+                    toolResult = JSON.stringify({ success: false, error: error.message });
+                }
             }
 
             messages.push({

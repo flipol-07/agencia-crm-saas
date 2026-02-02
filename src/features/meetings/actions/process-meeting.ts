@@ -26,6 +26,7 @@ Debes generar un JSON con la siguiente estructura:
 {
   "title": "Título corto y descriptivo de la reunión (3-5 palabras)",
   "summary": "Resumen ejecutivo del acuerdo/reunión",
+  "attendees": ["Juan Pérez (Vendedor)", "María López (Cliente)"],
   "key_points": ["Punto 1", "Punto 2"],
   "conclusions": ["Acuerdo A", "Tarea B"],
   "feedback": {
@@ -38,10 +39,11 @@ Debes generar un JSON con la siguiente estructura:
 }
 
 REGLAS DE ANÁLISIS:
-1. Si detectas nombres de personas (estilo guión: "Juan: Hola..." o "0:00 - Juan: Hola..."), identifica quiénes son vendedores y quiénes clientes.
-2. Proporciona sugerencias de mejora PERSONALIZADAS para cada vendedor en "seller_feedback".
-3. Si NO hay nombres (texto plano de Whisper), da un "general_feedback" analizando la estrategia de venta global.
-4. "customer_sentiment" debe ser un feedback simple de lo que proyectaba el cliente.
+1. IDENTIFICACIÓN DE ASISTENTES: Extrae TODOS los nombres de las personas que participan. Si es evidente su rol (Vendedor/Cliente), inclúyelo entre paréntesis.
+2. Si detectas nombres de personas (estilo guión: "Juan: Hola..." o "0:00 - Juan: Hola..."), úsalos para populate "attendees" y "seller_feedback".
+3. Proporciona sugerencias de mejora PERSONALIZADAS para cada vendedor en "seller_feedback".
+4. Si NO hay nombres (texto plano de Whisper), da un "general_feedback" analizando la estrategia de venta global y deja "attendees" vacío o con "Desconocido".
+5. "customer_sentiment" debe ser un feedback simple de lo que proyectaba el cliente.
 
 Responde ÚNICAMENTE con el objeto JSON.`
 
@@ -172,7 +174,7 @@ export async function processMeeting(formData: FormData) {
             summary: analysis.summary,
             key_points: analysis.key_points,
             conclusions: analysis.conclusions,
-            feedback: analysis.feedback
+            feedback: { ...analysis.feedback, attendees: analysis.attendees }
         })
 
         if (dbError) throw new Error(`Error guardando en DB: ${dbError.message}`)
