@@ -324,6 +324,23 @@ test('should calculate total with tax', () => {
     5. **Hotfix Cookies**: No usar `cookies()` dentro de `"use cache"`. Pasar `userId` como argumento y usar un cliente stateless (`createAdminClient`).
 - **Aplicar en**: Todos los dashboards con múltiples fuentes de datos.
 
+### 2026-02-02: Google Fonts Blocking & Service Worker Crash
+- **Error**: `Network error` al cargar fuentes de Google y `Failed to execute 'match' on 'CacheStorage'`.
+- **Causa**: Headers estrictos `Cross-Origin-Opener-Policy: same-origin` bloquean recursos externos opacos.
+- **Fix**: Eliminar headers restrictivos en `next.config.ts` si no se usa SharedArrayBuffer.
+- **Aplicar en**: Proyectos que usen Google Fonts, Scripts externos o PWA.
+
+### 2026-02-02: Next.js Image Performance & Scroll Warning
+- **Error**: `Image ... missing "sizes" prop` y `Detected scroll-behavior: smooth on <html>`.
+- **Fix**: Añadir `sizes` a `<Image fill>` y `data-scroll-behavior="smooth"` a `<html>`.
+- **Aplicar en**: Todos los componentes con imágenes full-width y layout root.
+
+### 2026-02-02: DeprecationWarning de Buffer en Email Sync
+- **Error**: `DeprecationWarning: Buffer() is deprecated` recurrente cada 5 min.
+- **Causa**: Librerías legacy (imap-simple/mailparser) usan constructor antiguo de Buffer.
+- **Fix**: Añadir `NODE_OPTIONS='--no-deprecation'` al script `dev`.
+- **Aplicar en**: Proyectos que usen clientes IMAP antiguos.
+
 ---
 
 *Este archivo es el cerebro de la fábrica. Cada error documentado la hace más fuerte.*

@@ -135,7 +135,7 @@ export function MobileNav() {
                             <div className="flex items-center justify-between p-4 border-b border-white/10 pt-safe">
                                 <Link href="/dashboard" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
                                     <div className="relative w-8 h-8">
-                                        <Image src="/aurie-official-logo.png" alt="Aura" fill className="object-contain" />
+                                        <Image src="/aurie-official-logo.png" alt="Aura" fill className="object-contain" sizes="32px" />
                                     </div>
                                     <span className="font-bold text-xl text-white">AURIE</span>
                                 </Link>
