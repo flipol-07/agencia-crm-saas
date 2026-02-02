@@ -60,8 +60,19 @@ export async function POST(req: Request) {
             if (user) userId = (user as any).id
         }
 
+        // 3. Preparar transcripción (Fathom envía un array de objetos o texto)
+        let finalText = ''
+        if (Array.isArray(transcript)) {
+            finalText = transcript.map((t: any) => {
+                const speaker = t.speaker?.display_name || 'Desconocido'
+                return `${speaker}: ${t.text}`
+            }).join('\n')
+        } else {
+            finalText = transcript
+        }
+
         // 3. Análisis Aurie
-        const analysis = await analyzeMeetingText(transcript)
+        const analysis = await analyzeMeetingText(finalText)
 
         // 4. Buscar contacto
         let contactId = null
@@ -83,7 +94,7 @@ export async function POST(req: Request) {
             title: title || 'Reunión de Fathom',
             date: date || new Date().toISOString(),
             contact_id: contactId,
-            transcription: transcript,
+            transcription: finalText,
             summary: analysis.summary || fathomSummary,
             key_points: analysis.key_points || [],
             conclusions: analysis.conclusions || (action_items ? [action_items] : []),
