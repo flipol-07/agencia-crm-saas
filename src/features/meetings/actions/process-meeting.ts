@@ -37,7 +37,7 @@ Debes generar un JSON con la siguiente estructura:
 }
 
 REGLAS DE ANÁLISIS:
-1. Si detectas nombres de personas (estilo guión: "Juan: Hola..."), identifica quiénes son vendedores y quiénes clientes.
+1. Si detectas nombres de personas (estilo guión: "Juan: Hola..." o "0:00 - Juan: Hola..."), identifica quiénes son vendedores y quiénes clientes.
 2. Proporciona sugerencias de mejora PERSONALIZADAS para cada vendedor en "seller_feedback".
 3. Si NO hay nombres (texto plano de Whisper), da un "general_feedback" analizando la estrategia de venta global.
 4. "customer_sentiment" debe ser un feedback simple de lo que proyectaba el cliente.
