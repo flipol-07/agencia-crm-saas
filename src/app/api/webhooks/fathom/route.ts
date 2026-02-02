@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@supabase/supabase-js'
 import { analyzeMeetingText } from '@/features/meetings/actions/process-meeting'
 import { NextResponse } from 'next/server'
 
@@ -25,7 +25,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'No recording ID found' }, { status: 400 })
         }
 
-        const supabase = await createClient()
+        const supabase = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.SUPABASE_SERVICE_ROLE_KEY!
+        )
 
         // 1. Evitar duplicados: Ver si ya existe este ID de Fathom
         const { data: existing } = await supabase
