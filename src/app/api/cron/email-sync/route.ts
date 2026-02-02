@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { EmailService } from '@/lib/email/service'
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { WhatsAppService } from '@/shared/lib/whatsapp'
 
 
@@ -23,7 +23,7 @@ export async function GET(req: Request) {
             return NextResponse.json({ success: true, count: 0, message: 'No se encontraron correos nuevos' })
         }
 
-        const supabase = await createClient()
+        const supabase = await createAdminClient()
         let syncedCount = 0
 
         // 2. Process each email
