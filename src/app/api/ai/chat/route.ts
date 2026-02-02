@@ -229,7 +229,7 @@ export async function POST(request: NextRequest) {
                     // First find contact IDs matching name
                     const { data: contacts } = await supabase.from('contacts').select('id').ilike('company_name', `%${functionArgs.contact_name}%`);
                     if (contacts && contacts.length > 0) {
-                        const ids = contacts.map(c => c.id);
+                        const ids = contacts.map((c: any) => c.id);
                         query = query.in('contact_id', ids);
                     }
                 }
