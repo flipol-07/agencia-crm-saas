@@ -54,7 +54,7 @@ export async function POST(req: Request) {
                 .eq('email', recording.organizer_email)
                 .single()
 
-            if (user) userId = user.id
+            if (user) userId = (user as any).id
         }
 
         // 3. Análisis Aurie
@@ -71,7 +71,7 @@ export async function POST(req: Request) {
                     .select('id')
                     .eq('email', guest.email)
                     .single()
-                if (contact) contactId = contact.id
+                if (contact) contactId = (contact as any).id
             }
         }
 
