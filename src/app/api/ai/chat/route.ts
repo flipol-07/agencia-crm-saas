@@ -99,6 +99,21 @@ export async function POST(request: NextRequest) {
                     },
                 },
             },
+            {
+                type: 'function',
+                function: {
+                    name: 'search_meetings',
+                    description: 'Busca en las transcripciones, resúmenes y puntos clave de las reuniones. Útil para recordar qué se habló con un cliente.',
+                    parameters: {
+                        type: 'object',
+                        properties: {
+                            query: { type: 'string', description: 'Término de búsqueda o tema' },
+                            contact_name: { type: 'string', description: 'Nombre de la empresa/contacto para filtrar' }
+                        },
+                        required: ['query']
+                    },
+                },
+            },
         ];
 
         const systemPrompt = `Eres Aura AI, la Consultora Experta Senior de esta agencia. 
@@ -206,6 +221,26 @@ export async function POST(request: NextRequest) {
                 } else {
                     toolResult = JSON.stringify(searchResults);
                 }
+            } else if (functionName === 'search_meetings') {
+                const q = functionArgs.query || '';
+                let query = supabase.from('meetings').select('title, date, summary, key_points, conclusions, contacts(company_name)');
+
+                if (functionArgs.contact_name) {
+                    // First find contact IDs matching name
+                    const { data: contacts } = await supabase.from('contacts').select('id').ilike('company_name', `%${functionArgs.contact_name}%`);
+                    if (contacts && contacts.length > 0) {
+                        const ids = contacts.map(c => c.id);
+                        query = query.in('contact_id', ids);
+                    }
+                }
+
+                if (q) {
+                    // Use plain text search on text fields
+                    query = query.or(`title.ilike.%${q}%,summary.ilike.%${q}%,transcription.ilike.%${q}%`);
+                }
+
+                const { data } = await query.order('date', { ascending: false }).limit(5);
+                toolResult = JSON.stringify(data);
             }
 
             messages.push({
