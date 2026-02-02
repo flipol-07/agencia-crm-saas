@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/server'
 import { EmailService } from '@/lib/email/service'
 import { revalidatePath } from 'next/cache'
 
@@ -14,7 +14,7 @@ export async function syncContactEmails(contactId: string, contactEmail: string)
         if (emails.length === 0) return { count: 0 }
 
         // 2. Guardar en Supabase (cache)
-        const supabase = await createClient()
+        const supabase = await createAdminClient()
 
         // Mapear a formato DB
         const emailsToUpsert = emails.map(email => ({
