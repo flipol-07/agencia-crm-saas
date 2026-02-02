@@ -95,9 +95,14 @@ export async function POST(req: Request) {
             }
         }
 
+        // 5. Formatear título con fecha
+        const meetingDate = new Date(date || createdAt || new Date().toISOString())
+        const formattedDate = meetingDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        const finalTitle = analysis.title ? `${analysis.title} (${formattedDate})` : `${title || 'Reunión de Fathom'} (${formattedDate})`
+
         // 5. Guardar
         const { error: dbError } = await (supabase.from('meetings') as any).insert({
-            title: title || 'Reunión de Fathom',
+            title: finalTitle,
             date: date || createdAt || new Date().toISOString(),
             contact_id: contactId,
             transcription: finalText,

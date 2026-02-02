@@ -24,6 +24,7 @@ Analiza la siguiente transcripción (que puede ser un diálogo con nombres de pe
 
 Debes generar un JSON con la siguiente estructura:
 {
+  "title": "Título corto y descriptivo de la reunión (3-5 palabras)",
   "summary": "Resumen ejecutivo del acuerdo/reunión",
   "key_points": ["Punto 1", "Punto 2"],
   "conclusions": ["Acuerdo A", "Tarea B"],
@@ -144,9 +145,27 @@ export async function processMeeting(formData: FormData) {
         console.log('5. Analizando con GPT-4o...')
         const analysis = await analyzeMeetingText(transcriptionText)
 
+        // 6. Formatear título con fecha
+        const meetingDate = new Date(date)
+        const formattedDate = meetingDate.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+        const finalTitle = analysis.title ? `${analysis.title} (${formattedDate})` : `${title} (${formattedDate})`
+
+        // 7. Evitar duplicados manuales
+        const { data: existing } = await supabase
+            .from('meetings')
+            .select('id')
+            .eq('title', finalTitle)
+            .eq('date', date)
+            .maybeSingle()
+
+        if (existing) {
+            console.log('Reunión manual ya existe, saltando:', finalTitle)
+            return { success: true, message: 'Reunión ya existente' }
+        }
+
         // 6. Save to DB
         const { error: dbError } = await (supabase.from('meetings') as any).insert({
-            title,
+            title: finalTitle,
             date,
             contact_id: contactId && contactId !== 'null' ? contactId : null,
             transcription: transcriptionText,
