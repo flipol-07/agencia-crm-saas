@@ -18,10 +18,16 @@ export async function POST(req: Request) {
             summary: fathomSummary,
             action_items,
             at: date,
-            id: fathomId
+            id: idFromPayload,
+            recording_id: recordingIdFromPayload,
+            created_at: createdAt
         } = recording
 
+        // Fathom a veces envía 'id' y a veces 'recording_id'
+        const fathomId = idFromPayload || recordingIdFromPayload
+
         if (!fathomId) {
+            console.error('Payload recibido sin ID:', JSON.stringify(recording, null, 2))
             return NextResponse.json({ error: 'No recording ID found' }, { status: 400 })
         }
 
@@ -92,7 +98,7 @@ export async function POST(req: Request) {
         // 5. Guardar
         const { error: dbError } = await (supabase.from('meetings') as any).insert({
             title: title || 'Reunión de Fathom',
-            date: date || new Date().toISOString(),
+            date: date || createdAt || new Date().toISOString(),
             contact_id: contactId,
             transcription: finalText,
             summary: analysis.summary || fathomSummary,
