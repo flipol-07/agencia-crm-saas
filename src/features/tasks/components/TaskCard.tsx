@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { TaskStatusSelector } from './TaskStatusSelector'
 import { TaskAssigneeAvatars } from './TaskAssigneeSelector'
@@ -21,6 +22,7 @@ export function TaskCard({
     className = '',
     style
 }: TaskCardProps) {
+    const [isStatusOpen, setIsStatusOpen] = useState(false)
     const priority = TASK_PRIORITIES.find(p => p.id === task.priority)
 
     const priorityBadge: Record<TaskPriority, string> = {
@@ -42,7 +44,7 @@ export function TaskCard({
 
     return (
         <div
-            className={`glass rounded-lg p-4 border-l-4 ${priorityBorder[task.priority]} hover:bg-white/5 transition-all cursor-pointer group ${className}`}
+            className={`glass rounded-lg p-4 border-l-4 ${priorityBorder[task.priority]} hover:bg-white/5 transition-all cursor-pointer group relative ${isStatusOpen ? 'z-50' : 'hover:z-50'} ${className}`}
             onClick={onOpen}
             style={style}
         >
@@ -78,6 +80,7 @@ export function TaskCard({
                             <TaskStatusSelector
                                 status={task.status}
                                 onChange={onStatusChange}
+                                onOpenChange={setIsStatusOpen}
                             />
                         </div>
 

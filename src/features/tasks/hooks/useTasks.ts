@@ -250,7 +250,6 @@ export function useTasksWithDetails() {
                     profiles (id, full_name, email, avatar_url)
                 )
             `)
-            .neq('status', 'done')
             .order('priority', { ascending: false })
             .order('due_date', { ascending: true, nullsFirst: false })
 
@@ -285,11 +284,7 @@ export function useTasksWithDetails() {
             throw new Error(error.message)
         }
 
-        if (status === 'done') {
-            setTasks(prev => prev.filter(t => t.id !== id))
-        } else {
-            setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t))
-        }
+        setTasks(prev => prev.map(t => t.id === id ? { ...t, status } : t))
     }
 
     const assignUser = async (taskId: string, userId: string) => {

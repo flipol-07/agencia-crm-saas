@@ -21,6 +21,7 @@ interface KanbanBoardProps {
     tasks: TaskWithDetails[]
     onOpenTask: (task: TaskWithDetails) => void
     onStatusChange: (taskId: string, status: TaskStatus) => void
+    showCompleted: boolean
 }
 
 // Draggable Wrapper
@@ -91,9 +92,8 @@ function KanbanColumn({
     )
 }
 
-export function KanbanBoard({ tasks, onOpenTask, onStatusChange }: KanbanBoardProps) {
+export function KanbanBoard({ tasks, onOpenTask, onStatusChange, showCompleted }: KanbanBoardProps) {
     const [activeTask, setActiveTask] = useState<TaskWithDetails | null>(null)
-    const [showCompleted, setShowCompleted] = useState(false)
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -138,18 +138,6 @@ export function KanbanBoard({ tasks, onOpenTask, onStatusChange }: KanbanBoardPr
 
     return (
         <div className="space-y-4">
-            <div className="flex justify-end">
-                <button
-                    onClick={() => setShowCompleted(!showCompleted)}
-                    className={`text-xs px-3 py-1.5 rounded-lg border transition-all ${showCompleted
-                            ? 'bg-lime-500/20 text-lime-400 border-lime-500/30'
-                            : 'bg-white/5 text-gray-500 border-white/10 hover:border-white/20'
-                        }`}
-                >
-                    {showCompleted ? 'Ocultar completadas' : 'Mostrar completadas'}
-                </button>
-            </div>
-
             <DndContext
                 sensors={sensors}
                 onDragStart={handleDragStart}
@@ -172,8 +160,8 @@ export function KanbanBoard({ tasks, onOpenTask, onStatusChange }: KanbanBoardPr
                                         >
                                             <div className="flex items-center gap-2 mb-2">
                                                 <span className={`w-2 h-2 rounded-full ${task.priority === 'urgent' ? 'bg-red-500' :
-                                                        task.priority === 'high' ? 'bg-amber-500' :
-                                                            task.priority === 'medium' ? 'bg-blue-500' : 'bg-gray-500'
+                                                    task.priority === 'high' ? 'bg-amber-500' :
+                                                        task.priority === 'medium' ? 'bg-blue-500' : 'bg-gray-500'
                                                     }`} />
                                                 <h4 className="font-medium text-white text-sm line-clamp-2">{task.title}</h4>
                                             </div>

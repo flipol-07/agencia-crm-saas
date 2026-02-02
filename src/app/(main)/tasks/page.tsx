@@ -22,16 +22,23 @@ type FilterMode = 'all' | 'mine'
 function TasksListView({
     tasks,
     onOpenTask,
-    onStatusChange
+    onStatusChange,
+    showCompleted
 }: {
     tasks: TaskWithDetails[]
     onOpenTask: (task: TaskWithDetails) => void
     onStatusChange: (taskId: string, status: TaskStatus) => void
+    showCompleted: boolean
 }) {
     const statusOrder: TaskStatus[] = ['todo', 'in_progress', 'in_review', 'blocked']
+    if (showCompleted) {
+        statusOrder.push('done')
+    }
+
+    const filteredTasks = tasks.filter(t => showCompleted || t.status !== 'done')
 
     const grouped = statusOrder.reduce((acc, status) => {
-        acc[status] = tasks.filter(t => t.status === status)
+        acc[status] = filteredTasks.filter(t => t.status === status)
         return acc
     }, {} as Record<TaskStatus, TaskWithDetails[]>)
 
@@ -82,6 +89,7 @@ export default function TasksPage() {
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedTask, setSelectedTask] = useState<TaskWithDetails | null>(null)
     const [showCreateModal, setShowCreateModal] = useState(false)
+    const [showCompleted, setShowCompleted] = useState(false)
 
     // Filtrar tareas
     const filteredTasks = useMemo(() => {
@@ -322,6 +330,17 @@ export default function TasksPage() {
                     ))}
                 </select>
 
+                {/* Show Completed Toggle */}
+                <button
+                    onClick={() => setShowCompleted(!showCompleted)}
+                    className={`px-4 py-2 text-sm rounded-lg border transition-all ${showCompleted
+                        ? 'bg-lime-500/20 text-lime-400 border-lime-500/30'
+                        : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/20'
+                        }`}
+                >
+                    {showCompleted ? 'Ocultar completadas' : 'Mostrar completadas'}
+                </button>
+
                 {/* Clear filters */}
                 {hasFilters && (
                     <button
@@ -373,12 +392,14 @@ export default function TasksPage() {
                     tasks={filteredTasks}
                     onOpenTask={setSelectedTask}
                     onStatusChange={handleStatusChange}
+                    showCompleted={showCompleted}
                 />
             ) : (
                 <TasksListView
                     tasks={filteredTasks}
                     onOpenTask={setSelectedTask}
                     onStatusChange={handleStatusChange}
+                    showCompleted={showCompleted}
                 />
             )}
 

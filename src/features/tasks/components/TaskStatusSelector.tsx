@@ -8,6 +8,7 @@ interface TaskStatusSelectorProps {
     status: TaskStatus
     onChange: (status: TaskStatus) => void
     disabled?: boolean
+    onOpenChange?: (isOpen: boolean) => void
 }
 
 const statusColors: Record<TaskStatus, { bg: string; hover: string; border: string }> = {
@@ -18,11 +19,15 @@ const statusColors: Record<TaskStatus, { bg: string; hover: string; border: stri
     done: { bg: 'bg-lime-500/20', hover: 'hover:bg-lime-500/30', border: 'border-lime-500/30' },
 }
 
-export function TaskStatusSelector({ status, onChange, disabled }: TaskStatusSelectorProps) {
+export function TaskStatusSelector({ status, onChange, disabled, onOpenChange }: TaskStatusSelectorProps) {
     const [isOpen, setIsOpen] = useState(false)
     const dropdownRef = useRef<HTMLDivElement>(null)
 
     const currentStatus = TASK_STATUSES.find(s => s.id === status)
+
+    useEffect(() => {
+        onOpenChange?.(isOpen)
+    }, [isOpen, onOpenChange])
 
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
