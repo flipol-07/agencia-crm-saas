@@ -154,13 +154,15 @@ export async function POST(request: NextRequest) {
             .eq('id', user.id)
             .single();
 
+        const userProfile = profile as any;
+
         const systemPrompt = `Eres Aura AI, la Consultora Senior de Aurie CRM. 
         Eres experta en Marketing B2B, UX/UI y Estrategia de Negocio.
 
         USUARIO:
-        - Nombre: ${profile?.full_name || 'Usuario'}
-        - Rol: ${profile?.professional_role || 'No especificado'}
-        - Contexto: ${profile?.professional_description || 'No definido'}
+        - Nombre: ${userProfile?.full_name || 'Usuario'}
+        - Rol: ${userProfile?.professional_role || 'No especificado'}
+        - Contexto: ${userProfile?.professional_description || 'No definido'}
 
         TIENES ACCESO TOTAL (vía herramientas) A:
         1. CRM: Contactos, Proyectos, Tareas, Gastos e Invoices.
