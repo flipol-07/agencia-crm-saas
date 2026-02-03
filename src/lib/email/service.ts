@@ -60,55 +60,72 @@ export class EmailService {
         })
 
         try {
-            await connection.openBox('INBOX')
+            const foldersToScan = ['INBOX', 'INBOX.Sent', 'Sent', 'Sent Messages']
+            const allParsedEmails: EmailMessage[] = []
 
-            const searchCriteria = [
-                ['OR', ['FROM', contactEmail], ['TO', contactEmail]]
-            ]
+            for (const folder of foldersToScan) {
+                try {
+                    await connection.openBox(folder)
 
-            const fetchOptions = {
-                bodies: ['HEADER', 'TEXT', ''],
-                markSeen: false,
-                struct: true
-            }
+                    const searchCriteria = [
+                        ['OR', ['FROM', contactEmail], ['TO', contactEmail]]
+                    ]
 
-            const messages = await connection.search(searchCriteria, fetchOptions)
-            const recentMessages = messages.slice(-20)
-
-            const parsedEmails: EmailMessage[] = []
-
-            for (const item of recentMessages) {
-                const all = item.parts.find((part: any) => part.which === '')
-                const id = item.attributes.uid
-
-                if (all && all.body) {
-                    const parsed = await simpleParser(all.body)
-
-                    const fromAddr = parsed.from?.value[0]?.address || ''
-                    const direction = fromAddr.includes(contactEmail) ? 'inbound' : 'outbound'
-
-                    let toAddr = ''
-                    if (Array.isArray(parsed.to)) {
-                        toAddr = parsed.to[0]?.text || ''
-                    } else if (parsed.to && 'text' in parsed.to) {
-                        toAddr = parsed.to.text || ''
+                    const fetchOptions = {
+                        bodies: ['HEADER', 'TEXT', ''],
+                        markSeen: false,
+                        struct: true
                     }
 
-                    parsedEmails.push({
-                        messageId: parsed.messageId || `${id}`,
-                        subject: parsed.subject || '(Sin asunto)',
-                        from: fromAddr,
-                        to: toAddr,
-                        date: parsed.date || new Date(),
-                        text: parsed.text || '',
-                        html: parsed.html || '',
-                        snippet: (parsed.text || '').substring(0, 150),
-                        direction
-                    })
+                    const messages = await connection.search(searchCriteria, fetchOptions)
+
+                    // We take the last 20 from each folder to have a good conversation history
+                    const recentMessages = messages.slice(-20)
+
+                    for (const item of recentMessages) {
+                        const all = item.parts.find((part: any) => part.which === '')
+                        const id = item.attributes.uid
+
+                        if (all && all.body) {
+                            const parsed = await simpleParser(all.body)
+
+                            const fromAddr = parsed.from?.value[0]?.address || ''
+                            // Si el correo viene del contacto, es inbound. 
+                            // Si viene de nosotros (y asumimos que el config.user es nuestro mail), es outbound.
+                            const direction = fromAddr.toLowerCase().includes(contactEmail.toLowerCase()) ? 'inbound' : 'outbound'
+
+                            let toAddr = ''
+                            if (Array.isArray(parsed.to)) {
+                                toAddr = parsed.to[0]?.text || ''
+                            } else if (parsed.to && 'text' in (parsed.to as any)) {
+                                toAddr = (parsed.to as any).text || ''
+                            }
+
+                            allParsedEmails.push({
+                                messageId: parsed.messageId || `imap-${folder}-${id}`,
+                                subject: parsed.subject || '(Sin asunto)',
+                                from: fromAddr,
+                                to: toAddr,
+                                date: parsed.date || new Date(),
+                                text: parsed.text || '',
+                                html: parsed.html || '',
+                                snippet: (parsed.text || '').substring(0, 150),
+                                direction
+                            })
+                        }
+                    }
+                } catch (folderError: any) {
+                    // Si una carpeta no existe (ej: Sent vs INBOX.Sent), simplemente la saltamos
+                    console.warn(`Folder ${folder} not found or inaccessible:`, folderError.message)
                 }
             }
 
-            return parsedEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
+            // Deduplicar por messageId y ordenar
+            const uniqueEmails = Array.from(
+                new Map(allParsedEmails.map(item => [item.messageId, item])).values()
+            )
+
+            return uniqueEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
 
         } finally {
             connection.end()

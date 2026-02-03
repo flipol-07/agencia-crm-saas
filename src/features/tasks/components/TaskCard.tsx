@@ -53,9 +53,16 @@ export function TaskCard({
                     <div className="flex items-center gap-3 mb-2">
                         <h3 className="font-medium text-white truncate group-hover:text-lime-400 transition-colors">{task.title}</h3>
                         {commentCount > 0 && (
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
+                            <button
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onOpen()
+                                }}
+                                className="flex items-center gap-1.5 bg-white/5 hover:bg-lime-500/20 text-gray-500 hover:text-lime-400 px-2 py-0.5 rounded-full text-[10px] transition-all border border-white/5"
+                                title="Ver comentarios"
+                            >
                                 💬 {commentCount}
-                            </span>
+                            </button>
                         )}
                     </div>
 

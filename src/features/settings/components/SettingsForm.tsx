@@ -17,26 +17,10 @@ export function SettingsForm() {
         billing_iban: '',
         invoice_prefix: 'INV-',
         next_invoice_number: 1,
-        // Optional visual
-        logo_url: '' // Using avatar? Or adding a specific logo_url to DB? I didn't add logo_url to DB. 
-        // Wait, I didn't add logo_url to profiles in DB. The user asked for "logo" in settings. 
-        // I should probably check if I should add it or just rely on avatar_url. 
-        // The prompt didn't strictly say "different logo", but "sus datos". 
-        // I will assume avatar_url is enough OR I should add it.
-        // Actually, I'll allow editing avatar_url if needed, or assume avatar is personal photo.
-        // Let's stick to billing data first. The implementation plan mentioned logo_url but I skipped adding it to profiles migration.
-        // I will add it now if I can, or just omit. 
-        // PROMPT: "settings... para facturas". Usually invoices have a company logo.
-        // I will ignore logo for now to strictly follow the "clean" path or add it quickly?
-        // Let's add logo_url to state but maybe not save it if column missing? 
-        // Ah, I missed adding `logo_url` to `profiles` migration.
-        // I will do another tiny migration for logo_url if I want perfection.
-        // Re-reading Plan: "logo_url (optional)".
-        // I will add it to DB now to be safe.
+        logo_url: '',
+        professional_role: '',
+        professional_description: ''
     })
-
-    // Wait, let's fix the DB column first or valid fields.
-    // I won't add logo_url to DB right now to avoid another migration context switch. I'll rely on text fields first.
 
     useEffect(() => {
         if (profile) {
@@ -50,7 +34,9 @@ export function SettingsForm() {
                 billing_iban: profile.billing_iban || '',
                 invoice_prefix: profile.invoice_prefix || 'INV-',
                 next_invoice_number: profile.next_invoice_number || 1,
-                logo_url: '' // Placeholder
+                logo_url: '', // Placeholder
+                professional_role: profile.professional_role || '',
+                professional_description: profile.professional_description || ''
             })
         }
     }, [profile])
@@ -76,7 +62,9 @@ export function SettingsForm() {
                 billing_phone: formData.billing_phone,
                 billing_iban: formData.billing_iban,
                 invoice_prefix: formData.invoice_prefix,
-                next_invoice_number: formData.next_invoice_number
+                next_invoice_number: formData.next_invoice_number,
+                professional_role: formData.professional_role,
+                professional_description: formData.professional_description
             })
             alert('Perfil de facturación guardado correctamente 💾')
         } catch (error) {
@@ -99,17 +87,45 @@ export function SettingsForm() {
                 <h2 className="text-xl font-semibold text-white border-b border-white/10 pb-4">
                     👤 Datos del Perfil (CRM)
                 </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-300">Nombre Visible (CRM)</label>
+                        <input
+                            type="text"
+                            name="full_name"
+                            value={formData.full_name}
+                            onChange={handleChange}
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-lime-400 outline-none focus:ring-1 focus:ring-lime-400/50 transition-all"
+                            placeholder="Tu Nombre (Ej: Juan Pérez)"
+                        />
+                        <p className="text-xs text-gray-500">Este nombre aparecerá en la barra lateral.</p>
+                    </div>
+
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-gray-300">Rol Profesional (IA)</label>
+                        <input
+                            type="text"
+                            name="professional_role"
+                            value={(formData as any).professional_role || ''}
+                            onChange={handleChange}
+                            className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-lime-400 outline-none focus:ring-1 focus:ring-lime-400/50 transition-all"
+                            placeholder="Ej: Diseñador Senior, Trafficker, CEO..."
+                        />
+                        <p className="text-xs text-gray-500">Aura AI usará esto para personalizar sus consejos.</p>
+                    </div>
+                </div>
+
                 <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-300">Nombre Visible (CRM)</label>
-                    <input
-                        type="text"
-                        name="full_name"
-                        value={formData.full_name}
+                    <label className="text-sm font-medium text-gray-300">Descripción Profesional / Foco actual</label>
+                    <textarea
+                        name="professional_description"
+                        value={(formData as any).professional_description || ''}
                         onChange={handleChange}
-                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-lime-400 outline-none focus:ring-1 focus:ring-lime-400/50 transition-all"
-                        placeholder="Tu Nombre (Ej: Juan Pérez)"
+                        rows={3}
+                        className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2.5 text-white focus:border-lime-400 outline-none resize-none focus:ring-1 focus:ring-lime-400/50 transition-all"
+                        placeholder="Describe brevemente a qué te dedicas o en qué estás trabajando ahora mismo..."
                     />
-                    <p className="text-xs text-gray-500">Este nombre aparecerá en la barra lateral y en las interacciones del CRM.</p>
+                    <p className="text-xs text-gray-500">Proporciona contexto a Aura sobre tus responsabilidades diarias.</p>
                 </div>
             </div>
 

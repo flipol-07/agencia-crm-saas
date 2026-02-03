@@ -3,7 +3,10 @@
 export function PrintButton() {
     return (
         <button
-            onClick={() => window.print()}
+            onClick={() => {
+                const id = window.location.pathname.split('/').pop()
+                if (id) window.open(`/print/invoices/${id}`, '_blank')
+            }}
             className="px-6 py-2 bg-lime-400 text-black font-semibold rounded-lg hover:bg-lime-300 transition-colors flex items-center gap-2"
         >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

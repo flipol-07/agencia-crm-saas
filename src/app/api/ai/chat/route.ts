@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'get_recent_expenses',
-                    description: 'Obtiene los últimos gastos. Útil para "¿Cuánto gasté?".',
+                    description: 'Gastos recientes (¿Cuánto hemos gastado?)',
                     parameters: { type: 'object', properties: { limit: { type: 'number' } } },
                 },
             },
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'get_recent_invoices',
-                    description: 'Obtiene las últimas facturas.',
+                    description: 'Facturas recientes y su estado.',
                     parameters: { type: 'object', properties: { limit: { type: 'number' } } },
                 },
             },
@@ -40,15 +40,23 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'get_recent_leads',
-                    description: 'Obtiene los últimos leads.',
+                    description: 'Leads capturados por el scraper.',
                     parameters: { type: 'object', properties: { limit: { type: 'number' } } },
                 },
             },
             {
                 type: 'function',
                 function: {
+                    name: 'get_scraper_campaigns',
+                    description: 'Campañas de prospección activas.',
+                    parameters: { type: 'object', properties: {} },
+                },
+            },
+            {
+                type: 'function',
+                function: {
                     name: 'search_contacts',
-                    description: 'Busca contactos por nombre, empresa o email.',
+                    description: 'Buscar clientes/contactos en el CRM.',
                     parameters: { type: 'object', properties: { query: { type: 'string' } } },
                 },
             },
@@ -56,7 +64,7 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'get_projects',
-                    description: 'Obtiene proyectos.',
+                    description: 'Proyectos actuales y su progreso.',
                     parameters: { type: 'object', properties: { status: { type: 'string' } } },
                 },
             },
@@ -64,23 +72,31 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'get_tasks',
-                    description: 'Obtiene tareas.',
+                    description: 'Tareas pendientes o completadas.',
                     parameters: { type: 'object', properties: { is_completed: { type: 'boolean' } } },
                 },
             },
             {
                 type: 'function',
                 function: {
-                    name: 'get_documents',
-                    description: 'Lista documentos.',
-                    parameters: { type: 'object', properties: { limit: { type: 'number' } } },
+                    name: 'get_team',
+                    description: 'Miembros del equipo de la agencia.',
+                    parameters: { type: 'object', properties: {} },
                 },
             },
             {
                 type: 'function',
                 function: {
                     name: 'get_recent_messages',
-                    description: 'Historial de mensajes/emails.',
+                    description: 'Emails con clientes y mensajes de chat.',
+                    parameters: { type: 'object', properties: { limit: { type: 'number' } } },
+                },
+            },
+            {
+                type: 'function',
+                function: {
+                    name: 'get_team_messages',
+                    description: 'Mensajes de chat interno del equipo.',
                     parameters: { type: 'object', properties: { limit: { type: 'number' } } },
                 },
             },
@@ -88,12 +104,12 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'search_knowledge_base',
-                    description: 'Busca en la biblioteca experta de Aura. Útil para consejos de marketing, diseño, gestión de proyectos B2B y trato al cliente.',
+                    description: 'Consultar biblioteca experta (Marketing, UX, Negocios).',
                     parameters: {
                         type: 'object',
                         properties: {
-                            query: { type: 'string', description: 'La consulta o duda conceptual.' },
-                            category: { type: 'string', enum: ['marketing', 'design', 'business'], description: 'Opcional: filtrar por categoría.' }
+                            query: { type: 'string' },
+                            category: { type: 'string', enum: ['marketing', 'design', 'business'] }
                         },
                         required: ['query']
                     },
@@ -103,12 +119,12 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'search_meetings',
-                    description: 'Busca en las transcripciones, resúmenes y puntos clave de las reuniones. Útil para recordar qué se habló con un cliente.',
+                    description: 'Buscar en transcripciones y resúmenes de reuniones.',
                     parameters: {
                         type: 'object',
                         properties: {
-                            query: { type: 'string', description: 'Término de búsqueda o tema' },
-                            contact_name: { type: 'string', description: 'Nombre de la empresa/contacto para filtrar' }
+                            query: { type: 'string' },
+                            contact_name: { type: 'string' }
                         },
                         required: ['query']
                     },
@@ -118,12 +134,12 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'learn_from_user',
-                    description: 'Aprende nueva información proporcionada por el usuario y la guarda en la base de conocimientos para el futuro.',
+                    description: 'Guardar nuevos datos o preferencias en memoria a largo plazo.',
                     parameters: {
                         type: 'object',
                         properties: {
-                            fact: { type: 'string', description: 'La información o hecho a aprender.' },
-                            category: { type: 'string', description: 'Categoría opcional (ej: preferencia_usuario, regla_negocio, correccion).' }
+                            fact: { type: 'string' },
+                            category: { type: 'string' }
                         },
                         required: ['fact']
                     },
@@ -131,23 +147,34 @@ export async function POST(request: NextRequest) {
             },
         ];
 
-        const systemPrompt = `Eres Aura AI, la Consultora Experta Senior de esta agencia. 
-        No eres solo una interfaz de datos; eres una estratega experta en Marketing B2B, Diseño Web Premium (UX/UI), Gestión de Proyectos y Éxito del Cliente.
+        // Contexto del usuario
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('full_name, professional_role, professional_description')
+            .eq('id', user.id)
+            .single();
 
-        CAPACIDADES ESPECIALES:
-        1. Base de Conocimientos: Tienes acceso a una biblioteca de formación avanzada vía 'search_knowledge_base'. Úsala SIEMPRE que el usuario pida consejos, estrategias o mejores prácticas.
-        2. Datos en Tiempo Real: Tienes acceso a los datos del CRM (Leads, Gastos, Proyectos, etc.).
-        3. Aprendizaje Continuo: Si el usuario te corrige o te enseña algo nuevo, USA la herramienta 'learn_from_user' para guardarlo. Dile explícitamente "He guardado esta nueva información en mi memoria".
-        4. Acceso a Reuniones: Tienes acceso completo a las transcripciones de reuniones. Si te preguntan algo específico (ej: "¿Quién asistió?"), lee la transcripción para encontrar la respuesta.
-        
-        TONO Y ESTILO:
-        - Profesional, proactiva y orientada a resultados.
-        - Usa Markdown para estructuras claras (encabezados, listas, negritas).
-        - Si el usuario pregunta algo general, busca en tu base de conocimientos para dar una respuesta basada en principios expertos, no solo en conocimiento general de GPT.
-        - Siempre menciona en qué te basas (ej: "Basándome en los principios de diseño 2024..." o "Siguiendo estrategias de marketing B2B...").
-        
-        El usuario actual tiene ID: ${user.id}.
-        Zona horaria: ${timezone || 'UTC'}.`;
+        const systemPrompt = `Eres Aura AI, la Consultora Senior de Aurie CRM. 
+        Eres experta en Marketing B2B, UX/UI y Estrategia de Negocio.
+
+        USUARIO:
+        - Nombre: ${profile?.full_name || 'Usuario'}
+        - Rol: ${profile?.professional_role || 'No especificado'}
+        - Contexto: ${profile?.professional_description || 'No definido'}
+
+        TIENES ACCESO TOTAL (vía herramientas) A:
+        1. CRM: Contactos, Proyectos, Tareas, Gastos e Invoices.
+        2. Comunicación: Emails con clientes, chat interno y reuniones (transcripciones).
+        3. Prospección: Campañas de scraping y leads capturados.
+        4. Equipo: Miembros de la agencia.
+        5. Conocimiento: Base experta y memoria compartida.
+
+        REGLAS DE ORO:
+        - Adapta siempre tus consejos al ROL e INTERESES del usuario (Marketing vs Diseño vs Gestión).
+        - Sé proactiva: Si ves algo relevante en los datos (gastos altos, tareas atrasadas, un lead caliente), menciónalo.
+        - Usa Markdown para respuestas escaneables.
+        - Si algo no lo sabes o no tienes la herramienta, dilo con honestidad.
+        - Timezone: ${timezone || 'UTC'}. User ID: ${user.id}.`;
 
         // Primera llamada (para detectar tool_calls)
         const response = await openai.chat.completions.create({
@@ -208,11 +235,17 @@ export async function POST(request: NextRequest) {
                 if (functionArgs.is_completed !== undefined) query = query.eq('is_completed', functionArgs.is_completed);
                 const { data } = await query.order('due_date', { ascending: true }).limit(20);
                 toolResult = JSON.stringify(data);
-            } else if (functionName === 'get_documents') {
-                const { data } = await supabase.from('documents').select('*').order('created_at', { ascending: false }).limit(functionArgs.limit || 10);
+            } else if (functionName === 'get_scraper_campaigns') {
+                const { data } = await supabase.from('scraper_campaigns').select('*').order('created_at', { ascending: false });
+                toolResult = JSON.stringify(data);
+            } else if (functionName === 'get_team') {
+                const { data } = await supabase.from('profiles').select('id, full_name, professional_role, email, avatar_url');
                 toolResult = JSON.stringify(data);
             } else if (functionName === 'get_recent_messages') {
                 const { data } = await supabase.from('contact_emails').select('*').order('received_at', { ascending: false }).limit(functionArgs.limit || 10);
+                toolResult = JSON.stringify(data);
+            } else if (functionName === 'get_team_messages') {
+                const { data } = await supabase.from('team_messages').select('content, created_at, sender_id').order('created_at', { ascending: false }).limit(functionArgs.limit || 20);
                 toolResult = JSON.stringify(data);
             } else if (functionName === 'search_knowledge_base') {
                 const queryText = functionArgs.query;

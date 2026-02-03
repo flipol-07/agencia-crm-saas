@@ -41,8 +41,13 @@ export function useProjectTasks(projectId: string) {
     }, [supabase, projectId])
 
     useEffect(() => {
-        if (projectId) {
+        // Solo intentar buscar si tenemos un projectId y parece un UUID válido
+        // (evita el error 400 al pasar 'general' desde el panel de contactos)
+        if (projectId && projectId.length === 36) {
             fetchTasks()
+        } else {
+            setTasks([])
+            setLoading(false)
         }
     }, [projectId, fetchTasks])
 
@@ -248,7 +253,8 @@ export function useTasksWithDetails() {
                     user_id,
                     created_at,
                     profiles (id, full_name, email, avatar_url)
-                )
+                ),
+                task_comments (id)
             `)
             .order('priority', { ascending: false })
             .order('due_date', { ascending: true, nullsFirst: false })
@@ -366,7 +372,8 @@ export function useTasksWithDetails() {
                     user_id,
                     created_at,
                     profiles (id, full_name, email, avatar_url)
-                )
+                ),
+                task_comments (id)
             `)
             .single()
 

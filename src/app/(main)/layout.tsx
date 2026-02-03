@@ -10,6 +10,7 @@ import { Suspense } from 'react'
 import { RealtimeNotifications } from '@/shared/components/providers/RealtimeNotifications'
 import { Toaster } from 'sonner'
 import { ProfileCompletionCheck } from '@/shared/components/features/ProfileCompletionCheck'
+import { NotificationBell } from '@/shared/components/layout/NotificationBell'
 
 async function UserNav() {
   const supabase = await createClient()
@@ -23,6 +24,9 @@ async function UserNav() {
   return (
     <div className="flex items-center gap-4">
       <span className="text-sm text-gray-400 hidden md:block">{user.email}</span>
+      <div className="flex items-center border-l border-white/10 pl-4">
+        <NotificationBell />
+      </div>
       <form action={signout}>
         <button
           type="submit"
@@ -89,9 +93,11 @@ export default function MainLayout({
           <Suspense fallback={<div className="animate-pulse bg-white/5 h-screen rounded-xl" />}>
             {children}
           </Suspense>
-          <Suspense fallback={null}>
-            <FloatingChat />
-          </Suspense>
+          <div className="print:hidden">
+            <Suspense fallback={null}>
+              <FloatingChat />
+            </Suspense>
+          </div>
         </main>
       </div>
     </div>

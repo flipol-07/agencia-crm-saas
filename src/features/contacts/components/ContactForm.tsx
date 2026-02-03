@@ -21,6 +21,7 @@ export interface ContactFormData {
     services: string[]
     source: ContactSource
     notes: string
+    estimated_value: string
 }
 
 export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps) {
@@ -35,6 +36,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
         services: [],
         source: 'outbound',
         notes: '',
+        estimated_value: '',
     })
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -178,6 +180,21 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         <option value="website" className="bg-gray-900">Website</option>
                         <option value="other" className="bg-gray-900">Otro</option>
                     </select>
+                </div>
+
+                <div>
+                    <label htmlFor="estimated_value" className="block text-sm font-medium text-gray-300 mb-2">
+                        Valor Estimado (€)
+                    </label>
+                    <input
+                        id="estimated_value"
+                        name="estimated_value"
+                        type="number"
+                        value={formData.estimated_value}
+                        onChange={handleChange}
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        placeholder="0.00"
+                    />
                 </div>
 
                 <div className="md:col-span-2">

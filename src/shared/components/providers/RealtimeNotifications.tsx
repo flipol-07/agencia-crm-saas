@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation'
 export function RealtimeNotifications() {
     // Memoize client to avoid recreation on every render
     const supabase = useMemo(() => createClient(), [])
-    const { increment, setCounts } = useNotificationStore()
+    const { increment, decrement, setCounts } = useNotificationStore()
     const router = useRouter()
 
     useEffect(() => {
@@ -18,25 +18,27 @@ export function RealtimeNotifications() {
             Notification.requestPermission()
         }
 
-        console.log('RealtimeNotifications: [1/4] Initializing global listener...')
-
-        // 1. Fetch initial counts
+        // 1. Fetch initial counts (Per User via RPC)
         const fetchInitialCounts = async () => {
-            console.log('RealtimeNotifications: [2/4] Fetching initial unread counts...')
-            const { data, error } = await (supabase.from('contact_emails') as any)
-                .select('contact_id')
-                .eq('is_read', false)
-                .eq('direction', 'inbound')
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) return
+
+            const { data, error } = await supabase.rpc('get_my_unread_counts')
 
             if (data) {
                 const counts: Record<string, number> = {}
-                data.forEach((email: any) => {
-                    if (email.contact_id) {
-                        counts[email.contact_id] = (counts[email.contact_id] || 0) + 1
+                const details: Record<string, { contactName: string, companyName: string }> = {}
+                
+                data.forEach((row: any) => {
+                    if (row.contact_id && row.count > 0) {
+                        counts[row.contact_id] = Number(row.count)
+                        details[row.contact_id] = {
+                            contactName: row.contact_name || '',
+                            companyName: row.company_name || 'Sin empresa'
+                        }
                     }
                 })
-                console.log('RealtimeNotifications: Initial counts loaded:', counts)
-                setCounts(counts)
+                setCounts(counts, details)
             }
             if (error) {
                 console.error('RealtimeNotifications: Error fetching initial counts:', error)
@@ -45,57 +47,96 @@ export function RealtimeNotifications() {
 
         fetchInitialCounts()
 
-        // 2. Subscribe to new emails
-        console.log('RealtimeNotifications: [3/4] Subscribing to ALL contact_emails changes...')
+        // 2. Realtime Subscriptions
         const channel = supabase
-            .channel('realtime_emails_global')
+            .channel('realtime_notifications_hub')
             .on(
                 'postgres_changes',
                 {
-                    event: 'INSERT', // Only notify on NEW inserts to avoid duplicates on updates
+                    event: 'INSERT',
                     schema: 'public',
                     table: 'contact_emails'
                 },
-                (payload: any) => {
-                    console.log('RealtimeNotifications: 🔔 DB Event Received:', payload.eventType, payload)
-
+                async (payload: any) => {
                     const newEmail = payload.new as any
 
-                    // Filter in JS for maximum local debugging
+                    // Filter in JS: Only inbound emails matter for notifications
                     if (newEmail.direction === 'inbound') {
-                        console.log('RealtimeNotifications: ✅ Inbound verified from:', newEmail.from_email)
-
+                        let contactName = 'Contacto'
+                        
                         if (newEmail.contact_id) {
-                            increment(newEmail.contact_id)
+                            // Fetch contact name for the store detail
+                            const { data: contact } = await supabase
+                                .from('contacts')
+                                .select('contact_name, company_name')
+                                .eq('id', newEmail.contact_id)
+                                .single()
+                            
+                            if (contact) {
+                                contactName = contact.contact_name || contact.company_name || 'Contacto'
+                                increment(newEmail.contact_id, {
+                                    contactName: contact.contact_name || '',
+                                    companyName: contact.company_name || ''
+                                })
+                            } else {
+                                increment(newEmail.contact_id)
+                            }
                         }
 
-                        const title = newEmail.contact_id ? 'Nuevo mensaje de contacto' : 'Mensaje (Remitente desconocido)'
-                        const body = `${newEmail.from_email}: ${newEmail.subject || 'Sin asunto'}`
+                        const receivedAt = new Date(newEmail.received_at || new Date()).getTime()
+                        const now = Date.now()
+                        const isRecent = (now - receivedAt) < 1000 * 60 * 60 // 1 hour
 
-                        // 1. Show Toast (Browser UI)
-                        toast.success(title, {
-                            description: body,
-                            duration: 15000,
-                            action: newEmail.contact_id ? {
-                                label: 'Ver Contacto',
-                                onClick: () => router.push(`/contacts/${newEmail.contact_id}`)
-                            } : undefined
-                        })
+                        // Only notify if recent to avoid spam
+                        if (isRecent) {
+                            const title = `Mensaje de ${contactName}`
+                            const body = `${newEmail.subject || 'Sin asunto'}`
 
-                        // 2. Show Native Notification (PWA / Mobile System)
-                        if ('Notification' in window && Notification.permission === 'granted') {
-                            new Notification(title, {
-                                body: body,
-                                icon: '/aurie-official-logo.png'
+                            // 1. Toast
+                            toast.success(title, {
+                                description: body,
+                                duration: 8000,
+                                action: newEmail.contact_id ? {
+                                    label: 'Ver',
+                                    onClick: () => router.push(`/contacts/${newEmail.contact_id}`)
+                                } : undefined
                             })
-                        }
 
-                        // 3. Refresh router
-                        router.refresh()
+                            // 2. Native Notification
+                            if ('Notification' in window && Notification.permission === 'granted') {
+                                new Notification(title, { body, icon: '/aurie-official-logo.png' })
+                            }
+                        }
                     }
                 }
             )
-            // Subscribe to Team Chat Messages
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'email_reads' // Listen for "Mark as Read" actions
+                },
+                async (payload: any) => {
+                    const newRead = payload.new as any
+                    const { data: { user } } = await supabase.auth.getUser()
+
+                    // If *I* read it (or my other device did), decrement count
+                    if (user && newRead.user_id === user.id) {
+                        // We need the contact_id to find which counter to decrement.
+                        // Fetch it from the email_id (message_id)
+                        const { data: email } = await supabase
+                            .from('contact_emails')
+                            .select('contact_id')
+                            .eq('message_id', newRead.email_id)
+                            .single()
+                        
+                        if (email?.contact_id) {
+                            decrement(email.contact_id)
+                        }
+                    }
+                }
+            )
             .on(
                 'postgres_changes',
                 {
@@ -105,12 +146,12 @@ export function RealtimeNotifications() {
                 },
                 async (payload: any) => {
                     const newMsg = payload.new as any
+                    const { data: { user } } = await supabase.auth.getUser()
 
                     // Filter out own messages
-                    const { data: { user } } = await supabase.auth.getUser()
                     if (user && newMsg.sender_id !== user.id) {
                         const title = 'Nuevo mensaje de equipo'
-                        const body = newMsg.content || 'Imagen/Archivo'
+                        const body = newMsg.content || 'Adjunto'
 
                         toast.info(title, {
                             description: body,
@@ -122,32 +163,21 @@ export function RealtimeNotifications() {
                         })
 
                         if ('Notification' in window && Notification.permission === 'granted') {
-                            new Notification(title, {
-                                body: body,
-                                icon: '/aurie-official-logo.png'
-                            })
+                            new Notification(title, { body, icon: '/aurie-official-logo.png' })
                         }
                     }
                 }
             )
             .subscribe((status: string) => {
-                console.log('RealtimeNotifications: [4/4] Subscription status:', status)
-                if (status === 'SUBSCRIBED') {
-                    console.log('RealtimeNotifications: 🚀 CRM is LIVE for all incoming mail!')
-                }
                 if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                    console.error('RealtimeNotifications: ❌ ERROR in real-time channel connection')
-                    toast.error('Error de conexión Realtime', {
-                        description: 'Las notificaciones podrían no llegar al instante.'
-                    })
+                    console.error('RealtimeNotifications: Connection Error', status)
                 }
             })
 
         return () => {
-            console.log('RealtimeNotifications: Cleaning up...')
             supabase.removeChannel(channel)
         }
-    }, [supabase, increment, setCounts, router])
+    }, [supabase, increment, decrement, setCounts, router])
 
     return null
 }

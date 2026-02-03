@@ -31,9 +31,14 @@ export async function syncContactEmails(contactId: string, contactEmail: string)
             body_html: email.html
         }))
 
+        // Deduplicar por message_id para evitar error en upsert batch (ON CONFLICT no soporta duplicados en el payload)
+        const uniqueEmailsToUpsert = Array.from(
+            new Map(emailsToUpsert.map(item => [item.message_id, item])).values()
+        )
+
         // Upsert para no duplicar
         const { error } = await (supabase.from('contact_emails') as any)
-            .upsert(emailsToUpsert as any, { onConflict: 'message_id' })
+            .upsert(uniqueEmailsToUpsert as any, { onConflict: 'message_id' })
 
         if (error) throw new Error(`Error BD: ${error.message}`)
 
@@ -49,7 +54,10 @@ export async function syncContactEmails(contactId: string, contactEmail: string)
         return { count: emails.length }
 
     } catch (error) {
-        console.error('Sync Emails Error:', error)
-        throw new Error(error instanceof Error ? error.message : 'Error de sincronización')
+        console.error('Email Sync Error [Internal]:', error)
+        // No exponemos detalles técnicos internos del servidor IMAP/BD al cliente
+        // pero sí un mensaje útil
+        const message = error instanceof Error ? error.message : (typeof error === 'string' ? error : 'Error de conexión o timeout');
+        throw new Error(`Fallo en sincronización: ${message}`);
     }
 }

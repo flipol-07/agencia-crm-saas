@@ -20,6 +20,8 @@ export type Profile = {
     billing_email?: string | null
     billing_phone?: string | null
     billing_iban?: string | null
+    professional_role?: string | null
+    professional_description?: string | null
 }
 
 // Enums de Contact
@@ -105,6 +107,24 @@ export interface ContactEmail {
 
 export type ContactEmailInsert = Omit<ContactEmail, 'id' | 'created_at'>
 export type ContactEmailUpdate = Partial<Omit<ContactEmail, 'id' | 'created_at'>>
+
+// ============================================
+// Contact Files Types
+// ============================================
+
+export interface ContactFile {
+    id: string
+    contact_id: string
+    name: string
+    file_path: string
+    file_size: number | null
+    content_type: string | null
+    created_at: string
+    created_by: string | null
+}
+
+export type ContactFileInsert = Omit<ContactFile, 'id' | 'created_at'>
+export type ContactFileUpdate = Partial<Omit<ContactFile, 'id' | 'created_at'>>
 
 // ============================================
 // Project Types
@@ -290,6 +310,8 @@ export interface Invoice {
     updated_at: string
     created_by: string | null
     issuer_profile_id: string | null
+    template_id: string | null
+    config: InvoiceTemplateConfig | null
 }
 
 export type InvoiceInsert = Omit<Invoice, 'id' | 'created_at' | 'updated_at'>
@@ -335,6 +357,47 @@ export interface Settings {
 
 export type SettingsInsert = Omit<Settings, 'id' | 'created_at' | 'updated_at'>
 export type SettingsUpdate = Partial<Omit<Settings, 'id' | 'created_at'>>
+
+// ============================================
+// Invoice Template Types
+// ============================================
+
+export interface InvoiceElement {
+    id: string
+    type: 'text' | 'title' | 'image' | 'table' | 'issuer' | 'recipient' | 'total' | 'invoice_number' | 'date'
+    x: number // positions in mm
+    y: number
+    width?: number
+    height?: number
+    content?: string
+    fontSize?: number
+    fontWeight?: string
+    color?: string
+    align?: 'left' | 'center' | 'right'
+    fontFamily?: string
+    src?: string // for images
+    opacity?: number
+    zIndex?: number
+}
+
+export interface InvoiceTemplateConfig {
+    elements: InvoiceElement[]
+    background_url?: string | null
+    global_font?: string
+}
+
+export interface InvoiceTemplate {
+    id: string
+    name: string
+    description: string | null
+    config: InvoiceTemplateConfig
+    max_items: number
+    background_url: string | null
+    is_default: boolean
+    profile_id: string | null
+    created_at: string
+    updated_at: string
+}
 
 // ============================================
 // Team Chat Types
@@ -397,6 +460,8 @@ export type Database = {
                     billing_email?: string | null
                     billing_phone?: string | null
                     billing_iban?: string | null
+                    professional_role?: string | null
+                    professional_description?: string | null
                 }
                 Update: {
                     id?: string
@@ -420,6 +485,8 @@ export type Database = {
                     billing_email?: string | null
                     billing_phone?: string | null
                     billing_iban?: string | null
+                    professional_role?: string | null
+                    professional_description?: string | null
                 }
                 Relationships: []
             }
@@ -528,6 +595,27 @@ export type Database = {
                     }
                 ]
             }
+            contact_files: {
+                Row: ContactFile
+                Insert: ContactFileInsert
+                Update: ContactFileUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "contact_files_contact_id_fkey"
+                        columns: ["contact_id"]
+                        isOneToOne: false
+                        referencedRelation: "contacts"
+                        referencedColumns: ["id"]
+                    },
+                    {
+                        foreignKeyName: "contact_files_created_by_fkey"
+                        columns: ["created_by"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
             invoices: {
                 Row: Invoice
                 Insert: InvoiceInsert & { issuer_profile_id?: string | null }
@@ -574,6 +662,20 @@ export type Database = {
                 Row: Settings
                 Insert: SettingsInsert
                 Update: SettingsUpdate
+            }
+            invoice_templates: {
+                Row: InvoiceTemplate
+                Insert: Omit<InvoiceTemplate, 'id' | 'created_at' | 'updated_at'>
+                Update: Partial<Omit<InvoiceTemplate, 'id' | 'created_at' | 'updated_at'>>
+                Relationships: [
+                    {
+                        foreignKeyName: "invoice_templates_profile_id_fkey"
+                        columns: ["profile_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
             }
             // Scraper Tables
             email_templates: {

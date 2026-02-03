@@ -37,7 +37,7 @@ export function TaskModal({
     onDelete
 }: TaskModalProps) {
     const { user } = useAuth()
-    const { comments, loading: commentsLoading, addComment } = useTaskComments(task.id)
+    const { comments, loading: commentsLoading, addComment, deleteComment } = useTaskComments(task.id)
     const [newComment, setNewComment] = useState('')
     const [saving, setSaving] = useState(false)
 
@@ -326,6 +326,26 @@ export function TaskModal({
                                                     minute: '2-digit'
                                                 })}
                                             </span>
+                                            {user && comment.user_id === user.id && (
+                                                <button
+                                                    onClick={async (e) => {
+                                                        e.stopPropagation();
+                                                        if (confirm('¿Eliminar comentario?')) {
+                                                            try {
+                                                                await deleteComment(comment.id);
+                                                            } catch (error) {
+                                                                console.error("Error deleting comment:", error);
+                                                            }
+                                                        }
+                                                    }}
+                                                    className="ml-auto p-1 text-gray-500 hover:text-red-400 rounded transition-colors"
+                                                    title="Eliminar comentario"
+                                                >
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                </button>
+                                            )}
                                         </div>
                                         <p className="text-gray-300 text-sm">{comment.content}</p>
                                     </div>

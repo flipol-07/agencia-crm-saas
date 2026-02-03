@@ -110,8 +110,8 @@ function SidebarContent() {
     const settingsLink = links.find(l => l.href === '/settings')
 
     return (
-        <aside className="hidden lg:flex w-64 flex-col border-r border-white/10 min-h-[calc(100vh-73px)]">
-            <nav className="flex-1 p-4 space-y-1">
+        <aside className="hidden lg:flex w-64 flex-col border-r border-white/10 sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden">
+            <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide">
                 {mainLinks.map((link) => {
                     const active = isActive(link.href)
                     return (
