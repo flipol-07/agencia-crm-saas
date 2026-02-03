@@ -1,6 +1,8 @@
 import nodemailer from 'nodemailer'
 import imap from 'imap-simple'
 import { simpleParser } from 'mailparser'
+import { AiMemoryService } from '@/shared/services/ai-memory.service'
+import { createClient } from '@/lib/supabase/server'
 
 const EMAIL_CONFIG = {
     user: process.env.EMAIL_USER!,
@@ -209,7 +211,37 @@ export class EmailService {
             )
 
             // Sort by date desc
-            return uniqueEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
+            const sorted = uniqueEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
+
+            // Proactividad: Intentar generar embeddings para los nuevos si se llama desde un contexto que lo permita
+            // Como AiMemoryService.storeMemory es async, no bloqueamos el retorno
+            try {
+                const supabase = await createClient();
+                for (const email of sorted.slice(0, 5)) { // Solo los 5 más recientes para evitar latencia
+                    const content = `Asunto: ${email.subject}\n\nContenido: ${email.text || email.snippet}`;
+                    // Verificar si ya existe para no duplicar
+                    const { data: existing } = await supabase
+                        .from('embeddings' as any)
+                        .select('id')
+                        .eq('entity_id', email.messageId)
+                        .eq('entity_type', 'email')
+                        .maybeSingle();
+
+                    if (!existing) {
+                        AiMemoryService.storeMemory({
+                            content,
+                            entity_type: 'email',
+                            entity_id: email.messageId,
+                            metadata: { subject: email.subject }
+                        }, supabase).catch(console.error);
+                    }
+                }
+            } catch (err) {
+                // Silently fail as this is a background optimization
+                console.warn('Background embedding generation skipped:', err);
+            }
+
+            return sorted
 
         } catch (error) {
             console.error('Error in fetchGlobalRecent:', error)
