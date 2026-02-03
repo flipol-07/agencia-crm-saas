@@ -1,9 +1,14 @@
-self.addEventListener('push', function (event) {
+/// <reference lib="webworker" />
+
+declare const self: ServiceWorkerGlobalScope;
+
+self.addEventListener('push', (event) => {
+    console.log('SW: Push event received', event);
     if (!event.data) return;
 
     try {
         const data = event.data.json();
-        const options = {
+        const options: NotificationOptions = {
             body: data.notification.body,
             icon: data.notification.icon || '/aurie-official-logo.png',
             badge: data.notification.badge || '/icons/icon-192x192.png',
@@ -19,21 +24,21 @@ self.addEventListener('push', function (event) {
     }
 });
 
-self.addEventListener('notificationclick', function (event) {
+self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const urlToOpen = event.notification.data.url || '/';
+    const urlToOpen = (event.notification.data as any)?.url || '/';
 
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function (clientList) {
+        self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
             for (let i = 0; i < clientList.length; i++) {
                 let client = clientList[i];
                 if (client.url === urlToOpen && 'focus' in client) {
-                    return client.focus();
+                    return (client as WindowClient).focus();
                 }
             }
-            if (clients.openWindow) {
-                return clients.openWindow(urlToOpen);
+            if (self.clients.openWindow) {
+                return self.clients.openWindow(urlToOpen);
             }
         })
     );
