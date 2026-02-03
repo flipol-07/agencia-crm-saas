@@ -5,9 +5,11 @@ import {
     ExpenseList,
     ExpenseForm,
     ExpenseSummary,
-    SectorBreakdown
+    SectorBreakdown,
+    TaxForecastCard
 } from '@/features/expenses/components'
 import { useExpenses, useExpenseStats } from '@/features/expenses/hooks'
+import { useTaxForecast } from '@/features/expenses/hooks/useTaxForecast'
 import { ExpenseWithRelations, ExpenseInsert, Sector, ExpenseCategory } from '@/features/expenses/types'
 
 interface ExpensesPageClientProps {
@@ -45,6 +47,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
     })
 
     const { stats, sectorStats, isLoading: statsLoading, refresh: refreshStats } = useExpenseStats(isPersonal)
+    const { data: taxData, isLoading: taxLoading } = useTaxForecast()
 
     // Cambiar tab actualiza filtro
     useEffect(() => {
@@ -197,6 +200,16 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
                             isLoading={statsLoading}
                         />
                     )}
+
+                    {!isPersonal && (
+                        <div className="mt-6">
+                            <TaxForecastCard
+                                data={taxData}
+                                isLoading={taxLoading}
+                            />
+                        </div>
+                    )}
+
                     {isPersonal && (
                         <div className="glass rounded-xl p-6">
                             <h3 className="text-lg font-semibold text-white mb-4">💡 Tip</h3>

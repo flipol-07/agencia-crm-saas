@@ -7,3 +7,5 @@ export { TaskCard } from './TaskCard'
 export { KanbanBoard } from './KanbanBoard'
 export { TaskModal } from './TaskModal'
 export { CreateTaskModal } from './CreateTaskModal'
+export { IntelligentTaskWidget } from './IntelligentTaskWidget'
+

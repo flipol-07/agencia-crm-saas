@@ -12,6 +12,8 @@ import {
     updateInvoiceWithItemsAction as updateInvoiceWithItems,
     generateInvoiceNumberAction as generateInvoiceNumber
 } from '../actions/invoiceActions'
+import { getSectorsCached } from '@/features/expenses/services/expenseService.server'
+import { Sector } from '@/features/expenses/types'
 import { InvoiceItemInsert, InvoiceWithDetails, Profile } from '@/types/database'
 import { InfoTooltip } from '@/shared/components/ui/Tooltip'
 import { CopyButton } from '@/shared/components/ui/CopyButton'
@@ -36,7 +38,9 @@ export function InvoiceForm({
     // State
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState<Profile[]>([])
+    const [sectors, setSectors] = useState<Sector[]>([])
     const [selectedIssuerId, setSelectedIssuerId] = useState<string>(initialData?.issuer_profile_id || '')
+    const [selectedSectorId, setSelectedSectorId] = useState<string>((initialData as any)?.sector_id || '')
 
     const [invoiceDate, setInvoiceDate] = useState(
         initialData?.issue_date || new Date().toISOString().split('T')[0]
@@ -107,6 +111,14 @@ export function InvoiceForm({
             }
         }
         fetchProfiles()
+
+        // Fetch Sectors
+        const fetchSectors = async () => {
+            const supabase = createClient()
+            const { data } = await supabase.from('sectors').select('*').order('name')
+            if (data) setSectors(data)
+        }
+        fetchSectors()
     }, [user, initialData, selectedIssuerId])
 
     // Generate Invoice Number when Issuer Changes
@@ -160,7 +172,8 @@ export function InvoiceForm({
                 due_date: null,
                 paid_date: null,
                 template_id: selectedTemplate?.id || null,
-                config: selectedTemplate?.config || null
+                config: selectedTemplate?.config || null,
+                sector_id: selectedSectorId || null
             }
 
             const itemsPayload = items.map(item => ({
@@ -285,6 +298,28 @@ export function InvoiceForm({
                                 <p className="text-gray-400">{selectedContact.tax_address || 'Sin dirección fiscal'}</p>
                             </div>
                         )}
+                    </div>
+
+                    {/* Sector Selector */}
+                    <div className="mt-4">
+                        <h3 className="text-lime-400 text-xs font-bold uppercase tracking-wider mb-2">Servicio / Sector</h3>
+                        <div className="relative">
+                            <select
+                                value={selectedSectorId}
+                                onChange={e => setSelectedSectorId(e.target.value)}
+                                className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-white outline-none focus:border-lime-400 appearance-none [&>option]:bg-zinc-900"
+                            >
+                                <option value="">Sin Clasificar...</option>
+                                {sectors.map(sector => (
+                                    <option key={sector.id} value={sector.id}>
+                                        {sector.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="absolute right-3 top-2.5 pointer-events-none text-gray-400">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>

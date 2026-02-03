@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import OpenAI from 'openai';
+import { AiMemoryService } from '@/shared/services/ai-memory.service';
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -133,15 +134,14 @@ export async function POST(request: NextRequest) {
             {
                 type: 'function',
                 function: {
-                    name: 'learn_from_user',
-                    description: 'Guardar nuevos datos o preferencias en memoria a largo plazo.',
+                    name: 'search_universal_memory',
+                    description: 'Buscar en la memoria a largo plazo (emails pasados, reuniones, acuerdos y aprendizajes).',
                     parameters: {
                         type: 'object',
                         properties: {
-                            fact: { type: 'string' },
-                            category: { type: 'string' }
+                            query: { type: 'string', description: 'Lo que quieres recordar u buscar.' }
                         },
-                        required: ['fact']
+                        required: ['query']
                     },
                 },
             },
@@ -176,7 +176,15 @@ export async function POST(request: NextRequest) {
         - Sé proactiva: Si ves algo relevante en los datos (gastos altos, tareas atrasadas, un lead caliente), menciónalo.
         - Usa Markdown para respuestas escaneables.
         - Si algo no lo sabes o no tienes la herramienta, dilo con honestidad.
-        - Timezone: ${timezone || 'UTC'}. User ID: ${user.id}.`;
+        - Timezone: ${timezone || 'UTC'}. User ID: ${user.id}.
+
+        PRINCIPIOS DE PRIORIZACIÓN (Copiloto "Qué hacer ahora"):
+        1. SUPERVIVENCIA: Facturas overdue (vencidas) son TOP 1. Necesitamos el cash.
+        2. CRECIMIENTO: Leads calientes (nuevos) o ventas por cerrar.
+        3. OPERACIONES: Tareas urgentes o proyectos con deadline inminente.
+        4. ESTRATEGIA: Revisión de KPIs o optimización de procesos.
+
+        Cuando el usuario pregunta "¿Qué hago ahora?" o similar, realiza una auditoría relámpago usando tus herramientas y da un TOP 3 de acciones inmediatas justificadas por datos.`;
 
         // Primera llamada (para detectar tool_calls)
         const response = await openai.chat.completions.create({
@@ -273,61 +281,54 @@ export async function POST(request: NextRequest) {
                 } else {
                     toolResult = JSON.stringify(searchResults);
                 }
+            } else if (functionName === 'search_universal_memory') {
+                const results = await AiMemoryService.searchMemory(functionArgs.query);
+                toolResult = JSON.stringify(results);
             } else if (functionName === 'search_meetings') {
                 const q = functionArgs.query || '';
-                // Changed: Added transcription to the selection list
-                let query = supabase.from('meetings').select('title, date, summary, transcription, key_points, conclusions, contacts(company_name)');
-
-                if (functionArgs.contact_name) {
-                    // First find contact IDs matching name
-                    const { data: contacts } = await supabase.from('contacts').select('id').ilike('company_name', `%${functionArgs.contact_name}%`);
-                    if (contacts && contacts.length > 0) {
-                        const ids = contacts.map((c: any) => c.id);
-                        query = query.in('contact_id', ids);
-                    }
-                }
-
+                // Usamos búsqueda semántica para reuniones también si hay query
                 if (q) {
-                    // Use plain text search on text fields
-                    query = query.or(`title.ilike.%${q}%,summary.ilike.%${q}%,transcription.ilike.%${q}%`);
+                    const results = await AiMemoryService.searchMemory(q, 3, 0.4);
+                    // Filtrar solo reuniones
+                    const meetingsOnly = results.filter((r: any) => r.entity_type === 'meeting');
+                    if (meetingsOnly.length > 0) {
+                        toolResult = JSON.stringify(meetingsOnly);
+                    } else {
+                        // Fallback a búsqueda tradicional si no hay resultados semánticos claros
+                        let query = supabase.from('meetings').select('title, date, summary, transcription, key_points, conclusions, contacts(company_name)');
+                        if (functionArgs.contact_name) {
+                            const { data: contacts } = await supabase.from('contacts').select('id').ilike('company_name', `%${functionArgs.contact_name}%`);
+                            if (contacts && contacts.length > 0) {
+                                const ids = contacts.map((c: any) => c.id);
+                                query = query.in('contact_id', ids);
+                            }
+                        }
+                        query = query.or(`title.ilike.%${q}%,summary.ilike.%${q}%,transcription.ilike.%${q}%`);
+                        const { data } = await query.order('date', { ascending: false }).limit(3);
+                        toolResult = JSON.stringify(data);
+                    }
+                } else {
+                    let query = supabase.from('meetings').select('title, date, summary, transcription, key_points, conclusions, contacts(company_name)');
+                    if (functionArgs.contact_name) {
+                        const { data: contacts } = await supabase.from('contacts').select('id').ilike('company_name', `%${functionArgs.contact_name}%`);
+                        if (contacts && contacts.length > 0) {
+                            const ids = contacts.map((c: any) => c.id);
+                            query = query.in('contact_id', ids);
+                        }
+                    }
+                    const { data } = await query.order('date', { ascending: false }).limit(3);
+                    toolResult = JSON.stringify(data);
                 }
-                const { data } = await query.order('date', { ascending: false }).limit(3); // Helper to limit context size since transcription is heavy
-                toolResult = JSON.stringify(data);
             } else if (functionName === 'learn_from_user') {
                 const { fact, category = 'user_learning' } = functionArgs;
 
                 try {
-                    // 1. Create a document for this fact
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const { data: doc, error: docError } = await (supabase.from('ai_knowledge_documents') as any)
-                        .insert({
-                            title: `Aprendizaje: ${fact.substring(0, 30)}...`,
-                            source_url: 'user_chat',
-                            category: category
-                        })
-                        .select()
-                        .single();
-
-                    if (docError) throw docError;
-
-                    // 2. Generate embedding
-                    const embeddingResponse = await openai.embeddings.create({
-                        model: 'text-embedding-3-small',
-                        input: fact,
+                    await AiMemoryService.storeMemory({
+                        content: fact,
+                        entity_type: 'user_learning',
+                        entity_id: user.id, // Referencia al usuario
+                        metadata: { category }
                     });
-                    const embedding = embeddingResponse.data[0].embedding;
-
-                    // 3. Store chunk
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    const { error: chunkError } = await (supabase.from('ai_knowledge_chunks') as any)
-                        .insert({
-                            document_id: doc.id,
-                            content: fact,
-                            embedding: embedding,
-                            metadata: { source: 'user_interaction', date: new Date().toISOString() }
-                        });
-
-                    if (chunkError) throw chunkError;
 
                     toolResult = JSON.stringify({ success: true, message: 'Información aprendida y guardada correctamente.' });
                 } catch (error: any) {

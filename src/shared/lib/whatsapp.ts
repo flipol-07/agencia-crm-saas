@@ -43,4 +43,14 @@ export class WhatsAppService {
 
         return this.sendMessage(message)
     }
+
+    static async notifyTaskUrgent(taskTitle: string, dueDate: string, taskId: string) {
+        const message = `⏰ *Tarea Urgente Pendiente*\n\n*Título:* ${taskTitle}\n*Vence:* ${dueDate}\n\n👉 Gestionar tarea: https://agencia-crm-saas.vercel.app/tasks/list?id=${taskId}`
+        return this.sendMessage(message)
+    }
+
+    static async notifyLeadStatusChange(contactName: string, company: string, oldStatus: string, newStatus: string, contactId: string) {
+        const message = `📈 *Cambio en Pipeline*\n\n*Contacto:* ${contactName}\n*Empresa:* ${company}\n*Estado:* ${oldStatus} -> *${newStatus}*\n\n👉 Ver contacto: https://agencia-crm-saas.vercel.app/contacts/${contactId}`
+        return this.sendMessage(message)
+    }
 }

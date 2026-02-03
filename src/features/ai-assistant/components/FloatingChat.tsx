@@ -5,13 +5,23 @@ import { useAiChat } from '../hooks/useAiChat';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
+import { useAuraStore } from '../store/aura-store';
+
 export function FloatingChat() {
-    const [isOpen, setIsOpen] = useState(false);
+    const { isOpen, setIsOpen, messageTrigger, clearTrigger } = useAuraStore();
     const [input, setInput] = useState('');
     const { messages, sendMessage, isLoading } = useAiChat();
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
+    useEffect(() => {
+        if (messageTrigger) {
+            sendMessage(messageTrigger);
+            clearTrigger();
+        }
+    }, [messageTrigger, sendMessage, clearTrigger]);
+
     const scrollToBottom = () => {
+
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 

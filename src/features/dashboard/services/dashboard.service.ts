@@ -15,8 +15,16 @@ export interface ExecutiveKPIs {
     pipelinePotential: number    // Sum of estimated_value for active contacts
     pendingInvoices: number      // Total pending invoices (sent + overdue)
     activeProjects: number       // Count of active projects
+    trends?: {
+        income: number           // Percentage change vs previous period
+        expenses: number
+        netProfit: number
+        pipeline: number
+        projects: number
+    }
 }
 
+// ... (Rest of interfaces remain the same)
 export interface MonthlyTrendData {
     month: string                // e.g., "Ene", "Feb"
     income: number
@@ -61,27 +69,43 @@ function getRangeFromPeriod(period: DashboardPeriod) {
     let start: Date | null = null
     const end = now
 
+    // Previous period logic
+    let prevStart: Date | null = null
+    let prevEnd: Date | null = null
+
     switch (period) {
         case '30d':
             start = subMonths(now, 1)
+            prevStart = subMonths(now, 2)
+            prevEnd = subMonths(now, 1)
             break
         case '90d':
             start = subMonths(now, 3)
+            prevStart = subMonths(now, 6)
+            prevEnd = subMonths(now, 3)
             break
         case '6m':
             start = subMonths(now, 6)
+            prevStart = subMonths(now, 12)
+            prevEnd = subMonths(now, 6)
             break
         case '1y':
             start = subMonths(now, 12)
+            prevStart = subMonths(now, 24)
+            prevEnd = subMonths(now, 12)
             break
         case 'all':
             start = null
+            prevStart = null
+            prevEnd = null
             break
     }
 
     return {
         start: start ? format(start, 'yyyy-MM-dd') : null,
-        end: format(end, 'yyyy-MM-dd')
+        end: format(end, 'yyyy-MM-dd'),
+        prevStart: prevStart ? format(prevStart, 'yyyy-MM-dd') : null,
+        prevEnd: prevEnd ? format(prevEnd, 'yyyy-MM-dd') : null
     }
 }
 
@@ -98,46 +122,129 @@ export async function getExecutiveKPIs(userId: string, period: DashboardPeriod =
 
     // Use admin client to avoid cookies() inside "use cache"
     const supabase = createAdminClient()
-    const { start, end } = getRangeFromPeriod(period)
+    const { start, end, prevStart, prevEnd } = getRangeFromPeriod(period)
 
-    // Parallelize all KPI queries
-    const [incomeResult, expenseResult, activeContacts, activeProjectsData, pendingInvs, activeProjectsCount] = await Promise.all([
-        // 1. Income
+    // Parallelize all KPI queries (Current + Previous Period)
+    const [
+        // CURRENT PERIOD
+        incomeResult,
+        expenseResult,
+        activeContacts,
+        activeProjectsData,
+        pendingInvs,
+        activeProjectsCount,
+        // PREVIOUS PERIOD (for trends)
+        prevIncomeResult,
+        prevExpenseResult,
+        prevActiveContacts, // Needs snapshot or created_at logic (approximation)
+        prevActiveProjectsCount
+    ] = await Promise.all([
+        // 1. Current Income
         (async () => {
             let q = (supabase as any).from('expenses').select('amount').eq('type', 'income')
             if (start) q = q.gte('date', start)
             return q.lte('date', end)
         })(),
-        // 2. Expenses
+        // 2. Current Expenses
         (async () => {
             let q = (supabase as any).from('expenses').select('amount').eq('type', 'expense').eq('is_personal', false)
             if (start) q = q.gte('date', start)
             return q.lte('date', end)
         })(),
-        // 3. Contacts
+        // 3. Current Contacts (Pipeline)
         (supabase as any).from('contacts').select('estimated_value').not('status', 'in', '("won","lost")'),
-        // 4. Projects budget
+        // 4. Current Projects budget
         (supabase as any).from('projects').select('budget').eq('status', 'active'),
-        // 5. Pending invoices
+        // 5. Current Pending invoices
         (supabase as any).from('invoices').select('total').in('status', ['sent', 'overdue']),
-        // 6. Projects count
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active')
+        // 6. Current Projects count
+        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+
+        // --- PREVIOUS PERIOD QUERIES ---
+
+        // 7. Prev Income
+        (async () => {
+            if (!prevStart || !prevEnd) return { data: [] }
+            return (supabase as any).from('expenses')
+                .select('amount')
+                .eq('type', 'income')
+                .gte('date', prevStart)
+                .lte('date', prevEnd)
+        })(),
+        // 8. Prev Expenses
+        (async () => {
+            if (!prevStart || !prevEnd) return { data: [] }
+            return (supabase as any).from('expenses')
+                .select('amount')
+                .eq('type', 'expense')
+                .eq('is_personal', false)
+                .gte('date', prevStart)
+                .lte('date', prevEnd)
+        })(),
+        // 9. Prev Pipeline (Approx: contacts created before prevEnd and updated in that range? Hard to reconstruct pipeline state without snapshots. 
+        // Strategy: Just compare created_at volume or assume steady state for now, simplified to 0 for trend if complex)
+        // Let's try: Contacts created in the previous period.
+        (async () => {
+            if (!prevStart || !prevEnd) return { data: [] }
+            return (supabase as any).from('contacts')
+                .select('estimated_value')
+                .gte('created_at', prevStart)
+                .lte('created_at', prevEnd)
+        })(),
+        // 10. Prev Projects (Approx: projects created in range)
+        (async () => {
+            if (!prevStart || !prevEnd) return { count: 0 }
+            return supabase.from('projects')
+                .select('*', { count: 'exact', head: true })
+                .gte('created_at', prevStart)
+                .lte('created_at', prevEnd)
+        })()
     ])
 
+    // --- Current Values ---
     const incomeThisMonth = (incomeResult.data as { amount: number }[] | null)?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0
     const expensesThisMonth = (expenseResult.data as { amount: number }[] | null)?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0
+    const netProfit = incomeThisMonth - expensesThisMonth
+
     const contactsValue = (activeContacts.data as { estimated_value: number }[] | null)?.reduce((sum, c) => sum + (Number(c.estimated_value) || 0), 0) || 0
     const projectsValue = (activeProjectsData.data as { budget: number }[] | null)?.reduce((sum, p) => sum + (Number(p.budget) || 0), 0) || 0
     const pipelinePotential = contactsValue + projectsValue
+
     const pendingInvoices = (pendingInvs.data as { total: number }[] | null)?.reduce((sum, inv) => sum + (Number(inv.total) || 0), 0) || 0
+    const activeProjects = activeProjectsCount.count || 0
+
+    // --- Previous Values ---
+    const prevIncome = (prevIncomeResult.data as { amount: number }[] | null)?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0
+    const prevExpenses = (prevExpenseResult.data as { amount: number }[] | null)?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0
+    const prevNetProfit = prevIncome - prevExpenses
+
+    // Pipeline Trend approximation (Value of leads created in period vs prev period)
+    // NOTE: True pipeline trend requires snapshots. We'll use "Value of leads created" as a proxy for sales velocity if period != all
+    const prevPipelineCreated = (prevActiveContacts.data as { estimated_value: number }[] | null)?.reduce((sum, c) => sum + (Number(c.estimated_value) || 0), 0) || 0
+    // We need current leads created too for fair comparison
+    // But we fetched ALL active contacts for "Current Pipeline". 
+    // Optimization: Let's calculate trends strictly for Income/Expense/Profit which are time-series based. 
+    // For Pipeline/Projects, we will return 0 trend if we can't accurately calculate it without snapshots.
+
+    const calculateTrend = (current: number, previous: number) => {
+        if (previous === 0) return current > 0 ? 100 : 0
+        return Math.round(((current - previous) / previous) * 100)
+    }
 
     return {
         incomeThisMonth,
         expensesThisMonth,
-        netProfit: incomeThisMonth - expensesThisMonth,
+        netProfit,
         pipelinePotential,
         pendingInvoices,
-        activeProjects: activeProjectsCount.count || 0
+        activeProjects,
+        trends: {
+            income: calculateTrend(incomeThisMonth, prevIncome),
+            expenses: calculateTrend(expensesThisMonth, prevExpenses),
+            netProfit: calculateTrend(netProfit, prevNetProfit),
+            pipeline: 0, // Not accurate to calculate without snapshots
+            projects: 0  // Not accurate to calculate active count history without snapshots
+        }
     }
 }
 
@@ -356,4 +463,54 @@ export async function getPriorityTasks(userId: string) {
     })
 
     return sortedTasks.slice(0, 5)
+}
+
+/**
+ * Get AI-powered recommendations based on user role and stats
+ */
+import { generateRecommendations, Recommendation } from '../lib/recommendation-engine'
+import { aiRecommendationsService } from './ai-recommendations.service'
+
+export async function getDashboardRecommendations(userId: string): Promise<Recommendation[]> {
+    'use cache'
+    cacheLife('minutes')
+
+    const supabase = createAdminClient()
+
+    // 1. Get Role
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('professional_role')
+        .eq('id', userId)
+        .single() as { data: { professional_role: string } | null }
+
+    // 2. Get KPIs (reuse existing function logic or call it if not for cache issues - better to fetch necessary data in parallel here for speed)
+    // We reuse getExecutiveKPIs but since we are inside a cached function, calling another cached function is fine in Next 16 (deduped).
+    const kpis = await getExecutiveKPIs(userId, '30d')
+
+    // 3. Get Context Data
+    const [recentLeads, highPrioTasks] = await Promise.all([
+        supabase.from('contacts').select('id', { count: 'exact', head: true }).gt('created_at', format(subMonths(new Date(), 1), 'yyyy-MM-dd')),
+        supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('is_completed', false).in('priority', ['high', 'urgent'])
+    ])
+
+    const context = {
+        role: profile?.professional_role || null,
+        kpis,
+        recentLeadsCount: recentLeads.count || 0,
+        highPriorityTasksCount: highPrioTasks.count || 0
+    }
+
+    // 4. Try AI Recommendations first
+    try {
+        const aiRecommendations = await aiRecommendationsService.generateRecommendations(context)
+        if (aiRecommendations.length > 0) {
+            return aiRecommendations
+        }
+    } catch (error) {
+        console.error('Failed to get AI recommendations, falling back to rules', error)
+    }
+
+    // 5. Fallback to Rule-based engine
+    return generateRecommendations(context)
 }

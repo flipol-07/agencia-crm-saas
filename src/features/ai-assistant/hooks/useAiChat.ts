@@ -66,9 +66,15 @@ export function useAiChat() {
         }
     };
 
+    const triggerMessage = (content: string) => {
+        sendMessage(content);
+    };
+
     return {
         messages,
         sendMessage,
+        triggerMessage,
         isLoading,
     };
 }
+

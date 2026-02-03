@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ExpenseInsert, ExpenseWithRelations, Sector, ExpenseCategory } from '../types'
+import { classifyExpenseAction } from '../actions/expenseActions'
 
 interface ExpenseFormProps {
     expense?: ExpenseWithRelations | null
@@ -33,7 +34,9 @@ export function ExpenseForm({
         tax_rate: 21
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const [isAnalyzing, setIsAnalyzing] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [aiReason, setAiReason] = useState<string | null>(null)
 
     useEffect(() => {
         if (expense) {
@@ -80,6 +83,44 @@ export function ExpenseForm({
             setError(err instanceof Error ? err.message : 'Error al guardar')
         } finally {
             setIsSubmitting(false)
+        }
+    }
+
+    const handleAIClassify = async () => {
+        if (!formData.description) {
+            setError('Escribe una descripción primero para que la IA pueda analizarla')
+            return
+        }
+
+        setIsAnalyzing(true)
+        setError(null)
+        setAiReason(null)
+
+        try {
+            const results = await classifyExpenseAction({
+                description: formData.description,
+                sectors,
+                categories,
+                type: formData.type
+            })
+
+            console.log('[AI Classification]', results)
+
+            if (results) {
+                setFormData(prev => ({
+                    ...prev,
+                    sector_id: results.sector_id || prev.sector_id,
+                    category_id: results.category_id || prev.category_id,
+                    tax_rate: results.tax_rate ?? prev.tax_rate,
+                    tax_deductible: results.tax_deductible ?? prev.tax_deductible
+                }))
+                setAiReason(results.reason)
+            }
+        } catch (err) {
+            console.error('AI Classification failed:', err)
+            setError('La IA no pudo clasificar la transacción. Inténtalo manualmente.')
+        } finally {
+            setIsAnalyzing(false)
         }
     }
 
@@ -153,9 +194,36 @@ export function ExpenseForm({
 
                     {/* Description */}
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Descripción
-                        </label>
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="block text-sm font-medium text-gray-300">
+                                Descripción
+                            </label>
+                            {formData.description && (
+                                <button
+                                    type="button"
+                                    onClick={handleAIClassify}
+                                    disabled={isAnalyzing}
+                                    className="flex items-center gap-1.5 px-2 py-1 rounded bg-lime-400/10 border border-lime-400/20 text-lime-400 text-xs font-semibold hover:bg-lime-400/20 transition-all disabled:opacity-50"
+                                >
+                                    {isAnalyzing ? (
+                                        <>
+                                            <svg className="animate-spin h-3 w-3" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                                            </svg>
+                                            Analizando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                            Clasificación Mágica
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </div>
                         <input
                             type="text"
                             value={formData.description}
@@ -163,6 +231,14 @@ export function ExpenseForm({
                             placeholder="ej: API OpenAI enero"
                             className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-lime-400"
                         />
+                        {aiReason && (
+                            <p className="mt-2 text-xs text-lime-400/80 flex items-start gap-1.5">
+                                <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                AI sugerencia: {aiReason}
+                            </p>
+                        )}
                     </div>
 
                     {/* Date */}

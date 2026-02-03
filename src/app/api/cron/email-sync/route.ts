@@ -17,7 +17,7 @@ export async function GET(req: Request) {
         console.log('[Sync] Iniciando sincronización global de emails via IMAP...')
 
         // 1. Fetch recent emails
-        const emails = await EmailService.fetchGlobalUnread(20)
+        const emails = await EmailService.fetchGlobalRecent(20)
 
         if (emails.length === 0) {
             return NextResponse.json({ success: true, count: 0, message: 'No se encontraron correos nuevos' })

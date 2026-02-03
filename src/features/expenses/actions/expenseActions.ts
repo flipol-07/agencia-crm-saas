@@ -5,8 +5,20 @@ import {
     Expense,
     ExpenseInsert,
     ExpenseUpdate,
-    ExpenseWithRelations
+    ExpenseWithRelations,
+    Sector,
+    ExpenseCategory
 } from '../types'
+import { classifyExpenseAI } from '../services/expense-ai.service'
+
+export async function classifyExpenseAction(params: {
+    description: string
+    sectors: Sector[]
+    categories: ExpenseCategory[]
+    type: 'expense' | 'income'
+}) {
+    return await classifyExpenseAI(params)
+}
 
 export async function getExpenseByIdAction(id: string): Promise<ExpenseWithRelations | null> {
     const supabase = await createClient()

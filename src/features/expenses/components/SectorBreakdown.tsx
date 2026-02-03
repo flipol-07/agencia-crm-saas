@@ -34,7 +34,7 @@ export function SectorBreakdown({ data, isLoading }: SectorBreakdownProps) {
     if (data.length === 0) {
         return (
             <div className="glass rounded-xl p-6">
-                <h3 className="text-lg font-semibold text-white mb-4">Por Sector</h3>
+                <h3 className="text-lg font-semibold text-white mb-4">Rentabilidad por Servicio</h3>
                 <p className="text-gray-400 text-sm">
                     No hay transacciones de empresa para mostrar
                 </p>
@@ -54,7 +54,7 @@ export function SectorBreakdown({ data, isLoading }: SectorBreakdownProps) {
 
     return (
         <div className="glass rounded-xl p-6">
-            <h3 className="text-lg font-semibold text-white mb-6">Por Sector</h3>
+            <h3 className="text-lg font-semibold text-white mb-6">Rentabilidad por Servicio</h3>
 
             <div className="space-y-5">
                 {data.map((sector) => {

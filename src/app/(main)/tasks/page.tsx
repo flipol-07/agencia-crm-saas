@@ -9,8 +9,10 @@ import {
     TaskModal,
     CreateTaskModal,
     TaskCard,
-    KanbanBoard
+    KanbanBoard,
+    IntelligentTaskWidget
 } from '@/features/tasks/components'
+
 import { useAuth } from '@/hooks/useAuth'
 import { TASK_PRIORITIES, TASK_STATUSES } from '@/types/database'
 import type { TaskWithDetails, TaskStatus, TaskPriority } from '@/types/database'
@@ -78,7 +80,7 @@ function TasksListView({
 
 // ============ MAIN PAGE ============
 export default function TasksPage() {
-    const { user } = useAuth()
+    const { user, profile } = useAuth()
     const { tasks, loading, updateTaskStatus, assignUser, unassignUser, updateTaskDetails, createQuickTask, deleteTask, refetch } = useTasksWithDetails()
     const { members } = useTeamMembers()
 
@@ -206,7 +208,13 @@ export default function TasksPage() {
     return (
         <div className="space-y-6">
             {/* Header */}
+            <IntelligentTaskWidget
+                tasks={tasks}
+                userProfile={profile}
+                onOpenTask={setSelectedTask}
+            />
             <div className="flex items-center justify-between flex-wrap gap-4">
+
                 <div>
                     <h1 className="text-3xl font-black uppercase tracking-tight text-white">Gestión de Tareas</h1>
                     <p className="text-gray-400 mt-1">

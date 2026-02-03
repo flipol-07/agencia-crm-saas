@@ -7,6 +7,19 @@ import { toast } from 'sonner'
 import { useRouter, usePathname } from 'next/navigation'
 import { sendChatNotification } from '@/features/team-chat/actions/send-chat-notification'
 
+const WEBPUSH_PUBLIC_KEY = 'BCH53wV_AUnSB_XZBXTA6iGDr4oil_deUAtu6YP8_SEibQ9-0SGB_wyjyGsXQsupOBdnnFW3q9GW93xZwJL_Crg'
+
+function urlBase64ToUint8Array(base64String: string) {
+    const padding = '='.repeat((4 - (base64String.length % 4)) % 4)
+    const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/')
+    const rawData = window.atob(base64)
+    const outputArray = new Uint8Array(rawData.length)
+    for (let i = 0; i < rawData.length; ++i) {
+        outputArray[i] = rawData.charCodeAt(i)
+    }
+    return outputArray
+}
+
 export function RealtimeNotifications() {
     // Memoize client to avoid recreation on every render
     const supabase = useMemo(() => createClient(), [])
@@ -15,10 +28,40 @@ export function RealtimeNotifications() {
     const pathname = usePathname()
 
     useEffect(() => {
-        // Request notification permission for PWA/Mobile
-        if ('Notification' in window && Notification.permission === 'default') {
-            Notification.requestPermission()
+        // 0. Push Notification Setup
+        const setupPushNotifications = async () => {
+            if (!('serviceWorker' in navigator) || !('PushManager' in window)) return
+
+            try {
+                const registration = await navigator.serviceWorker.ready
+
+                // Request permission
+                const permission = await Notification.requestPermission()
+                if (permission !== 'granted') return
+
+                // Check for existing subscription
+                let subscription = await registration.pushManager.getSubscription()
+
+                if (!subscription) {
+                    // Create new subscription
+                    subscription = await registration.pushManager.subscribe({
+                        userVisibleOnly: true,
+                        applicationServerKey: urlBase64ToUint8Array(WEBPUSH_PUBLIC_KEY)
+                    })
+                }
+
+                // Send to backend
+                await fetch('/api/push/subscribe', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ subscription })
+                })
+            } catch (error) {
+                console.error('Error setting up push notifications:', error)
+            }
         }
+
+        setupPushNotifications()
 
         // 1. Fetch initial counts (Per User via RPC)
         const fetchInitialCounts = async () => {
@@ -183,6 +226,66 @@ export function RealtimeNotifications() {
 
                         // Always trigger WhatsApp notification (backend handles if needed)
                         sendChatNotification(newMsg.sender_id, body, newMsg.chat_id)
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'INSERT',
+                    schema: 'public',
+                    table: 'tasks'
+                },
+                async (payload: any) => {
+                    const newTask = payload.new as any
+                    const { data: { user } } = await supabase.auth.getUser()
+
+                    // Only notify if assigned to current user
+                    if (user && newTask.assigned_to === user.id) {
+                        const title = 'Nueva tarea asignada'
+                        const body = newTask.title || 'Sin título'
+
+                        toast.info(title, {
+                            description: body,
+                            action: {
+                                label: 'Ver',
+                                onClick: () => router.push(`/tasks/list?id=${newTask.id}`)
+                            }
+                        })
+
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification(title, { body, icon: '/aurie-official-logo.png' })
+                        }
+                    }
+                }
+            )
+            .on(
+                'postgres_changes',
+                {
+                    event: 'UPDATE',
+                    schema: 'public',
+                    table: 'contacts'
+                },
+                async (payload: any) => {
+                    const oldContact = payload.old as any
+                    const newContact = payload.new as any
+
+                    // Notify on lead status (pipeline phase) changes
+                    if (newContact.pipeline_phase !== oldContact.pipeline_phase) {
+                        const title = 'Cambio en Pipeline'
+                        const body = `${newContact.company_name}: ${oldContact.pipeline_phase || 'Lead'} -> ${newContact.pipeline_phase}`
+
+                        toast.success(title, {
+                            description: body,
+                            action: {
+                                label: 'Ver',
+                                onClick: () => router.push(`/contacts/${newContact.id}`)
+                            }
+                        })
+
+                        if ('Notification' in window && Notification.permission === 'granted') {
+                            new Notification(title, { body, icon: '/aurie-official-logo.png' })
+                        }
                     }
                 }
             )

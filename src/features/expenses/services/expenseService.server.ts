@@ -126,9 +126,10 @@ export async function getExpenseStatsCached(
 export async function getExpensesBySectorCached(): Promise<
     { sector_id: string; sector_name: string; sector_color: string; expenses: number; income: number }[]
 > {
-    cacheLife('hours')
     const supabase = createAdminClient()
-    const { data, error } = await (supabase.from('expenses') as any)
+
+    // Fetch individual expenses/income from expenses table
+    const { data: expensesData, error: expensesError } = await (supabase.from('expenses') as any)
         .select(`
             type,
             amount,
@@ -138,15 +139,28 @@ export async function getExpensesBySectorCached(): Promise<
         .eq('is_personal', false)
         .not('sector_id', 'is', null)
 
-    if (error) {
-        console.error('[Expense Service] Error fetching expenses by sector:', error)
+    if (expensesError) {
+        console.error('[Expense Service] Error fetching expenses by sector:', expensesError)
         return []
     }
 
-    const expenses = (data || []) as any[]
+    // Fetch invoices with sector_id
+    const { data: invoicesData, error: invoicesError } = await (supabase.from('invoices') as any)
+        .select(`
+            total,
+            sector_id,
+            sectors (name, color)
+        `)
+        .not('sector_id', 'is', null)
+
+    if (invoicesError) {
+        console.error('[Expense Service] Error fetching invoices by sector:', invoicesError)
+    }
+
     const bySector: Record<string, any> = {}
 
-    for (const exp of expenses) {
+    // Process expenses table entries
+    for (const exp of (expensesData || [])) {
         const sectorId = exp.sector_id
         const sector = exp.sectors
 
@@ -166,8 +180,76 @@ export async function getExpensesBySectorCached(): Promise<
         }
     }
 
+    // Process invoices table entries (all are income)
+    for (const inv of (invoicesData || [])) {
+        const sectorId = inv.sector_id
+        const sector = inv.sectors
+
+        if (!bySector[sectorId]) {
+            bySector[sectorId] = {
+                sector_name: sector?.name || 'Sin sector',
+                sector_color: sector?.color || '#888',
+                expenses: 0,
+                income: 0
+            }
+        }
+
+        bySector[sectorId].income += Number(inv.total)
+    }
+
     return Object.entries(bySector).map(([sector_id, sectorData]: [string, any]) => ({
         sector_id,
         ...sectorData
     }))
+}
+
+export async function getTaxForecastCached(): Promise<{
+    iva_repercutido: number
+    iva_soportado: number
+    iva_resultado: number
+    quarter: number
+    year: number
+}> {
+    const supabase = createAdminClient()
+    const now = new Date()
+    const month = now.getMonth()
+    const year = now.getFullYear()
+    const quarter = Math.floor(month / 3) + 1
+
+    // Quarter dates
+    const qStartMonth = (quarter - 1) * 3
+    const startDate = new Date(year, qStartMonth, 1).toISOString().split('T')[0]
+    const endDate = new Date(year, qStartMonth + 3, 0).toISOString().split('T')[0]
+
+    // Fetch Invoices Tax (IVA Repercutido)
+    const { data: invoices, error: invError } = await (supabase.from('invoices') as any)
+        .select('tax_amount')
+        .gte('issue_date', startDate)
+        .lte('issue_date', endDate)
+        .eq('status', 'paid') // Only paid? Or all issued? Usually all issued for IVA. Let's include all except draft/cancelled.
+        .not('status', 'in', '("draft","cancelled")')
+
+    // Fetch Expenses Tax (IVA Soportado)
+    const { data: expenses, error: expError } = await (supabase.from('expenses') as any)
+        .select('tax_amount')
+        .eq('tax_deductible', true)
+        .eq('is_personal', false)
+        .gte('date', startDate)
+        .lte('date', endDate)
+
+    if (invError || expError) {
+        console.error('[Tax Forecast] Error:', invError || expError)
+        return { iva_repercutido: 0, iva_soportado: 0, iva_resultado: 0, quarter, year }
+    }
+
+    const iva_repercutido = (invoices || []).reduce((acc: number, inv: any) => acc + Number(inv.tax_amount || 0), 0)
+    const iva_soportado = (expenses || []).reduce((acc: number, exp: any) => acc + Number(exp.tax_amount || 0), 0)
+
+    return {
+        iva_repercutido,
+        iva_soportado,
+        iva_resultado: iva_repercutido - iva_soportado,
+        quarter,
+        year
+    }
 }

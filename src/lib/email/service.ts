@@ -132,8 +132,8 @@ export class EmailService {
         }
     }
 
-    // === GLOBAL SYNC (CRON) ===
-    static async fetchGlobalUnread(limit: number = 20): Promise<EmailMessage[]> {
+    // === GLOBAL SYNC (CRON / MANUAL) ===
+    static async fetchGlobalRecent(limit: number = 30): Promise<EmailMessage[]> {
         if (!EMAIL_CONFIG.user || !EMAIL_CONFIG.password) {
             console.warn('Credenciales de email no configuradas. Saltando sync.')
             return []
@@ -144,55 +144,75 @@ export class EmailService {
         })
 
         try {
-            await connection.openBox('INBOX')
+            const foldersToScan = ['INBOX', 'INBOX.Sent', 'Sent', 'Sent Messages']
+            const allParsedEmails: EmailMessage[] = []
 
-            // Fetch recent messages (not necessarily unseen, we'll handle duplicates in DB)
-            const searchCriteria = ['ALL']
-            const fetchOptions = {
-                bodies: ['HEADER', 'TEXT', ''],
-                markSeen: false,
-                struct: true
-            }
+            for (const folder of foldersToScan) {
+                try {
+                    await connection.openBox(folder)
 
-            const messages = await connection.search(searchCriteria, fetchOptions)
-            const recentMessages = messages.slice(-limit)
-
-            const parsedEmails: EmailMessage[] = []
-
-            for (const item of recentMessages) {
-                const all = item.parts.find((part: any) => part.which === '')
-                const id = item.attributes.uid
-
-                if (all && all.body) {
-                    const parsed = await simpleParser(all.body)
-
-                    const fromAddr = parsed.from?.value[0]?.address || ''
-
-                    let toAddr = ''
-                    if (Array.isArray(parsed.to)) {
-                        toAddr = parsed.to[0]?.text || ''
-                    } else if (parsed.to && 'text' in parsed.to) {
-                        toAddr = (parsed.to as any).text || ''
+                    // Fetch recent messages
+                    // We use 1:* to get all messages, but since we only want recent ones,
+                    // in a real large mailbox we should rely on SEARCH with SINCE date or similar.
+                    // For simplicity and "recent" logic, we'll take the las 'limit' messages.
+                    const searchCriteria = ['ALL']
+                    const fetchOptions = {
+                        bodies: ['HEADER', 'TEXT', ''],
+                        markSeen: false,
+                        struct: true
                     }
 
-                    parsedEmails.push({
-                        messageId: parsed.messageId || `imap-${id}-${parsed.date?.getTime()}`,
-                        subject: parsed.subject || '(Sin asunto)',
-                        from: fromAddr,
-                        to: toAddr,
-                        date: parsed.date || new Date(),
-                        text: parsed.text || '',
-                        html: parsed.html || '',
-                        snippet: (parsed.text || '').substring(0, 150),
-                        direction: 'inbound' // In global sync, we assume everything in INBOX is inbound
-                    })
+                    const messages = await connection.search(searchCriteria, fetchOptions)
+                    const recentMessages = messages.slice(-limit)
+
+                    for (const item of recentMessages) {
+                        const all = item.parts.find((part: any) => part.which === '')
+                        const id = item.attributes.uid
+
+                        if (all && all.body) {
+                            const parsed = await simpleParser(all.body)
+
+                            const fromAddr = parsed.from?.value[0]?.address || ''
+
+                            // Determine direction based on our user email
+                            // If the sender is us, it's outbound. Otherwise inbound.
+                            const direction = fromAddr.toLowerCase().includes(EMAIL_CONFIG.user.toLowerCase()) ? 'outbound' : 'inbound'
+
+                            let toAddr = ''
+                            if (Array.isArray(parsed.to)) {
+                                toAddr = parsed.to[0]?.text || ''
+                            } else if (parsed.to && 'text' in (parsed.to as any)) {
+                                toAddr = (parsed.to as any).text || ''
+                            }
+
+                            allParsedEmails.push({
+                                messageId: parsed.messageId || `imap-${folder}-${id}`,
+                                subject: parsed.subject || '(Sin asunto)',
+                                from: fromAddr,
+                                to: toAddr,
+                                date: parsed.date || new Date(),
+                                text: parsed.text || '',
+                                html: parsed.html || '',
+                                snippet: (parsed.text || '').substring(0, 150),
+                                direction
+                            })
+                        }
+                    }
+                } catch (folderError: any) {
+                    console.warn(`Folder ${folder} not found or inaccessible during global sync:`, folderError.message)
                 }
             }
 
-            return parsedEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
+            // Deduplicate by messageId
+            const uniqueEmails = Array.from(
+                new Map(allParsedEmails.map(item => [item.messageId, item])).values()
+            )
+
+            // Sort by date desc
+            return uniqueEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
 
         } catch (error) {
-            console.error('Error in fetchGlobalUnread:', error)
+            console.error('Error in fetchGlobalRecent:', error)
             return []
         } finally {
             connection.end()

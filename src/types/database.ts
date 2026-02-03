@@ -66,6 +66,10 @@ export interface Contact {
     ai_description: string | null
     services: string[] | null
     last_interaction: string | null
+    probability_close: number | null
+    inactivity_status: 'active' | 'warning' | 'inactive' | null
+    ai_suggestions: any[] | null // JSONB
+    last_analyzed_at: string | null
 }
 
 export type ContactInsert = Omit<Contact, 'id' | 'created_at' | 'updated_at'>

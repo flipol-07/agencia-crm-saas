@@ -42,6 +42,22 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
     const [saving, setSaving] = useState(false)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
 
+    const [isAnalyzingOpportunity, setIsAnalyzingOpportunity] = useState(false)
+
+    const handleAnalyzeOpportunity = async () => {
+        setIsAnalyzingOpportunity(true)
+        try {
+            const res = await fetch(`/api/contacts/${contact.id}/analyze`, { method: 'POST' })
+            if (!res.ok) throw new Error('Analysis failed')
+            router.refresh()
+        } catch (error) {
+            console.error('Error:', error)
+            alert('Error al analizar la oportunidad')
+        } finally {
+            setIsAnalyzingOpportunity(false)
+        }
+    }
+
     const handleAnalyze = async () => {
         if (!contact.website) return
 
@@ -118,6 +134,85 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* ====== COLUMNA IZQUIERDA: Datos + Pipeline + Notas ====== */}
             <div className="space-y-6">
+
+                {/* 🔮 Oportunidad & Scoring (New) */}
+                <div className="glass rounded-xl p-6 relative overflow-hidden bg-gradient-to-br from-purple-500/5 to-blue-500/5 border border-purple-500/10">
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <span className="text-2xl">🔮</span>
+                            <h2 className="text-lg font-semibold text-white">Oportunidad IA</h2>
+                        </div>
+                        <button
+                            onClick={handleAnalyzeOpportunity}
+                            disabled={isAnalyzingOpportunity}
+                            className="text-xs bg-purple-500 text-white px-3 py-1.5 rounded-lg font-medium hover:bg-purple-600 transition-colors disabled:opacity-50 shadow-lg shadow-purple-500/20"
+                        >
+                            {isAnalyzingOpportunity ? 'Analizando...' : 'Analizar Oportunidad'}
+                        </button>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-4 mb-4">
+                        {/* Score Gauge */}
+                        <div className="col-span-1 bg-black/20 rounded-lg p-3 text-center border border-white/5 flex flex-col justify-center items-center">
+                            <span className="text-xs text-gray-400 mb-1">Probabilidad</span>
+                            {contact.probability_close !== null ? (
+                                <div className="relative">
+                                    <span className={`text-3xl font-bold ${contact.probability_close >= 70 ? 'text-lime-400' :
+                                            contact.probability_close >= 40 ? 'text-blue-400' :
+                                                'text-gray-400'
+                                        }`}>
+                                        {contact.probability_close}%
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="text-xl text-gray-600">--</span>
+                            )}
+                        </div>
+
+                        {/* Inactivity Status */}
+                        <div className="col-span-2 bg-black/20 rounded-lg p-3 border border-white/5">
+                            <span className="text-xs text-gray-400 block mb-2">Estado de Actividad</span>
+                            {contact.inactivity_status ? (
+                                <div className="flex items-center gap-2">
+                                    <span className={`w-3 h-3 rounded-full ${contact.inactivity_status === 'active' ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' :
+                                            contact.inactivity_status === 'warning' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' :
+                                                'bg-red-500 shadow-[0_0_8px_#ef4444]'
+                                        }`} />
+                                    <span className="text-white capitalize font-medium">
+                                        {contact.inactivity_status === 'active' ? 'Activo (Reciente)' :
+                                            contact.inactivity_status === 'warning' ? 'Alerta (15+ días)' :
+                                                'Inactivo (30+ días)'}
+                                    </span>
+                                </div>
+                            ) : (
+                                <span className="text-sm text-gray-500">Sin datos de actividad</span>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Suggestions */}
+                    {contact.ai_suggestions && contact.ai_suggestions.length > 0 ? (
+                        <div className="space-y-2">
+                            <span className="text-xs text-purple-300 font-medium uppercase tracking-wider">Sugerencias Estratégicas</span>
+                            <ul className="space-y-2">
+                                {(contact.ai_suggestions as any[]).map((suggestion, idx) => (
+                                    <li key={idx} className="text-sm text-gray-300 flex items-start gap-2 bg-white/5 p-2 rounded border border-white/5">
+                                        <span className="text-purple-400 mt-0.5">⚡</span>
+                                        <span>
+                                            <strong className="text-white block text-xs mb-0.5">{suggestion.action}</strong>
+                                            <span className="text-xs opacity-70">{suggestion.reason}</span>
+                                        </span>
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    ) : (
+                        <p className="text-xs text-gray-500 text-center py-2">
+                            Haz clic en analizar para obtener sugerencias.
+                        </p>
+                    )}
+                </div>
+
                 {/* Datos del cliente */}
                 <div className="glass rounded-xl p-6">
                     <div className="flex items-center justify-between mb-4">

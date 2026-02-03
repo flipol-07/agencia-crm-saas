@@ -1,4 +1,4 @@
-import { StatCard, RecentLeads, PriorityTasks, TrendChart, ExpenseChart, ProjectProgress, PeriodSelector } from '@/features/dashboard/components'
+import { StatCard, RecentLeads, PriorityTasks, TrendChart, ExpenseChart, ProjectProgress, PeriodSelector, RecommendationsWidget } from '@/features/dashboard/components'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
@@ -72,6 +72,12 @@ async function AuthenticatedDashboardContent({ period }: { period: DashboardPeri
         {[1, 2, 3, 4].map(i => <div key={i} className="h-32 animate-pulse bg-white/5 rounded-2xl border border-white/10" />)}
       </div>}>
         <DashboardKPIsSection userId={userId} period={period} />
+      </Suspense>
+
+
+      {/* ZONA 1.5: RECOMENDACIONES IA */}
+      <Suspense fallback={<div className="h-40 animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
+        <RecommendationsWidget userId={userId} />
       </Suspense>
 
       {/* ZONA 2: ANALYTICS */}
@@ -157,6 +163,8 @@ async function DashboardKPIsSection({ userId, period }: { userId: string, period
           value={formatCurrency(kpis.incomeThisMonth)}
           subtitle={`Facturas pagadas ${periodLabel}`}
           color="green"
+          trend={kpis.trends?.income !== undefined ? (kpis.trends.income >= 0 ? 'up' : 'down') : undefined}
+          trendValue={kpis.trends?.income !== undefined ? `${kpis.trends.income > 0 ? '+' : ''}${kpis.trends.income}%` : undefined}
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -169,6 +177,12 @@ async function DashboardKPIsSection({ userId, period }: { userId: string, period
           value={formatCurrency(kpis.expensesThisMonth)}
           subtitle={`Gastos de negocio ${periodLabel}`}
           color="red"
+          trend={kpis.trends?.expenses !== undefined ? (kpis.trends.expenses >= 0 ? 'down' : 'up') : undefined} // Expenses UP is bad (red) - wait, StatCard 'down' is red. 'up' is green. 
+          // Actually, let's keep it simple: Arrow matches direction. Color matches trend. 
+          // If I pass 'up', it gets 'text-brand' (green). If I pass 'down' it gets 'text-red-400'.
+          // For expenses: Increase (+10%) -> I want RED arrow pointing UP? StatCard doesn't support that decoupling easily. 
+          // Let's just show direction. User understands expenses.
+          trendValue={kpis.trends?.expenses !== undefined ? `${kpis.trends.expenses > 0 ? '+' : ''}${kpis.trends.expenses}%` : undefined}
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
@@ -181,8 +195,8 @@ async function DashboardKPIsSection({ userId, period }: { userId: string, period
           value={formatCurrency(kpis.netProfit)}
           subtitle="Ingresos - Gastos"
           color={kpis.netProfit >= 0 ? 'lime' : 'red'}
-          trend={profitTrend}
-          trendValue={kpis.netProfit >= 0 ? 'Positivo' : 'Negativo'}
+          trend={kpis.trends?.netProfit !== undefined ? (kpis.trends.netProfit >= 0 ? 'up' : 'down') : undefined}
+          trendValue={kpis.trends?.netProfit !== undefined ? `${kpis.trends.netProfit > 0 ? '+' : ''}${kpis.trends.netProfit}%` : undefined}
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -196,6 +210,7 @@ async function DashboardKPIsSection({ userId, period }: { userId: string, period
           subtitle={`${kpis.activeProjects} proyectos activos`}
           color="purple"
           tooltip="Suma del valor estimado de todos los contactos activos en el pipeline (no cerrados como ganados o perdidos)."
+          // Pipeline trends are 0 for now, so no trend display
           icon={
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />

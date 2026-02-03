@@ -90,11 +90,34 @@ export function ContactCard({ contact }: ContactCardProps) {
                     )}
                 </div>
 
-                <div className="flex items-center justify-between pt-4 border-t border-white/5">
-                    <span className="text-[10px] uppercase tracking-wider text-zinc-600 bg-zinc-950/30 px-2 py-1 rounded border border-white/5">
-                        {getSourceLabel(contact.source)}
-                    </span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full bg-${stage.color}-500/10 text-${stage.color}-400 border border-${stage.color}-500/20 font-medium`}>
+                <div className="flex items-center justify-between pt-4 border-t border-white/5 gap-2">
+                    <div className="flex items-center gap-2">
+                        <span className="text-[10px] uppercase tracking-wider text-zinc-600 bg-zinc-950/30 px-2 py-1 rounded border border-white/5">
+                            {getSourceLabel(contact.source)}
+                        </span>
+
+                        {/* Inactivity Badge */}
+                        {contact.inactivity_status && contact.inactivity_status !== 'active' && (
+                            <span className={`text-[10px] px-1.5 py-1 rounded border capitalize ${contact.inactivity_status === 'inactive'
+                                    ? 'text-red-400 bg-red-400/5 border-red-400/10'
+                                    : 'text-amber-400 bg-amber-400/5 border-amber-400/10'
+                                }`} title="Inactividad detectada">
+                                {contact.inactivity_status === 'inactive' ? '💤 Inactivo' : '⚠️ Revisar'}
+                            </span>
+                        )}
+
+                        {/* Probability Score */}
+                        {typeof contact.probability_close === 'number' && (
+                            <span className={`text-[10px] font-bold px-1.5 py-1 rounded border ${contact.probability_close >= 70 ? 'text-lime-400 bg-lime-400/5 border-lime-400/10' :
+                                    contact.probability_close >= 30 ? 'text-blue-400 bg-blue-400/5 border-blue-400/10' :
+                                        'text-zinc-500 bg-zinc-500/5 border-zinc-500/10'
+                                }`} title="Probabilidad de cierre IA">
+                                {contact.probability_close}%
+                            </span>
+                        )}
+                    </div>
+
+                    <span className={`text-xs px-2.5 py-1 rounded-full bg-${stage.color}-500/10 text-${stage.color}-400 border border-${stage.color}-500/20 font-medium whitespace-nowrap`}>
                         {stage.label}
                     </span>
                 </div>
