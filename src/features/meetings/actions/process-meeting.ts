@@ -6,13 +6,6 @@ import { revalidatePath } from 'next/cache'
 import fs from 'fs'
 import path from 'path'
 import os from 'os'
-import ffmpeg from 'fluent-ffmpeg'
-import ffmpegStatic from 'ffmpeg-static'
-
-if (ffmpegStatic) {
-    ffmpeg.setFfmpegPath(ffmpegStatic)
-}
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
 /**
@@ -108,18 +101,26 @@ export async function processMeeting(formData: FormData) {
                 if (!isAudio) {
                     console.log('2. Extrayendo audio con FFmpeg...')
                     try {
+                        // Dynamic import to avoid build-side static analysis issues
+                        const ffmpeg = (await import('fluent-ffmpeg')).default
+                        const ffmpegStatic = (await import('ffmpeg-static')).default
+
+                        if (ffmpegStatic) {
+                            ffmpeg.setFfmpegPath(ffmpegStatic)
+                        }
+
                         await new Promise((resolve, reject) => {
                             ffmpeg(inputPath)
                                 .toFormat('mp3')
                                 .audioChannels(1)
                                 .audioBitrate('32k')
                                 .on('end', () => resolve(null))
-                                .on('error', (err) => reject(err))
+                                .on('error', (err: any) => reject(err))
                                 .save(outputPath)
                         })
                         finalAudioPath = outputPath
                     } catch (ffmpegErr) {
-                        console.warn('FFmpeg falló, intentando transcripción directa...')
+                        console.warn('FFmpeg falló, intentando transcripción directa...', ffmpegErr)
                     }
                 }
 

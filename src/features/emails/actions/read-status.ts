@@ -12,8 +12,7 @@ export async function markEmailAsRead(emailId: string) {
     }
 
     try {
-        const { error } = await supabase
-            .from('email_reads')
+        const { error } = await (supabase.from('email_reads') as any)
             .insert({
                 email_id: emailId,
                 user_id: user.id
@@ -46,8 +45,7 @@ export async function markEmailAsUnread(emailId: string) {
     }
 
     try {
-        const { error } = await supabase
-            .from('email_reads')
+        const { error } = await (supabase.from('email_reads') as any)
             .delete()
             .match({
                 email_id: emailId,

@@ -12,8 +12,8 @@ export default function TeamChatLayout({
     // MainLayout has: min-h-screen -> flex -> main className="flex-1 ... min-w-0"
     // So h-full works if parent has height.
     // We want the chat to fill the available space. 
-    // Usually main has "h-[calc(100vh-theme(spacing.header))]" if strict.
-    // Let's assume h-[calc(100vh-80px)] approx.
+    // Usually main has a fixed height adjustment.
+    // Let's assume h-[calc(100vh-100px)] approx.
 
     return (
         <div className="flex h-[calc(100vh-100px)] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 backdrop-blur-2xl">

@@ -12,7 +12,23 @@ const nextConfig: NextConfig = {
     mcpServer: true,
   },
   cacheComponents: true,
-
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        os: false,
+      };
+    }
+    // Suprimir warnings de fluent-ffmpeg que usa requires dinámicos
+    config.plugins.push(
+      new (require('webpack').IgnorePlugin)({
+        resourceRegExp: /^(fluent-ffmpeg|ffmpeg-static)$/,
+      })
+    );
+    return config;
+  },
 }
 
 export default withPWA(nextConfig)
