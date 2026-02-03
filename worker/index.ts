@@ -9,7 +9,7 @@ self.addEventListener('push', (event) => {
 
     try {
         const data = event.data.json();
-        const options: NotificationOptions = {
+        const options: any = {
             body: data.notification.body,
             icon: data.notification.icon || '/aurie-official-logo.png',
             badge: data.notification.badge || '/icons/icon-192x192.png',
