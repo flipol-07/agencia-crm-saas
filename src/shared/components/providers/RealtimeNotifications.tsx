@@ -36,41 +36,29 @@ export function RealtimeNotifications() {
             }
 
             try {
-                console.log('Push: Checking Service Worker...')
                 const registration = await navigator.serviceWorker.ready
-                console.log('Push: Service Worker Ready:', registration.active?.state)
 
                 // Request permission
                 const permission = await Notification.requestPermission()
-                console.log('Push: Permission status:', permission)
                 if (permission !== 'granted') return
 
                 // Check for existing subscription
                 let subscription = await registration.pushManager.getSubscription()
-                console.log('Push: Existing subscription:', !!subscription)
 
                 if (!subscription) {
-                    console.log('Push: Creating new subscription...')
                     // Create new subscription
                     subscription = await registration.pushManager.subscribe({
                         userVisibleOnly: true,
                         applicationServerKey: urlBase64ToUint8Array(WEBPUSH_PUBLIC_KEY)
                     })
-                    console.log('Push: New subscription created.')
                 }
 
                 // Send to backend
-                const response = await fetch('/api/push/subscribe', {
+                await fetch('/api/push/subscribe', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ subscription })
                 })
-
-                if (response.ok) {
-                    console.log('Push: Backend synchronized successfully.')
-                } else {
-                    console.error('Push: Backend synchronization failed.')
-                }
             } catch (error) {
                 console.error('Error setting up push notifications:', error)
             }
