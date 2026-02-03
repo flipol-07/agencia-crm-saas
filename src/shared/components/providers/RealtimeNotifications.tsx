@@ -4,13 +4,15 @@ import { useEffect, useMemo } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useNotificationStore } from '@/shared/store/useNotificationStore'
 import { toast } from 'sonner'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import { sendChatNotification } from '@/features/team-chat/actions/send-chat-notification'
 
 export function RealtimeNotifications() {
     // Memoize client to avoid recreation on every render
     const supabase = useMemo(() => createClient(), [])
-    const { increment, decrement, setCounts } = useNotificationStore()
+    const { increment, decrement, setCounts, incrementTeam, setTeamUnread } = useNotificationStore()
     const router = useRouter()
+    const pathname = usePathname()
 
     useEffect(() => {
         // Request notification permission for PWA/Mobile
@@ -28,7 +30,7 @@ export function RealtimeNotifications() {
             if (data) {
                 const counts: Record<string, number> = {}
                 const details: Record<string, { contactName: string, companyName: string }> = {}
-                
+
                 data.forEach((row: any) => {
                     if (row.contact_id && row.count > 0) {
                         counts[row.contact_id] = Number(row.count)
@@ -42,6 +44,12 @@ export function RealtimeNotifications() {
             }
             if (error) {
                 console.error('RealtimeNotifications: Error fetching initial counts:', error)
+            }
+
+            // 2. Fetch team unread count
+            const { data: teamData, error: teamError } = await supabase.rpc('get_team_unread_count')
+            if (teamData !== null && !teamError) {
+                setTeamUnread(Number(teamData))
             }
         }
 
@@ -63,7 +71,7 @@ export function RealtimeNotifications() {
                     // Filter in JS: Only inbound emails matter for notifications
                     if (newEmail.direction === 'inbound') {
                         let contactName = 'Contacto'
-                        
+
                         if (newEmail.contact_id) {
                             // Fetch contact name for the store detail
                             const { data: contact } = await supabase
@@ -71,7 +79,7 @@ export function RealtimeNotifications() {
                                 .select('contact_name, company_name')
                                 .eq('id', newEmail.contact_id)
                                 .single()
-                            
+
                             if (contact) {
                                 contactName = contact.contact_name || contact.company_name || 'Contacto'
                                 increment(newEmail.contact_id, {
@@ -130,7 +138,7 @@ export function RealtimeNotifications() {
                             .select('contact_id')
                             .eq('message_id', newRead.email_id)
                             .single()
-                        
+
                         if (email?.contact_id) {
                             decrement(email.contact_id)
                         }
@@ -150,9 +158,15 @@ export function RealtimeNotifications() {
 
                     // Filter out own messages
                     if (user && newMsg.sender_id !== user.id) {
+                        // 1. Update store if not on the chat page
+                        if (pathname !== `/team-chat/${newMsg.chat_id}`) {
+                            incrementTeam()
+                        }
+
                         const title = 'Nuevo mensaje de equipo'
                         const body = newMsg.content || 'Adjunto'
 
+                        // 2. Toast
                         toast.info(title, {
                             description: body,
                             duration: 5000,
@@ -162,9 +176,13 @@ export function RealtimeNotifications() {
                             }
                         })
 
+                        // 3. Push and WhatsApp
                         if ('Notification' in window && Notification.permission === 'granted') {
                             new Notification(title, { body, icon: '/aurie-official-logo.png' })
                         }
+
+                        // Always trigger WhatsApp notification (backend handles if needed)
+                        sendChatNotification(newMsg.sender_id, body, newMsg.chat_id)
                     }
                 }
             )

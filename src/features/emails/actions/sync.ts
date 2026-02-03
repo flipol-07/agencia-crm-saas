@@ -26,7 +26,7 @@ export async function syncContactEmails(contactId: string, contactEmail: string)
             to_email: email.to,
             direction: email.direction,
             received_at: email.date.toISOString(),
-            is_read: true, // Por defecto leídos si ya los sincronizamos
+            is_read: email.direction === 'outbound', // Solo los salientes se marcan leídos por defecto
             body_text: email.text,
             body_html: email.html
         }))

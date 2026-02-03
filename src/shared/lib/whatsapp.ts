@@ -37,4 +37,10 @@ export class WhatsAppService {
 
         return this.sendMessage(message)
     }
+
+    static async notifyNewTeamMessage(senderName: string, content: string, chatId: string) {
+        const message = `💬 *Mensaje de Equipo en CRM Aurie*\n\n*De:* ${senderName}\n*Mensaje:* ${content}\n\n👉 Responder: https://agencia-crm-saas.vercel.app/team-chat/${chatId}`
+
+        return this.sendMessage(message)
+    }
 }

@@ -60,3 +60,42 @@ export async function markEmailAsUnread(emailId: string) {
         return { success: false, error }
     }
 }
+export async function markAllEmailsAsRead(contactId: string) {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        throw new Error('Unauthorized')
+    }
+
+    try {
+        // 1. Get all inbound message_ids for this contact
+        const { data: emails, error: emailsError } = await supabase
+            .from('contact_emails')
+            .select('message_id')
+            .eq('contact_id', contactId)
+            .eq('direction', 'inbound')
+
+        if (emailsError) throw emailsError
+        if (!emails || emails.length === 0) return { success: true, count: 0 }
+
+        const messageIds = (emails as any[]).map((e: any) => e.message_id).filter(Boolean) as string[]
+
+        // 2. Insert into email_reads using onConflict to skip existing
+        const readsToInsert = messageIds.map(id => ({
+            email_id: id,
+            user_id: user.id
+        }))
+
+        const { error: insertError } = await (supabase.from('email_reads') as any)
+            .upsert(readsToInsert, { onConflict: 'email_id, user_id' })
+
+        if (insertError) throw insertError
+
+        revalidatePath(`/contacts/${contactId}`)
+        return { success: true, count: messageIds.length }
+    } catch (error) {
+        console.error('Error marking all emails as read:', error)
+        return { success: false, error }
+    }
+}

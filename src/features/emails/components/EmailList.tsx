@@ -8,6 +8,9 @@ import { createClient } from '@/lib/supabase/client'
 import type { ContactEmail } from '@/types/database'
 import { cleanEmailBody } from '../utils/email-cleaner'
 import { EmailEyeButton } from './EmailEyeButton'
+import { markAllEmailsAsRead } from '../actions/read-status'
+import { toast } from 'sonner'
+import { useNotificationStore } from '@/shared/store/useNotificationStore'
 
 interface EmailListProps {
     contactId: string
@@ -29,6 +32,8 @@ export function EmailList({ contactId, contactEmail, emails, onRefresh }: EmailL
     const router = useRouter()
     const [showAll, setShowAll] = useState(false)
     const [readEmailIds, setReadEmailIds] = useState<Set<string>>(new Set())
+    const [isMarkingAll, setIsMarkingAll] = useState(false)
+    const { clear } = useNotificationStore()
     const supabase = createClient()
 
     // Fetch read statuses
@@ -37,20 +42,41 @@ export function EmailList({ contactId, contactEmail, emails, onRefresh }: EmailL
             const { data: { user } } = await supabase.auth.getUser()
             if (!user || !emails.length) return
 
-            // Map emails to message_id for the query
-            const messageIds = emails.map(e => e.message_id).filter(Boolean) as string[]
+            try {
+                // 1. Get all inbound message_ids for this contact
+                const { data: inboundEmails, error: emailsError } = await supabase
+                    .from('contact_emails')
+                    .select('message_id')
+                    .eq('contact_id', contactId)
+                    .eq('direction', 'inbound')
 
-            if (messageIds.length === 0) return
+                if (emailsError) {
+                    console.error('Error fetching inbound emails:', emailsError)
+                    return
+                }
 
-            const { data: reads } = await supabase
-                .from('email_reads')
-                .select('email_id')
-                .eq('user_id', user.id)
-                .in('email_id', messageIds)
+                const inboundMessageIds = (inboundEmails as any[])?.map((e: any) => e.message_id).filter(Boolean) as string[]
 
-            if (reads) {
-                const readIds = (reads as any[]).map((r: any) => r.email_id as string);
-                setReadEmailIds(new Set(readIds));
+                if (inboundMessageIds.length === 0) return
+
+                // 2. Query email_reads for these inbound message_ids
+                const { data: reads, error: readsError } = await supabase
+                    .from('email_reads')
+                    .select('email_id')
+                    .eq('user_id', user.id)
+                    .in('email_id', inboundMessageIds)
+
+                if (readsError) {
+                    console.error('Error fetching email reads:', readsError)
+                    return
+                }
+
+                if (reads) {
+                    const readIds = (reads as any[]).map((r: any) => r.email_id as string);
+                    setReadEmailIds(new Set(readIds));
+                }
+            } catch (error) {
+                console.error('Unexpected error in fetchReadStatuses:', error)
             }
         }
 
@@ -147,6 +173,42 @@ export function EmailList({ contactId, contactEmail, emails, onRefresh }: EmailL
 
     return (
         <div className="space-y-4">
+            {conversations.length > 0 && (
+                <div className="flex justify-between items-center px-1">
+                    <h3 className="text-xs font-bold text-gray-500 uppercase tracking-widest">
+                        Comunicaciones
+                    </h3>
+                    <button
+                        onClick={async () => {
+                            if (isMarkingAll) return
+                            setIsMarkingAll(true)
+                            try {
+                                const res = await markAllEmailsAsRead(contactId)
+                                if (res.success) {
+                                    // Local update
+                                    const allMessageIds = emails.map(e => e.message_id).filter(Boolean) as string[]
+                                    setReadEmailIds(new Set([...Array.from(readEmailIds), ...allMessageIds]))
+                                    clear(contactId)
+                                    toast.success('Todos los correos marcados como leídos')
+                                } else {
+                                    toast.error('Error al marcar como leídos')
+                                }
+                            } catch (err) {
+                                toast.error('Error al marcar como leídos')
+                            } finally {
+                                setIsMarkingAll(false)
+                            }
+                        }}
+                        disabled={isMarkingAll}
+                        className="text-[10px] font-bold text-lime-400 hover:text-lime-300 uppercase tracking-tighter flex items-center gap-1 transition-colors disabled:opacity-50"
+                    >
+                        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Marcar todo como leído
+                    </button>
+                </div>
+            )}
             <div className="space-y-3">
                 {conversations.length === 0 ? (
                     <p className="text-gray-500 text-sm text-center py-4">

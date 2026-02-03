@@ -132,6 +132,20 @@ export default function TemplatesPage() {
         }
     }
 
+    async function handleSetDefault(id: string) {
+        try {
+            const { error } = await supabase.rpc('set_default_template', {
+                p_template_id: id
+            })
+
+            if (error) throw error
+            fetchTemplates()
+        } catch (error) {
+            console.error('Error setting default template:', error)
+            alert('Error al establecer como predeterminada')
+        }
+    }
+
     async function handleDelete(id: string) {
         if (!confirm('¿Seguro que quieres eliminar esta plantilla? Esta acción no se puede deshacer.')) return
 
@@ -212,6 +226,14 @@ export default function TemplatesPage() {
                                 >
                                     Eliminar
                                 </button>
+                                {!template.is_default && (
+                                    <button
+                                        onClick={() => handleSetDefault(template.id)}
+                                        className="text-xs text-lime-400 hover:text-lime-300 font-bold transition-colors"
+                                    >
+                                        Usar por defecto
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

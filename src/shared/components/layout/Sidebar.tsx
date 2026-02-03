@@ -7,7 +7,7 @@ import { useNotificationStore } from '@/shared/store/useNotificationStore'
 
 function SidebarContent() {
     const pathname = usePathname()
-    const { totalUnread } = useNotificationStore()
+    const { totalUnread, teamUnread } = useNotificationStore()
 
     const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`)
 
@@ -130,6 +130,11 @@ function SidebarContent() {
                             {(link as any).isContact && totalUnread > 0 && (
                                 <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
                                     {totalUnread}
+                                </span>
+                            )}
+                            {link.href === '/team-chat' && teamUnread > 0 && (
+                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center animate-pulse">
+                                    {teamUnread}
                                 </span>
                             )}
                         </Link>

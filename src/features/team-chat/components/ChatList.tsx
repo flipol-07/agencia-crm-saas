@@ -10,9 +10,11 @@ import { UserSelectorModal } from './UserSelectorModal'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
+import { useNotificationStore } from '@/shared/store/useNotificationStore'
 
 export function ChatList() {
     const { user } = useAuth()
+    const { clearTeam } = useNotificationStore()
     const params = useParams()
     const activeChatId = params?.chatId as string
 
@@ -30,6 +32,7 @@ export function ChatList() {
     useEffect(() => {
         if (user) {
             fetchChats()
+            clearTeam()
 
             // Subscribe to new chats or updates
             const supabase = createClient()
@@ -77,11 +80,11 @@ export function ChatList() {
             avatar: other.avatar_url,
             initial: (other.full_name || other.email || '?')[0].toUpperCase()
         }
-        return { name: 'Chat Personal', avatar: null, initial: 'YO' }
+        return null // Don't show if no other participant (unless group, handled later)
     }
 
     return (
-        <div className="flex flex-col h-full bg-zinc-950 border-r border-white/5">
+        <div className="flex flex-col w-full h-full bg-transparent">
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
                 <h1 className="font-bold text-lg text-white">Chats</h1>
@@ -120,38 +123,42 @@ export function ChatList() {
                         </button>
                     </div>
                 ) : (
-                    <div className="divide-y divide-white/5">
+                    <div className="divide-y divide-white/5 space-y-1 p-2">
                         {chats.map(chat => {
                             const info = getChatDisplayInfo(chat)
+                            if (!info) return null
+
                             const isActive = activeChatId === chat.id
 
                             return (
                                 <Link
                                     key={chat.id}
                                     href={`/team-chat/${chat.id}`}
-                                    className={`block p-4 hover:bg-white/5 transition-colors ${isActive ? 'bg-white/10 border-l-2 border-lime-500' : ''}`}
+                                    className={`block p-3 rounded-xl transition-all ${isActive
+                                        ? 'bg-lime-500/10 border border-lime-500/20'
+                                        : 'hover:bg-white/5 border border-transparent'
+                                        }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="relative">
-                                            <div className="w-12 h-12 rounded-full bg-zinc-800 text-gray-400 flex items-center justify-center font-bold text-lg overflow-hidden border border-white/10">
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden border ${isActive ? 'border-lime-500/50 text-lime-500 bg-lime-500/10' : 'border-white/10 bg-zinc-800 text-gray-400'}`}>
                                                 {info.avatar ? (
                                                     <img src={info.avatar} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     info.initial
                                                 )}
                                             </div>
-                                            {/* Online status indicator could go here */}
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline mb-0.5">
-                                                <h3 className={`font-semibold truncate ${isActive ? 'text-white' : 'text-gray-200'}`}>
+                                                <h3 className={`font-medium text-sm truncate ${isActive ? 'text-lime-400' : 'text-gray-200'}`}>
                                                     {info.name}
                                                 </h3>
                                                 <span className="text-[10px] text-gray-500 whitespace-nowrap ml-2">
                                                     {chat.updated_at && formatDistanceToNow(new Date(chat.updated_at), { addSuffix: false, locale: es })}
                                                 </span>
                                             </div>
-                                            <p className={`text-sm truncate ${isActive ? 'text-gray-300' : 'text-gray-500'}`}>
+                                            <p className={`text-xs truncate ${isActive ? 'text-lime-500/70' : 'text-gray-500'}`}>
                                                 {chat.last_message_preview || 'Nueva conversación'}
                                             </p>
                                         </div>

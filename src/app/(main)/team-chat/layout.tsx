@@ -7,23 +7,16 @@ export default function TeamChatLayout({
 }: {
     children: React.ReactNode
 }) {
-    // Height calculation: Screen height - Header height (approx 64px/4rem + padding?)
-    // Actually typically handled by flex-1 in parent structure?
-    // MainLayout has: min-h-screen -> flex -> main className="flex-1 ... min-w-0"
-    // So h-full works if parent has height.
-    // We want the chat to fill the available space. 
-    // Usually main has a fixed height adjustment.
-    // Let's assume h-[calc(100vh-100px)] approx.
-
+    // A more cohesive layout without harsh separators
     return (
-        <div className="flex h-[calc(100vh-100px)] rounded-2xl overflow-hidden border border-white/10 shadow-2xl bg-black/40 backdrop-blur-2xl">
+        <div className="flex h-[calc(100vh-100px)] rounded-3xl overflow-hidden border border-white/5 shadow-2xl bg-zinc-900/50 backdrop-blur-3xl">
             {/* Desktop Sidebar */}
-            <div className="hidden md:flex w-80 h-full border-r border-white/10 bg-black/20">
+            <div className="hidden md:flex w-80 h-full border-r border-white/5 bg-transparent">
                 <ChatList />
             </div>
 
-            {/* Content Area (Mobile List OR Chat Window) */}
-            <div className="flex-1 h-full min-w-0 bg-zinc-950/30 relative">
+            {/* Content Area */}
+            <div className="flex-1 h-full min-w-0 bg-transparent relative">
                 {children}
             </div>
         </div>

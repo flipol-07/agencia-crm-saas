@@ -51,7 +51,9 @@ export default function MainLayout({
 }) {
   return (
     <div className="min-h-screen bg-black">
-      <RealtimeNotifications />
+      <Suspense fallback={null}>
+        <RealtimeNotifications />
+      </Suspense>
       <Toaster position="top-right" theme="dark" richColors />
 
       <Suspense fallback={null}>

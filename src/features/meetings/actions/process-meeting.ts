@@ -22,9 +22,12 @@ Debes generar un JSON con la siguiente estructura:
   "attendees": ["Juan Pérez (Vendedor)", "María López (Cliente)"],
   "key_points": ["Punto 1", "Punto 2"],
   "conclusions": ["Acuerdo A", "Tarea B"],
+  "tasks": [
+    { "title": "Nombre de la tarea", "description": "Descripción detallada", "priority": "low" | "medium" | "high" }
+  ],
   "feedback": {
     "seller_feedback": [
-        { "name": "Nombre del vendedor", "improvements": ["Cosa a mejorar 1", "Cosa a mejorar 2"] }
+      { "name": "Nombre del vendedor", "improvements": ["Cosa a mejorar 1", "Cosa a mejorar 2"] }
     ],
     "general_feedback": "Feedback general del equipo de ventas",
     "customer_sentiment": "Breve análisis de cómo se sentía el cliente (interés, dudas, etc.)"
@@ -37,6 +40,7 @@ REGLAS DE ANÁLISIS:
 3. Proporciona sugerencias de mejora PERSONALIZADAS para cada vendedor en "seller_feedback".
 4. Si NO hay nombres (texto plano de Whisper), da un "general_feedback" analizando la estrategia de venta global y deja "attendees" vacío o con "Desconocido".
 5. "customer_sentiment" debe ser un feedback simple de lo que proyectaba el cliente.
+6. EXTRACCIÓN DE TAREAS: Identifica tareas EXPLÍCITAS mencionadas en la reunión. Busca especialmente frases como "Crea una tarea...", "Recuérdame que...", "Te envío...", "Tengo que...". Crea objetos claros en el array "tasks". Si no hay tareas claras, devuelve un array vacío.
 
 Responde ÚNICAMENTE con el objeto JSON.`
 
@@ -167,7 +171,7 @@ export async function processMeeting(formData: FormData) {
         }
 
         // 6. Save to DB
-        const { error: dbError } = await (supabase.from('meetings') as any).insert({
+        const { data: meetingData, error: dbError } = await (supabase.from('meetings') as any).insert({
             title: finalTitle,
             date,
             contact_id: contactId && contactId !== 'null' ? contactId : null,
@@ -176,9 +180,29 @@ export async function processMeeting(formData: FormData) {
             key_points: analysis.key_points,
             conclusions: analysis.conclusions,
             feedback: { ...analysis.feedback, attendees: analysis.attendees }
-        })
+        }).select().single()
 
         if (dbError) throw new Error(`Error guardando en DB: ${dbError.message}`)
+
+        // 7. Extract and Save Tasks
+        if (analysis.tasks && Array.isArray(analysis.tasks) && analysis.tasks.length > 0) {
+            console.log(`7. Creando ${analysis.tasks.length} tareas extraídas...`)
+            const tasksToInsert = analysis.tasks.map((t: any) => ({
+                title: `${t.title} (R)`,
+                description: t.description,
+                priority: t.priority || 'medium',
+                status: 'todo',
+                contact_id: contactId && contactId !== 'null' ? contactId : null,
+                meeting_id: meetingData.id,
+                is_completed: false
+            }))
+
+            const { error: tasksError } = await (supabase.from('tasks') as any).insert(tasksToInsert)
+            if (tasksError) {
+                console.error('Error creando tareas automáticas:', tasksError)
+                // No lanzamos error global para no fallar el procesamiento de la reunión
+            }
+        }
 
         revalidatePath('/meetings')
         return { success: true }

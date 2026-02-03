@@ -9,6 +9,8 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { useNotificationStore } from '@/shared/store/useNotificationStore'
+import { markChatAsRead } from '../actions/chat-actions'
 
 interface Props {
     chatId: string
@@ -16,6 +18,7 @@ interface Props {
 
 export function ChatWindow({ chatId }: Props) {
     const { user } = useAuth()
+    const { clearTeam } = useNotificationStore()
     const [messages, setMessages] = useState<TeamMessage[]>([])
     const [chatInfo, setChatInfo] = useState<{ name: string, avatar: string | null } | null>(null)
     const [newMessage, setNewMessage] = useState('')
@@ -31,6 +34,7 @@ export function ChatWindow({ chatId }: Props) {
     useEffect(() => {
         if (!user) return
         loadData()
+        clearTeam()
 
         // Realtime subscription
         const supabase = createClient()
@@ -43,6 +47,11 @@ export function ChatWindow({ chatId }: Props) {
                 filter: `chat_id=eq.${chatId}`
             }, (payload: { new: TeamMessage }) => {
                 const newMsg = payload.new
+                if (newMsg.sender_id !== user.id) {
+                    markChatAsRead(chatId)
+                    clearTeam()
+                }
+
                 setMessages(prev => {
                     // Avoid duplicates if optimistic update adds generic ID vs real
                     if (prev.some(m => m.id === newMsg.id)) return prev
@@ -53,7 +62,7 @@ export function ChatWindow({ chatId }: Props) {
             .subscribe()
 
         return () => {
-            supabase.removeChannel(channel)
+            if (channel) supabase.removeChannel(channel)
         }
     }, [chatId, user])
 
@@ -64,6 +73,7 @@ export function ChatWindow({ chatId }: Props) {
             teamChatService.getChat(chatId)
         ])
         setMessages(msgs)
+        markChatAsRead(chatId)
 
         if (chat && user) {
             const other = chat.participants.find(p => p.profiles?.id !== user.id)?.profiles
@@ -128,9 +138,9 @@ export function ChatWindow({ chatId }: Props) {
     if (loading) return <div className="flex-1 flex items-center justify-center text-gray-500">Cargando conversación...</div>
 
     return (
-        <div className="flex flex-col h-full bg-zinc-950/50 backdrop-blur-xl">
+        <div className="flex flex-col h-full bg-transparent">
             {/* Header */}
-            <div className="p-4 border-b border-white/10 flex items-center gap-4 bg-black/20">
+            <div className="p-4 border-b border-white/5 flex items-center gap-4 bg-black/20">
                 <Link href="/team-chat" className="md:hidden text-gray-400 hover:text-white">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
