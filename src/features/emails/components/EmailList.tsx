@@ -49,7 +49,8 @@ export function EmailList({ contactId, contactEmail, emails, onRefresh }: EmailL
                 .in('email_id', messageIds)
 
             if (reads) {
-                setReadEmailIds(new Set(reads.map(r => r.email_id)))
+                const readIds = (reads as any[]).map((r: any) => r.email_id as string);
+                setReadEmailIds(new Set(readIds));
             }
         }
 

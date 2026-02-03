@@ -159,7 +159,8 @@ export function InvoiceForm({
                 notes: null,
                 due_date: null,
                 paid_date: null,
-                template_id: selectedTemplate?.id || null
+                template_id: selectedTemplate?.id || null,
+                config: selectedTemplate?.config || null
             }
 
             const itemsPayload = items.map(item => ({
@@ -287,153 +288,153 @@ export function InvoiceForm({
                     </div>
                 </div>
             </div>
-            
-            {/* Template Selection */ }
-    {
-        templates.length > 0 && (
-            <div className="pt-4 border-t border-white/10">
-                <div className="flex items-center justify-between mb-2">
-                    <label className="text-xs text-lime-400 font-bold uppercase tracking-wider">Diseño de Factura</label>
-                    {isOverflowing && (
-                        <span className="text-xs text-red-400 font-bold animate-pulse">
-                            ⚠️ Se recomienda usar "{optimalTemplate?.name}" ({optimalTemplate?.max_items} items)
-                        </span>
-                    )}
-                </div>
-                <select
-                    value={selectedTemplate?.id || ''}
-                    onChange={e => {
-                        const found = templates.find(t => t.id === e.target.value)
-                        if (found) setSelectedTemplate(found)
-                    }}
-                    className={`w-full bg-zinc-900 border rounded px-3 py-2 text-white outline-none appearance-none transition-colors ${isOverflowing ? 'border-red-500/50' : 'border-white/10 focus:border-lime-400'
-                        }`}
+
+            {/* Template Selection */}
+            {
+                templates.length > 0 && (
+                    <div className="pt-4 border-t border-white/10">
+                        <div className="flex items-center justify-between mb-2">
+                            <label className="text-xs text-lime-400 font-bold uppercase tracking-wider">Diseño de Factura</label>
+                            {isOverflowing && (
+                                <span className="text-xs text-red-400 font-bold animate-pulse">
+                                    ⚠️ Se recomienda usar "{optimalTemplate?.name}" ({optimalTemplate?.max_items} items)
+                                </span>
+                            )}
+                        </div>
+                        <select
+                            value={selectedTemplate?.id || ''}
+                            onChange={e => {
+                                const found = templates.find(t => t.id === e.target.value)
+                                if (found) setSelectedTemplate(found)
+                            }}
+                            className={`w-full bg-zinc-900 border rounded px-3 py-2 text-white outline-none appearance-none transition-colors ${isOverflowing ? 'border-red-500/50' : 'border-white/10 focus:border-lime-400'
+                                }`}
+                        >
+                            {templates.map(t => (
+                                <option key={t.id} value={t.id}>
+                                    {t.name} (Máx {t.max_items} items) {t.is_default ? 'DEFAULT' : ''}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )
+            }
+
+            {/* Items */}
+            <div className="pt-4">
+                <table className="w-full text-left border-collapse">
+                    <thead>
+                        <tr className="text-xs text-gray-500 border-b border-white/10">
+                            <th className="py-2 w-1/2">Descripción</th>
+                            <th className="py-2 w-20 text-center">Cant.</th>
+                            <th className="py-2 w-24 text-right">Precio</th>
+                            <th className="py-2 w-24 text-right">Total</th>
+                            <th className="py-2 w-10"></th>
+                        </tr>
+                    </thead>
+                    <tbody className="text-sm">
+                        {items.map((item, idx) => (
+                            <tr key={idx} className="group hover:bg-white/5">
+                                <td className="py-2 pr-2">
+                                    <input
+                                        type="text"
+                                        value={item.description}
+                                        onChange={e => updateItem(idx, 'description', e.target.value)}
+                                        className="w-full bg-transparent border-none outline-none text-white placeholder-gray-600"
+                                        placeholder="Descripción del servicio..."
+                                    />
+                                </td>
+                                <td className="py-2 px-1">
+                                    <input
+                                        type="number"
+                                        value={item.quantity}
+                                        onChange={e => updateItem(idx, 'quantity', parseFloat(e.target.value))}
+                                        className="w-full bg-transparent border-none outline-none text-white text-center"
+                                        min="1"
+                                    />
+                                </td>
+                                <td className="py-2 pl-2 text-right">
+                                    <input
+                                        type="number"
+                                        value={item.unit_price}
+                                        onChange={e => updateItem(idx, 'unit_price', parseFloat(e.target.value))}
+                                        className="w-full bg-transparent border-none outline-none text-white text-right"
+                                        step="0.01"
+                                    />
+                                </td>
+                                <td className="py-2 text-right text-gray-300">
+                                    {(item.quantity * item.unit_price).toFixed(2)}€
+                                </td>
+                                <td className="py-2 text-right">
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveItem(idx)}
+                                        className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
+                                    >
+                                        ×
+                                    </button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+                <button
+                    type="button"
+                    onClick={handleAddItem}
+                    className="mt-2 text-xs text-lime-400 hover:text-lime-300 flex items-center gap-1"
                 >
-                    {templates.map(t => (
-                        <option key={t.id} value={t.id}>
-                            {t.name} (Máx {t.max_items} items) {t.is_default ? 'DEFAULT' : ''}
-                        </option>
-                    ))}
-                </select>
+                    + Añadir línea
+                </button>
             </div>
-        )
-    }
 
-    {/* Items */ }
-    <div className="pt-4">
-        <table className="w-full text-left border-collapse">
-            <thead>
-                <tr className="text-xs text-gray-500 border-b border-white/10">
-                    <th className="py-2 w-1/2">Descripción</th>
-                    <th className="py-2 w-20 text-center">Cant.</th>
-                    <th className="py-2 w-24 text-right">Precio</th>
-                    <th className="py-2 w-24 text-right">Total</th>
-                    <th className="py-2 w-10"></th>
-                </tr>
-            </thead>
-            <tbody className="text-sm">
-                {items.map((item, idx) => (
-                    <tr key={idx} className="group hover:bg-white/5">
-                        <td className="py-2 pr-2">
-                            <input
-                                type="text"
-                                value={item.description}
-                                onChange={e => updateItem(idx, 'description', e.target.value)}
-                                className="w-full bg-transparent border-none outline-none text-white placeholder-gray-600"
-                                placeholder="Descripción del servicio..."
-                            />
-                        </td>
-                        <td className="py-2 px-1">
-                            <input
-                                type="number"
-                                value={item.quantity}
-                                onChange={e => updateItem(idx, 'quantity', parseFloat(e.target.value))}
-                                className="w-full bg-transparent border-none outline-none text-white text-center"
-                                min="1"
-                            />
-                        </td>
-                        <td className="py-2 pl-2 text-right">
-                            <input
-                                type="number"
-                                value={item.unit_price}
-                                onChange={e => updateItem(idx, 'unit_price', parseFloat(e.target.value))}
-                                className="w-full bg-transparent border-none outline-none text-white text-right"
-                                step="0.01"
-                            />
-                        </td>
-                        <td className="py-2 text-right text-gray-300">
-                            {(item.quantity * item.unit_price).toFixed(2)}€
-                        </td>
-                        <td className="py-2 text-right">
-                            <button
-                                type="button"
-                                onClick={() => handleRemoveItem(idx)}
-                                className="text-gray-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
-                            >
-                                ×
-                            </button>
-                        </td>
-                    </tr>
-                ))}
-            </tbody>
-        </table>
-        <button
-            type="button"
-            onClick={handleAddItem}
-            className="mt-2 text-xs text-lime-400 hover:text-lime-300 flex items-center gap-1"
-        >
-            + Añadir línea
-        </button>
-    </div>
+            {/* Totales */}
+            <div className="flex justify-end pt-4 border-t border-white/10">
+                <div className="w-64 space-y-2 text-sm">
+                    <div className="flex justify-between text-gray-400">
+                        <span>Subtotal</span>
+                        <span>{subtotal.toFixed(2)} {currency}</span>
+                    </div>
+                    <div className="flex justify-between text-gray-400 items-center">
+                        <span className="flex items-center gap-1">
+                            IVA %
+                        </span>
+                        <input
+                            type="number"
+                            value={taxRate}
+                            onChange={(e) => setTaxRate(parseFloat(e.target.value))}
+                            className="w-16 bg-zinc-800 border border-white/10 rounded px-2 py-0.5 text-right text-white text-xs"
+                        />
+                    </div>
+                    <div className="flex justify-between text-gray-400">
+                        <span>Importe IVA</span>
+                        <span>{taxAmount.toFixed(2)} {currency}</span>
+                    </div>
+                    <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-white/10">
+                        <span>Total</span>
+                        <span>{total.toFixed(2)} {currency}</span>
+                    </div>
+                </div>
+            </div>
 
-    {/* Totales */ }
-    <div className="flex justify-end pt-4 border-t border-white/10">
-        <div className="w-64 space-y-2 text-sm">
-            <div className="flex justify-between text-gray-400">
-                <span>Subtotal</span>
-                <span>{subtotal.toFixed(2)} {currency}</span>
+            {/* Acciones */}
+            <div className="flex justify-end gap-3 pt-4">
+                {onCancel && (
+                    <button
+                        type="button"
+                        onClick={onCancel}
+                        className="px-4 py-2 text-gray-400 hover:text-white"
+                    >
+                        Cancelar
+                    </button>
+                )}
+                <button
+                    type="submit"
+                    disabled={loading}
+                    className="px-6 py-2 bg-lime-400 text-black font-bold rounded-lg hover:bg-lime-300 disabled:opacity-50 transition-all shadow-lg hover:shadow-lime-400/20"
+                >
+                    {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Crear Factura')}
+                </button>
             </div>
-            <div className="flex justify-between text-gray-400 items-center">
-                <span className="flex items-center gap-1">
-                    IVA %
-                </span>
-                <input
-                    type="number"
-                    value={taxRate}
-                    onChange={(e) => setTaxRate(parseFloat(e.target.value))}
-                    className="w-16 bg-zinc-800 border border-white/10 rounded px-2 py-0.5 text-right text-white text-xs"
-                />
-            </div>
-            <div className="flex justify-between text-gray-400">
-                <span>Importe IVA</span>
-                <span>{taxAmount.toFixed(2)} {currency}</span>
-            </div>
-            <div className="flex justify-between text-lg font-bold text-white pt-2 border-t border-white/10">
-                <span>Total</span>
-                <span>{total.toFixed(2)} {currency}</span>
-            </div>
-        </div>
-    </div>
-
-    {/* Acciones */ }
-    <div className="flex justify-end gap-3 pt-4">
-        {onCancel && (
-            <button
-                type="button"
-                onClick={onCancel}
-                className="px-4 py-2 text-gray-400 hover:text-white"
-            >
-                Cancelar
-            </button>
-        )}
-        <button
-            type="submit"
-            disabled={loading}
-            className="px-6 py-2 bg-lime-400 text-black font-bold rounded-lg hover:bg-lime-300 disabled:opacity-50 transition-all shadow-lg hover:shadow-lime-400/20"
-        >
-            {loading ? 'Guardando...' : (initialData ? 'Guardar Cambios' : 'Crear Factura')}
-        </button>
-    </div>
         </form>
     )
 }
