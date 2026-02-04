@@ -347,6 +347,19 @@ test('should calculate total with tax', () => {
 - **Fix**: Validar `error` y `data` antes de acceder a property. `if (error || !data?.user)`.
 - **Aplicar en**: Todas las llamadas a `supabase.auth.getUser()` en Server Components.
 
+### 2026-02-04: Next.js 16 Build & Uncached Data Outside of Suspense
+- **Error**: `Route ... Uncached data was accessed outside of <Suspense>`. El build falla en Vercel/Local.
+- **Causa**:
+    1.  Acceso a `params` o `searchParams` (que ahora son Promises) fuera de una frontera de `Suspense`.
+    2.  Uso de hooks dinámicos (`usePathname`, `useSearchparams`, `useParams`) en componentes del Layout (como `GlassHeader`) sin estar envueltos en `Suspense`.
+    3.  Incompatibilidad de `export const dynamic = 'force-dynamic'` con `cacheComponents: true`.
+- **Fix**:
+    1.  **Layout**: Siempre envolver componentes que usen hooks dinámicos (Header, Sidebar) en `<Suspense>` dentro de `layout.tsx`.
+    2.  **Rutas Dinámicas**: Pasar `params` a un componente hijo `async` y dentro de ese hijo hacer `await params`. Envolver la llamada al hijo en `<Suspense>` en el archivo `page.tsx`.
+    3.  **Client Components**: Si un componente cliente usa `useParams()`, asegurar que el `page.tsx` o el layout lo envuelva en `Suspense`.
+- **Aplicar en**: Todos los proyectos Next.js 16+.
+
 ---
 
 *Este archivo es el cerebro de la fábrica. Cada error documentado la hace más fuerte.*
+

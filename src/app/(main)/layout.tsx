@@ -23,7 +23,10 @@ export default function MainLayout({
       </Suspense>
 
       {/* Glass Header */}
-      <GlassHeader />
+      <Suspense fallback={<div className="h-[73px] w-full border-b border-white/5 bg-background/80 backdrop-blur-2xl" />}>
+        <GlassHeader />
+      </Suspense>
+
 
       <div className="flex relative">
         {/* Glass Sidebar */}

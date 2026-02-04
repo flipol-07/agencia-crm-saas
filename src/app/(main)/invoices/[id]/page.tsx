@@ -1,10 +1,8 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { InvoiceDetailView } from '@/features/invoices/components'
-import type { InvoiceItem, Settings, InvoiceWithDetails } from '@/types/database'
-
-// Habilitar PPR (Partial Prerendering) si estamos en canary, sino omitir
-// export const experimental_ppr = true
+import type { Settings, InvoiceWithDetails } from '@/types/database'
+import { Suspense } from 'react'
 
 async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithDetails, settings: Settings | null } | null> {
     const supabase = await createClient()
@@ -25,7 +23,6 @@ async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithDetails
 
     const invoice = data as unknown as InvoiceWithDetails
 
-    // 1. Fetch Global Settings (Always needed for defaults like Logo, Currency)
     const { data: globalSettings } = await (supabase.from('settings') as any)
         .select('*')
         .limit(1)
@@ -33,7 +30,6 @@ async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithDetails
 
     let effectiveSettings = globalSettings as Settings | null
 
-    // 2. If Invoice has an Issuer, fetch Profile and Override
     if (invoice.issuer_profile_id) {
         const { data: profile } = await (supabase.from('profiles') as any)
             .select('*')
@@ -48,25 +44,6 @@ async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithDetails
                 address: profile.billing_address || effectiveSettings.address,
                 email: profile.billing_email || effectiveSettings.email,
                 phone: profile.billing_phone || effectiveSettings.phone,
-                // If profile has IBAN, we might want to append it to defaults or notes? 
-                // InvoiceDetailView uses `notes` field from invoice usually for IBAN.
-                // But let's stick to the basic company info overrides for now.
-            }
-        } else if (profile && !effectiveSettings) {
-            // Edge case: No global settings but we have a profile. Construct minimal settings.
-            effectiveSettings = {
-                id: 'generated-from-profile',
-                created_at: new Date().toISOString(),
-                updated_at: new Date().toISOString(),
-                company_name: profile.billing_name || profile.full_name || 'Sin Nombre',
-                tax_id: profile.billing_tax_id || '',
-                address: profile.billing_address || '',
-                email: profile.billing_email || '',
-                phone: profile.billing_phone || '',
-                logo_url: profile.avatar_url || null, // Use avatar as fallback if no global settings
-                currency: 'EUR',
-                default_tax_rate: 21,
-                website: null
             }
         }
     }
@@ -74,7 +51,17 @@ async function getInvoiceData(id: string): Promise<{ invoice: InvoiceWithDetails
     return { invoice, settings: effectiveSettings }
 }
 
-export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
+export default function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
+
+
+    return (
+        <Suspense fallback={<InvoiceDetailSkeleton />}>
+            <InvoiceDetailContent params={params} />
+        </Suspense>
+    )
+}
+
+async function InvoiceDetailContent({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
     const data = await getInvoiceData(id)
 
@@ -84,3 +71,21 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
 
     return <InvoiceDetailView initialInvoice={data.invoice} settings={data.settings} />
 }
+
+function InvoiceDetailSkeleton() {
+    return (
+        <div className="max-w-[1200px] mx-auto p-4 lg:p-8 space-y-8 animate-pulse">
+            <div className="h-10 bg-white/5 rounded w-1/4" />
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="lg:col-span-2 space-y-6">
+                    <div className="h-[600px] bg-white/5 rounded-2xl" />
+                </div>
+                <div className="space-y-6">
+                    <div className="h-64 bg-white/5 rounded-2xl" />
+                    <div className="h-32 bg-white/5 rounded-2xl" />
+                </div>
+            </div>
+        </div>
+    )
+}
+

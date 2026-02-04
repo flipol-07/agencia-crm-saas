@@ -1,12 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { InvoiceCanvas } from '@/features/invoices/components/InvoiceCanvas'
 import type { InvoiceWithDetails, Settings, InvoiceTemplate } from '@/types/database'
 
-export default function PrintInvoicePage() {
+export default function PrintInvoicePage({ params }: { params: Promise<{ id: string }> }) {
+    return (
+        <Suspense fallback={<div className="p-8">Cargando modo impresión...</div>}>
+            <PrintContent params={params} />
+        </Suspense>
+    )
+}
+
+function PrintContent({ params }: { params: Promise<{ id: string }> }) {
+    return <PrintInvoiceClient />
+}
+
+function PrintInvoiceClient() {
     const { id } = useParams()
     const [data, setData] = useState<{ invoice: InvoiceWithDetails, settings: Settings, template: InvoiceTemplate } | null>(null)
     const [loading, setLoading] = useState(true)

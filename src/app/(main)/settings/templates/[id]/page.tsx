@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { InvoiceTemplate, InvoiceWithDetails } from '@/types/database'
@@ -49,7 +49,19 @@ const MOCK_SETTINGS = {
     default_notes: ''
 } as any
 
-export default function TemplateEditorPage() {
+export default function TemplateEditorPage({ params }: { params: Promise<{ id: string }> }) {
+    return (
+        <Suspense fallback={<div className="fixed inset-0 bg-black flex items-center justify-center text-gray-500 z-[100]">Cargando editor de precisión...</div>}>
+            <TemplateEditorContent params={params} />
+        </Suspense>
+    )
+}
+
+function TemplateEditorContent({ params }: { params: Promise<{ id: string }> }) {
+    return <TemplateEditorClient />
+}
+
+function TemplateEditorClient() {
     const { id } = useParams()
     const router = useRouter()
     const supabase = createClient()
@@ -169,7 +181,6 @@ export default function TemplateEditorPage() {
             </header>
 
             <div className="flex-1 flex overflow-hidden z-10 relative">
-                {/* Main Workspace (Canvas) */}
                 {/* Main Workspace (Canvas) with 3D Perspective */}
                 <div className="flex-1 overflow-auto flex justify-center items-start pt-20 pb-20 custom-scrollbar relative bg-transparent perspective-[2000px]">
 
