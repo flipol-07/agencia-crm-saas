@@ -59,7 +59,7 @@ export function EditMeetingModal({ meeting, isOpen, onClose, onUpdate }: EditMee
                             type="text"
                             value={title}
                             onChange={e => setTitle(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#8b5cf6]/50 focus:outline-none"
                             required
                         />
                     </div>
@@ -70,7 +70,7 @@ export function EditMeetingModal({ meeting, isOpen, onClose, onUpdate }: EditMee
                             type="date"
                             value={date}
                             onChange={e => setDate(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#8b5cf6]/50 focus:outline-none"
                             required
                         />
                     </div>
@@ -80,7 +80,7 @@ export function EditMeetingModal({ meeting, isOpen, onClose, onUpdate }: EditMee
                         <select
                             value={contactId}
                             onChange={e => setContactId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#8b5cf6]/50 focus:outline-none"
                         >
                             <option value="">Sin asignar</option>
                             {contacts.map(c => (
@@ -101,7 +101,7 @@ export function EditMeetingModal({ meeting, isOpen, onClose, onUpdate }: EditMee
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex-1 px-4 py-2 bg-lime-500 hover:bg-lime-400 text-black font-bold rounded-lg transition-colors disabled:opacity-50"
+                            className="flex-1 px-4 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-lg transition-colors disabled:opacity-50"
                         >
                             {loading ? 'Guardando...' : 'Guardar Cambios'}
                         </button>

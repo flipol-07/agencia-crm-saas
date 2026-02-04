@@ -29,7 +29,7 @@ export function TaxForecastCard({ data, isLoading }: TaxForecastCardProps) {
     const isPositive = data.iva_resultado > 0
 
     return (
-        <div className="glass rounded-xl p-6 border-l-4 border-lime-400">
+        <div className="glass rounded-xl p-6 border-l-4 border-[#8b5cf6]">
             <div className="flex justify-between items-start mb-4">
                 <div>
                     <h3 className="text-gray-400 text-xs font-bold uppercase tracking-wider">
@@ -39,7 +39,7 @@ export function TaxForecastCard({ data, isLoading }: TaxForecastCardProps) {
                         {formatCurrency(data.iva_resultado)}
                     </p>
                 </div>
-                <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${isPositive ? 'bg-orange-500/20 text-orange-400' : 'bg-lime-500/20 text-lime-400'}`}>
+                <div className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${isPositive ? 'bg-orange-500/20 text-orange-400' : 'bg-[#8b5cf6]/20 text-[#a78bfa]'}`}>
                     {isPositive ? 'A Pagar' : 'A Devolver'}
                 </div>
             </div>

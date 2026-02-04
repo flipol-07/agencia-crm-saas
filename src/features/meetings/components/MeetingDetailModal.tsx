@@ -78,19 +78,19 @@ export function MeetingDetailModal({ meeting, isOpen, onClose, onDelete, onUpdat
                 <div className="flex border-b border-white/5">
                     <button
                         onClick={() => setActiveTab('summary')}
-                        className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'summary' ? 'text-lime-400 border-b-2 border-lime-400 bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'summary' ? 'text-[#a78bfa] border-b-2 border-[#a78bfa] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     >
                         Resumen y Puntos Clave
                     </button>
                     <button
                         onClick={() => setActiveTab('analysis')}
-                        className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'analysis' ? 'text-lime-400 border-b-2 border-lime-400 bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'analysis' ? 'text-[#a78bfa] border-b-2 border-[#a78bfa] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     >
                         Análisis de Venta 🚀
                     </button>
                     <button
                         onClick={() => setActiveTab('transcription')}
-                        className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'transcription' ? 'text-lime-400 border-b-2 border-lime-400 bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
+                        className={`flex-1 py-4 text-sm font-medium transition-colors ${activeTab === 'transcription' ? 'text-[#a78bfa] border-b-2 border-[#a78bfa] bg-white/5' : 'text-gray-400 hover:text-white hover:bg-white/5'}`}
                     >
                         Transcripción
                     </button>
@@ -101,7 +101,7 @@ export function MeetingDetailModal({ meeting, isOpen, onClose, onDelete, onUpdat
                     {activeTab === 'summary' && (
                         <div className="space-y-8 animate-in fade-in duration-300">
                             <section>
-                                <h3 className="text-lg font-bold text-lime-400 mb-4 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-[#a78bfa] mb-4 flex items-center gap-2">
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                     </svg>
@@ -174,7 +174,7 @@ export function MeetingDetailModal({ meeting, isOpen, onClose, onDelete, onUpdat
 
                             {/* Seller Feedback */}
                             <section>
-                                <h3 className="text-lg font-bold text-yellow-400 mb-4 flex items-center gap-2">
+                                <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center gap-2">
                                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.364-6.364l-.707-.707M6.343 17.657l-.707.707m12.728 0l-.707-.707M12 21V12" />
                                     </svg>
@@ -185,7 +185,7 @@ export function MeetingDetailModal({ meeting, isOpen, onClose, onDelete, onUpdat
                                         meeting.feedback.seller_feedback.map((seller, i) => (
                                             <div key={i} className="bg-zinc-800/50 p-5 rounded-xl border border-white/5">
                                                 <h4 className="text-white font-bold mb-3 flex items-center gap-2">
-                                                    <div className="w-8 h-8 rounded-full bg-lime-500/20 text-lime-400 flex items-center justify-center text-xs">
+                                                    <div className="w-8 h-8 rounded-full bg-[#8b5cf6]/20 text-[#a78bfa] flex items-center justify-center text-xs">
                                                         {seller.name.charAt(0)}
                                                     </div>
                                                     {seller.name}
@@ -193,7 +193,7 @@ export function MeetingDetailModal({ meeting, isOpen, onClose, onDelete, onUpdat
                                                 <ul className="space-y-2">
                                                     {seller.improvements.map((imp, j) => (
                                                         <li key={j} className="text-sm text-gray-400 flex gap-2">
-                                                            <span className="text-lime-500">✓</span>
+                                                            <span className="text-[#8b5cf6]">✓</span>
                                                             {imp}
                                                         </li>
                                                     ))}
@@ -209,8 +209,8 @@ export function MeetingDetailModal({ meeting, isOpen, onClose, onDelete, onUpdat
                             </section>
 
                             {/* General Team Feedback */}
-                            <section className="bg-lime-500/5 p-6 rounded-xl border border-lime-500/20">
-                                <h3 className="text-lg font-bold text-lime-400 mb-3">Feedback General del Equipo</h3>
+                            <section className="bg-[#8b5cf6]/5 p-6 rounded-xl border border-[#8b5cf6]/20">
+                                <h3 className="text-lg font-bold text-[#a78bfa] mb-3">Feedback General del Equipo</h3>
                                 <p className="text-gray-300 leading-relaxed">
                                     {meeting.feedback?.general_feedback || 'No hay feedback general disponible.'}
                                 </p>

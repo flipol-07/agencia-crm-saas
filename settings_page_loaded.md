@@ -1,0 +1,34 @@
+- generic [ref=e1]:
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - link "CRM" [ref=e10] [cursor=pointer]:
+        - /url: /
+        - heading "CRM" [level=1] [ref=e11]
+      - paragraph [ref=e12]: Inicia sesión en tu cuenta
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]:
+          - generic [ref=e17]: Email
+          - textbox "Email" [ref=e18]:
+            - /placeholder: tu@email.com
+            - text: plorenzopizarro@gmail.com
+        - generic [ref=e19]:
+          - generic [ref=e20]: Contraseña
+          - textbox "Contraseña" [ref=e21]:
+            - /placeholder: ••••••••
+            - text: auriePol2026
+        - button "Iniciar sesión" [active] [ref=e22] [cursor=pointer]:
+          - generic [ref=e23]: Iniciar sesión
+      - generic [ref=e28]: O continúa con
+      - button "Google" [ref=e29] [cursor=pointer]:
+        - img [ref=e30]
+        - generic [ref=e35]: Google
+      - generic [ref=e36]:
+        - link "¿Olvidaste tu contraseña?" [ref=e37] [cursor=pointer]:
+          - /url: /forgot-password
+        - link "Crear cuenta" [ref=e38] [cursor=pointer]:
+          - /url: /signup
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e44] [cursor=pointer]:
+    - img [ref=e45]
+  - alert [ref=e48]

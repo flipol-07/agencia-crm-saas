@@ -119,7 +119,7 @@ function SidebarContent() {
     const settingsLink = links.find(l => l.href === '/settings')
 
     return (
-        <aside className="hidden lg:flex w-64 flex-col border-r border-white/10 sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden">
+        <aside className="hidden lg:flex w-64 flex-col border-r border-border-subtle sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden glass-panel">
             <nav className="flex-1 p-4 space-y-1 overflow-y-auto scrollbar-hide">
                 {mainLinks.map((link) => {
                     const active = isActive(link.href)
@@ -127,22 +127,23 @@ function SidebarContent() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${active
-                                ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group relative overflow-hidden ${active
+                                ? 'bg-brand/10 text-white neon-border'
+                                : 'text-text-secondary hover:text-white hover:bg-white/5'
                                 }`}
                         >
-                            <div className={`transition-colors ${active ? 'text-brand' : 'text-current group-hover:text-white'}`}>
+                            {active && <div className="absolute inset-0 bg-brand/5 blur-xl animate-pulse" />}
+                            <div className={`transition-colors relative z-10 ${active ? 'text-brand drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]' : 'text-current group-hover:text-white'}`}>
                                 {link.icon}
                             </div>
-                            <span className="font-medium flex-1">{link.label}</span>
+                            <span className="font-medium flex-1 relative z-10">{link.label}</span>
                             {(link as any).isContact && totalUnread > 0 && (
-                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center">
+                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center relative z-10">
                                     {totalUnread}
                                 </span>
                             )}
                             {link.href === '/team-chat' && teamUnread > 0 && (
-                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center animate-pulse">
+                                <span className="bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[1.25rem] text-center animate-pulse relative z-10">
                                     {teamUnread}
                                 </span>
                             )}
@@ -151,23 +152,25 @@ function SidebarContent() {
                 })}
             </nav>
 
-            {settingsLink && (
-                <div className="p-4 border-t border-white/10 mt-auto">
-                    <Link
-                        href={settingsLink.href}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${isActive(settingsLink.href)
-                            ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        <div className={`transition-colors ${isActive(settingsLink.href) ? 'text-brand' : 'text-current group-hover:text-white'}`}>
-                            {settingsLink.icon}
-                        </div>
-                        <span className="font-medium flex-1">Ajustes</span>
-                    </Link>
-                </div>
-            )}
-        </aside>
+            {
+                settingsLink && (
+                    <div className="p-4 border-t border-border-subtle mt-auto">
+                        <Link
+                            href={settingsLink.href}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-300 group ${isActive(settingsLink.href)
+                                ? 'bg-brand/10 text-white neon-border'
+                                : 'text-text-secondary hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            <div className={`transition-colors ${isActive(settingsLink.href) ? 'text-brand drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]' : 'text-current group-hover:text-white'}`}>
+                                {settingsLink.icon}
+                            </div>
+                            <span className="font-medium flex-1">Ajustes</span>
+                        </Link>
+                    </div>
+                )
+            }
+        </aside >
     )
 }
 

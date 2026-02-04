@@ -67,13 +67,13 @@ export function ServiceTagSelector({ selectedTags, onChange }: ServiceTagSelecto
                 Servicios *
             </label>
             <div
-                className={`w-full min-h-[50px] px-3 py-2 bg-white/5 border rounded-lg flex flex-wrap gap-2 items-center transition-all cursor-text ${isFocused ? 'border-lime-400 ring-1 ring-lime-400' : 'border-white/10'}`}
+                className={`w-full min-h-[50px] px-3 py-2 bg-white/5 border rounded-lg flex flex-wrap gap-2 items-center transition-all cursor-text ${isFocused ? 'border-[#8b5cf6] ring-1 ring-[#8b5cf6]' : 'border-white/10'}`}
                 onClick={() => inputRef.current?.focus()}
             >
                 {selectedTags.map(tag => (
                     <span
                         key={tag}
-                        className="bg-lime-400/20 text-lime-400 px-2 py-1 rounded-md text-sm flex items-center gap-1 border border-lime-400/30"
+                        className="bg-[#8b5cf6]/20 text-[#8b5cf6] px-2 py-1 rounded-md text-sm flex items-center gap-1 border border-[#8b5cf6]/30"
                     >
                         {tag}
                         <button
@@ -118,7 +118,7 @@ export function ServiceTagSelector({ selectedTags, onChange }: ServiceTagSelecto
                         <button
                             type="button"
                             onClick={() => addTag(inputValue)}
-                            className="w-full text-left px-3 py-2 text-lime-400 hover:bg-white/10 rounded-md transition-colors text-sm font-medium border-t border-white/5"
+                            className="w-full text-left px-3 py-2 text-[#8b5cf6] hover:bg-white/10 rounded-md transition-colors text-sm font-medium border-t border-white/5"
                         >
                             Crear "{inputValue}"
                         </button>

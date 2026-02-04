@@ -19,7 +19,7 @@ const A4_WIDTH_MM = 210
 const A4_HEIGHT_MM = 297
 
 const DEFAULT_BLOCKS: InvoiceElement[] = [
-    { id: '1', type: 'title', x: 20, y: 20, content: 'FACTURA', fontSize: 32, fontWeight: '900', color: '#a3e635' },
+    { id: '1', type: 'title', x: 20, y: 20, content: 'FACTURA', fontSize: 32, fontWeight: '900', color: '#8b5cf6' },
     { id: '2', type: 'invoice_number', x: 20, y: 35, fontSize: 10, color: '#9ca3af' },
     { id: '3', type: 'issuer', x: 20, y: 60 },
     { id: '4', type: 'recipient', x: 120, y: 60 },
@@ -178,7 +178,7 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                     </button>
                     <button
                         onClick={() => setShowEditor(!showEditor)}
-                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${showEditor ? 'bg-lime-400 text-black shadow-lg shadow-lime-400/20' : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'}`}
+                        className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${showEditor ? 'bg-[#8b5cf6] text-white shadow-lg shadow-[#8b5cf6]/20' : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'}`}
                     >
                         ✨ {showEditor ? 'Modo Editor Activo' : 'Editor de Bloques'}
                     </button>
@@ -188,7 +188,7 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                     <button
                         onClick={handleSave}
                         disabled={!hasChanges || loading}
-                        className={`px-4 py-2 rounded-lg font-bold ${hasChanges ? 'bg-lime-400 text-black' : 'bg-white/5 text-gray-500'}`}
+                        className={`px-4 py-2 rounded-lg font-bold ${hasChanges ? 'bg-[#8b5cf6] text-white' : 'bg-white/5 text-gray-500'}`}
                     >
                         {isSaving ? 'Guardando...' : 'Guardar'}
                     </button>

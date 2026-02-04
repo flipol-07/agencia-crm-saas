@@ -200,7 +200,7 @@ export function EmailList({ contactId, contactEmail, emails, onRefresh }: EmailL
                             }
                         }}
                         disabled={isMarkingAll}
-                        className="text-[10px] font-bold text-lime-400 hover:text-lime-300 uppercase tracking-tighter flex items-center gap-1 transition-colors disabled:opacity-50"
+                        className="text-[10px] font-bold text-[#8b5cf6] hover:text-[#7c3aed] uppercase tracking-tighter flex items-center gap-1 transition-colors disabled:opacity-50"
                     >
                         <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -235,7 +235,7 @@ export function EmailList({ contactId, contactEmail, emails, onRefresh }: EmailL
             {conversations.length > 3 && (
                 <div className="text-center mt-4 pb-2">
                     <button
-                        className="text-xs text-lime-400 hover:text-lime-300 transition-colors font-medium flex items-center gap-1 mx-auto bg-white/5 border border-white/10 px-3 py-1.5 rounded-full hover:bg-white/10"
+                        className="text-xs text-[#8b5cf6] hover:text-[#7c3aed] transition-colors font-medium flex items-center gap-1 mx-auto bg-white/5 border border-white/10 px-3 py-1.5 rounded-full hover:bg-white/10"
                         onClick={() => setShowAll(!showAll)}
                     >
                         {showAll ? (
@@ -265,7 +265,7 @@ function ConversationItem({ conversation, readEmailIds, onReadToggle, contactId 
     const isLatestOutbound = latestEmail.direction === 'outbound'
 
     return (
-        <div className={`rounded-xl border transition-all duration-200 overflow-hidden ${expanded ? 'border-lime-400/30 bg-white/5' : 'bg-white/5 border-white/10 hover:border-white/20'
+        <div className={`rounded-xl border transition-all duration-200 overflow-hidden ${expanded ? 'border-[#8b5cf6]/30 bg-white/5' : 'bg-white/5 border-white/10 hover:border-white/20'
             }`}>
             {/* Cabecera del Hilo */}
             <div
@@ -283,7 +283,7 @@ function ConversationItem({ conversation, readEmailIds, onReadToggle, contactId 
                             {latestEmail && formatDistanceToNow(new Date(latestEmail.received_at || latestEmail.created_at), { addSuffix: true, locale: es })}
                         </span>
                         {isLatestOutbound && (
-                            <span className="text-[10px] text-lime-400 flex items-center gap-1 font-medium">
+                            <span className="text-[10px] text-[#8b5cf6] flex items-center gap-1 font-medium">
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" /></svg>
                                 Respondiste
                             </span>
@@ -292,7 +292,7 @@ function ConversationItem({ conversation, readEmailIds, onReadToggle, contactId 
                 </div>
 
                 <div className="flex justify-between items-center gap-4">
-                    <h4 className={`text-sm font-semibold truncate flex-1 leading-snug ${expanded ? 'text-lime-400' : 'text-slate-200'}`}>
+                    <h4 className={`text-sm font-semibold truncate flex-1 leading-snug ${expanded ? 'text-[#8b5cf6]' : 'text-slate-200'}`}>
                         {conversation.subject || '(Sin asunto)'}
                     </h4>
                 </div>
@@ -334,7 +334,7 @@ function ConversationItem({ conversation, readEmailIds, onReadToggle, contactId 
                                 const mailtoUrl = `mailto:${targetEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
                                 window.open(mailtoUrl, '_blank')
                             }}
-                            className="flex items-center gap-1.5 px-4 py-2 bg-lime-400 text-black text-xs font-bold rounded-lg hover:bg-lime-300 transition-all hover:scale-105 shadow-lg shadow-lime-400/20"
+                            className="flex items-center gap-1.5 px-4 py-2 bg-[#8b5cf6] text-white text-xs font-bold rounded-lg hover:bg-[#7c3aed] transition-all hover:scale-105 shadow-lg shadow-purple-500/20"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -361,7 +361,7 @@ function EmailMessageItem({ email, isLast, isRead, onReadToggle, contactId }: { 
         <div className={`flex flex-col ${isInbound ? 'items-start' : 'items-end'} animate-in fade-in slide-in-from-bottom-2 duration-300`}>
             <div className={`max-w-[85%] rounded-2xl p-4 shadow-md transition-all ${isInbound
                 ? 'bg-slate-800/80 border border-white/10 rounded-tl-none text-slate-100'
-                : 'bg-lime-400 text-black rounded-tr-none font-medium'
+                : 'bg-[#8b5cf6] text-white rounded-tr-none font-medium'
                 }`}>
 
                 <div className={`flex items-center gap-2 mb-2 ${isInbound ? 'opacity-50' : 'opacity-70'}`}>

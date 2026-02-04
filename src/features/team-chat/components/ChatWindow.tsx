@@ -147,11 +147,11 @@ export function ChatWindow({ chatId }: Props) {
                     </svg>
                 </Link>
 
-                <div className="w-10 h-10 rounded-full bg-lime-500/20 flex items-center justify-center overflow-hidden border border-white/10">
+                <div className="w-10 h-10 rounded-full bg-[#8b5cf6]/20 flex items-center justify-center overflow-hidden border border-white/10">
                     {chatInfo?.avatar ? (
                         <img src={chatInfo.avatar} alt="" className="w-full h-full object-cover" />
                     ) : (
-                        <span className="text-lime-500 font-bold">{chatInfo?.name?.[0]?.toUpperCase() || '#'}</span>
+                        <span className="text-[#8b5cf6] font-bold">{chatInfo?.name?.[0]?.toUpperCase() || '#'}</span>
                     )}
                 </div>
                 <div>
@@ -168,11 +168,11 @@ export function ChatWindow({ chatId }: Props) {
                     return (
                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start mb-2'}`}>
                             <div className={`max-w-[80%] md:max-w-[60%] rounded-2xl px-4 py-2 relative shadow-sm ${isMe
-                                ? 'bg-lime-500 text-black rounded-tr-none'
+                                ? 'bg-[#8b5cf6] text-white rounded-tr-none'
                                 : 'bg-zinc-800 text-white rounded-tl-none border border-white/5'
                                 }`}>
                                 <p className="whitespace-pre-wrap text-sm md:text-base">{msg.content}</p>
-                                <div className={`text-[10px] mt-1 text-right ${isMe ? 'text-black/60' : 'text-gray-400'}`}>
+                                <div className={`text-[10px] mt-1 text-right ${isMe ? 'text-white/60' : 'text-gray-400'}`}>
                                     {format(new Date(msg.created_at), 'HH:mm', { locale: es })}
                                     {isMe && (
                                         <span className="ml-1">
@@ -190,7 +190,7 @@ export function ChatWindow({ chatId }: Props) {
             {/* Input Area */}
             <div className="p-4 bg-zinc-900 border-t border-white/10">
                 <form onSubmit={handleSend} className="flex gap-2 items-end max-w-4xl mx-auto">
-                    <div className="flex-1 bg-black/40 border border-white/10 rounded-2xl flex items-center p-1 focus-within:ring-1 focus-within:ring-lime-500/50 focus-within:border-lime-500/50 transition-all">
+                    <div className="flex-1 bg-black/40 border border-white/10 rounded-2xl flex items-center p-1 focus-within:ring-1 focus-within:ring-[#8b5cf6]/50 focus-within:border-[#8b5cf6]/50 transition-all">
                         <textarea
                             value={newMessage}
                             onChange={(e) => setNewMessage(e.target.value)}
@@ -203,7 +203,7 @@ export function ChatWindow({ chatId }: Props) {
                     <button
                         type="submit"
                         disabled={!newMessage.trim() || sending}
-                        className="bg-lime-500 text-black p-3 rounded-xl hover:bg-lime-400 disabled:opacity-50 disabled:hover:bg-lime-500 transition-all flex-shrink-0"
+                        className="bg-[#8b5cf6] text-white p-3 rounded-xl hover:bg-[#7c3aed] disabled:opacity-50 disabled:hover:bg-[#8b5cf6] transition-all flex-shrink-0"
                     >
                         {sending ? (
                             <svg className="w-6 h-6 animate-spin" fill="none" viewBox="0 0 24 24">

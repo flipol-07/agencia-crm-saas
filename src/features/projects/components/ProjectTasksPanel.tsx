@@ -34,8 +34,8 @@ function TaskItem({
             <button
                 onClick={() => onToggle(!task.is_completed)}
                 className={`mt-0.5 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${task.is_completed
-                    ? 'bg-lime-400 border-lime-400'
-                    : 'border-white/20 hover:border-lime-400/50 hover:bg-lime-400/5'
+                    ? 'bg-[#8b5cf6] border-[#8b5cf6]'
+                    : 'border-white/20 hover:border-[#8b5cf6]/50 hover:bg-[#8b5cf6]/5'
                     }`}
             >
                 {task.is_completed && (
@@ -118,7 +118,7 @@ function ProjectCard({
 
     const statusColors: Record<string, string> = {
         pending: 'bg-zinc-800 text-zinc-400 border border-zinc-700/50',
-        active: 'bg-lime-500/10 text-lime-400 border border-lime-500/20',
+        active: 'bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/20',
         on_hold: 'bg-amber-500/10 text-amber-400 border border-amber-500/20',
         completed: 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20',
         cancelled: 'bg-red-500/10 text-red-400 border border-red-500/20',
@@ -166,7 +166,7 @@ function ProjectCard({
                 <div className="flex items-center gap-4 flex-1">
                     <button
                         onClick={onToggle}
-                        className={`p-2 rounded-lg bg-zinc-800/50 transition-transform ${isExpanded ? 'rotate-90 text-lime-400' : 'text-zinc-500'}`}
+                        className={`p-2 rounded-lg bg-zinc-800/50 transition-transform ${isExpanded ? 'rotate-90 text-[#8b5cf6]' : 'text-zinc-500'}`}
                     >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
@@ -182,19 +182,19 @@ function ProjectCard({
                                     value={editName}
                                     onChange={(e) => setEditName(e.target.value)}
                                     onBlur={() => setIsEditing(false)}
-                                    className="bg-zinc-950 border border-lime-500/50 rounded px-2 py-0.5 text-white text-sm focus:outline-none w-full max-w-[200px]"
+                                    className="bg-zinc-950 border border-[#8b5cf6]/50 rounded px-2 py-0.5 text-white text-sm focus:outline-none w-full max-w-[200px]"
                                 />
                             </form>
                         ) : (
                             <div className="flex items-center gap-2 group/title">
-                                <h4 onClick={onToggle} className={`font-semibold uppercase tracking-wider cursor-pointer ${_isGeneral ? 'text-lime-400' : 'text-zinc-100'}`}>
+                                <h4 onClick={onToggle} className={`font-semibold uppercase tracking-wider cursor-pointer ${_isGeneral ? 'text-[#8b5cf6]' : 'text-zinc-100'}`}>
                                     {project.name}
                                 </h4>
                                 {!_isGeneral && (
                                     <>
                                         <button
                                             onClick={() => setIsEditing(true)}
-                                            className="opacity-0 group-hover/title:opacity-100 p-1 text-zinc-500 hover:text-lime-400 transition-opacity"
+                                            className="opacity-0 group-hover/title:opacity-100 p-1 text-zinc-500 hover:text-[#8b5cf6] transition-opacity"
                                         >
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
@@ -225,7 +225,7 @@ function ProjectCard({
                     </span>
                     <div className="w-20 h-1 bg-zinc-800 rounded-full overflow-hidden">
                         <div
-                            className="h-full bg-lime-400 transition-all duration-500"
+                            className="h-full bg-[#8b5cf6] transition-all duration-500"
                             style={{ width: `${totalTasks > 0 ? ((totalTasks - pendingTasks) / totalTasks) * 100 : 0}%` }}
                         />
                     </div>
@@ -237,7 +237,7 @@ function ProjectCard({
                     <div className="h-px bg-gradient-to-r from-transparent via-white/5 to-transparent mb-4 mx-4" />
                     {loading ? (
                         <div className="flex flex-col items-center py-8 gap-3">
-                            <div className="w-6 h-6 border-2 border-lime-400/20 border-t-lime-400 rounded-full animate-spin" />
+                            <div className="w-6 h-6 border-2 border-[#8b5cf6]/20 border-t-[#8b5cf6] rounded-full animate-spin" />
                             <span className="text-zinc-500 text-xs font-medium tracking-wide">Cargando tareas profesionalmente...</span>
                         </div>
                     ) : (
@@ -261,7 +261,7 @@ function ProjectCard({
                             </div>
 
                             {/* Add task form */}
-                            <form onSubmit={handleAddTask} className="flex gap-2 group/form p-1 bg-zinc-950/50 rounded-xl border border-white/5 focus-within:border-lime-400/30 transition-all mx-4">
+                            <form onSubmit={handleAddTask} className="flex gap-2 group/form p-1 bg-zinc-950/50 rounded-xl border border-white/5 focus-within:border-[#8b5cf6]/30 transition-all mx-4">
                                 <input
                                     type="text"
                                     value={newTaskTitle}
@@ -272,7 +272,7 @@ function ProjectCard({
                                 <button
                                     type="submit"
                                     disabled={isAdding || !newTaskTitle.trim()}
-                                    className="px-4 py-2 text-sm bg-lime-400 text-black font-bold rounded-lg hover:bg-lime-300 disabled:opacity-0 transition-all shadow-lg shadow-lime-400/10 shrink-0"
+                                    className="px-4 py-2 text-sm bg-[#8b5cf6] text-white font-bold rounded-lg hover:bg-[#7c3aed] disabled:opacity-0 transition-all shadow-lg shadow-purple-500/10 shrink-0"
                                 >
                                     +
                                 </button>
@@ -398,10 +398,10 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
             </div>
 
             {/* Create project form */}
-            <form onSubmit={handleCreateProject} className="flex flex-col md:flex-row gap-3 group/panel p-2 bg-zinc-950/30 rounded-2xl border border-white/5 focus-within:border-lime-400/20 transition-all shadow-inner">
+            <form onSubmit={handleCreateProject} className="flex flex-col md:flex-row gap-3 group/panel p-2 bg-zinc-950/30 rounded-2xl border border-white/5 focus-within:border-[#8b5cf6]/20 transition-all shadow-inner">
                 <div className="flex-1 flex flex-col md:flex-row items-stretch md:items-center px-3 gap-3">
                     <div className="flex items-center gap-3 flex-1">
-                        <svg className="w-5 h-5 text-zinc-600 group-focus-within/panel:text-lime-400 transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 text-zinc-600 group-focus-within/panel:text-[#8b5cf6] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
                         <input
@@ -416,7 +416,7 @@ export function ProjectTasksPanel({ contactId }: ProjectTasksPanelProps) {
                 <button
                     type="submit"
                     disabled={isCreating || !newProjectName.trim()}
-                    className="w-full md:w-auto px-6 py-2.5 text-xs bg-zinc-800 text-zinc-100 font-bold uppercase tracking-widest rounded-xl hover:bg-lime-400 hover:text-black hover:shadow-lg hover:shadow-lime-400/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                    className="w-full md:w-auto px-6 py-2.5 text-xs bg-zinc-800 text-zinc-100 font-bold uppercase tracking-widest rounded-xl hover:bg-[#8b5cf6] hover:text-white hover:shadow-lg hover:shadow-purple-500/20 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                 >
                     {isCreating ? 'Creando...' : 'Crear Proyecto'}
                 </button>

@@ -12,7 +12,7 @@ export const metadata: Metadata = {
     statusBarStyle: 'black-translucent',
     title: 'Aurie CRM',
     startupImage: [
-      '/auri-official-logo.png',
+      '/brand/logo.png',
     ],
   },
 }

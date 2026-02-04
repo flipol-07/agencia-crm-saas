@@ -30,7 +30,7 @@ export const FontSelector = memo(function FontSelector({ value, onChange }: Prop
                         className={`
                             w-full text-left px-3 py-2 text-sm rounded transition-colors
                             ${value === font.name
-                                ? 'bg-lime-400 text-black font-bold'
+                                ? 'bg-brand text-white font-bold'
                                 : 'bg-white/5 text-gray-300 hover:bg-white/10'}
                         `}
                         style={{ fontFamily: font.family }}

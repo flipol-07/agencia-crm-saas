@@ -14,7 +14,7 @@ export function ExpenseList({ expenses, isLoading, onEdit, onDelete }: ExpenseLi
         return (
             <div className="glass rounded-xl p-8">
                 <div className="flex items-center justify-center gap-3">
-                    <div className="w-5 h-5 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-[#8b5cf6] border-t-transparent rounded-full animate-spin" />
                     <span className="text-gray-400">Cargando transacciones...</span>
                 </div>
             </div>
@@ -85,7 +85,7 @@ export function ExpenseList({ expenses, isLoading, onEdit, onDelete }: ExpenseLi
                                 <div
                                     className="w-10 h-10 rounded-lg flex items-center justify-center text-lg"
                                     style={{
-                                        backgroundColor: expense.type === 'income' ? 'rgba(163, 230, 53, 0.2)' : 'rgba(239, 68, 68, 0.2)'
+                                        backgroundColor: expense.type === 'income' ? 'rgba(139, 92, 246, 0.2)' : 'rgba(239, 68, 68, 0.2)'
                                     }}
                                 >
                                     {expense.type === 'income' ? '📈' : '📉'}
@@ -111,14 +111,14 @@ export function ExpenseList({ expenses, isLoading, onEdit, onDelete }: ExpenseLi
                                             <span className="text-purple-400">Personal</span>
                                         )}
                                         {expense.tax_deductible && (
-                                            <span className="text-lime-400">Deducible</span>
+                                            <span className="text-[#a78bfa]">Deducible</span>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Amount */}
                                 <div className="text-right">
-                                    <p className={`font-semibold ${expense.type === 'income' ? 'text-lime-400' : 'text-red-400'}`}>
+                                    <p className={`font-semibold ${expense.type === 'income' ? 'text-[#a78bfa]' : 'text-red-400'}`}>
                                         {formatAmount(expense.amount, expense.type)}
                                     </p>
                                     {expense.tax_deductible && expense.tax_amount > 0 && (

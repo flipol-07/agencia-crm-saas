@@ -32,10 +32,10 @@ function PipelineCard({ contact, isOverlay = false }: { contact: Contact, isOver
     }
 
     return (
-        <div className={`bg-white/5 border border-white/10 rounded-lg p-4 hover:border-lime-400/30 transition-all cursor-pointer group select-none overflow-hidden ${isOverlay ? 'shadow-2xl bg-[#1a1a1a] border-lime-500/50' : ''}`}>
+        <div className={`bg-white/5 border border-white/10 rounded-lg p-4 hover:border-purple-400/30 hover:shadow-[0_0_15px_rgba(139,92,246,0.1)] transition-all cursor-pointer group select-none overflow-hidden ${isOverlay ? 'shadow-2xl bg-[#1a1a1a] border-purple-500/50' : ''}`}>
             <div className="flex items-start justify-between mb-2">
                 <Link href={`/contacts/${contact.id}`} className="flex-1 min-w-0" onClick={e => e.stopPropagation()}>
-                    <h4 className="font-medium text-white group-hover:text-lime-400 transition-colors truncate">
+                    <h4 className="font-medium text-white group-hover:text-[#8b5cf6] transition-colors truncate">
                         {contact.company_name}
                     </h4>
                 </Link>
@@ -63,7 +63,7 @@ function PipelineCard({ contact, isOverlay = false }: { contact: Contact, isOver
                         Email
                     </span>
                 )}
-                <span className="ml-auto font-mono text-lime-500/80">
+                <span className="ml-auto font-mono text-purple-400 font-bold">
                     {contact.estimated_value ? `${contact.estimated_value.toLocaleString()}€` : '-'}
                 </span>
             </div>
@@ -111,7 +111,7 @@ function PipelineColumn({
         blue: 'border-blue-500/30 bg-blue-500/5',
         purple: 'border-purple-500/30 bg-purple-500/5',
         amber: 'border-amber-500/30 bg-amber-500/5',
-        lime: 'border-lime-500/30 bg-lime-500/5',
+        lime: 'border-[#8b5cf6]/30 bg-[#8b5cf6]/5', // Mapped to purple for consistency
         red: 'border-red-500/30 bg-red-500/5',
     }
 
@@ -120,7 +120,7 @@ function PipelineColumn({
         blue: 'text-blue-400',
         purple: 'text-purple-400',
         amber: 'text-amber-400',
-        lime: 'text-lime-400',
+        lime: 'text-[#8b5cf6]', // Mapped to purple
         red: 'text-red-400',
     }
 

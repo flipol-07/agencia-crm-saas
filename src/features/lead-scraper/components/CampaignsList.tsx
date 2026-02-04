@@ -16,7 +16,7 @@ export function CampaignsList({ campaigns, currentCampaign, onSelect, onDelete, 
         scraping: { label: 'Scraping...', color: 'text-blue-400', bg: 'bg-blue-500/20' },
         finding_emails: { label: 'Buscando emails...', color: 'text-purple-400', bg: 'bg-purple-500/20' },
         ready: { label: 'Listo', color: 'text-green-400', bg: 'bg-green-500/20' },
-        generating: { label: 'Generando...', color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
+        generating: { label: 'Generando...', color: 'text-[#a78bfa]', bg: 'bg-[#8b5cf6]/20' },
         sending: { label: 'Enviando...', color: 'text-orange-400', bg: 'bg-orange-500/20' },
         completed: { label: 'Completado', color: 'text-emerald-400', bg: 'bg-emerald-500/20' },
     }
@@ -57,7 +57,7 @@ export function CampaignsList({ campaigns, currentCampaign, onSelect, onDelete, 
                                 <div
                                     key={campaign.id}
                                     className={`w-full text-left p-4 rounded-xl border transition-all ${isActive
-                                        ? 'bg-[#bfff00]/10 border-[#bfff00]/30'
+                                        ? 'bg-[#8b5cf6]/20 border-[#8b5cf6]/50 shadow-[0_0_15px_rgba(139,92,246,0.1)]'
                                         : 'bg-white/5 border-white/10 hover:bg-white/10'
                                         }`}
                                 >

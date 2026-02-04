@@ -22,6 +22,7 @@ export type Profile = {
     billing_iban?: string | null
     professional_role?: string | null
     professional_description?: string | null
+    default_irpf_rate?: number | null
 }
 
 // Enums de Contact
@@ -309,13 +310,12 @@ export interface Invoice {
     subtotal: number
     tax_rate: number
     tax_amount: number
-    total: number
-    created_at: string
-    updated_at: string
     created_by: string | null
     issuer_profile_id: string | null
     template_id: string | null
     config: InvoiceTemplateConfig | null
+    irpf_rate: number
+    irpf_amount: number
 }
 
 export type InvoiceInsert = Omit<Invoice, 'id' | 'created_at' | 'updated_at'>
@@ -466,6 +466,7 @@ export type Database = {
                     billing_iban?: string | null
                     professional_role?: string | null
                     professional_description?: string | null
+                    default_irpf_rate?: number | null
                 }
                 Update: {
                     id?: string

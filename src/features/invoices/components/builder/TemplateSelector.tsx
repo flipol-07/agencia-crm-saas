@@ -32,7 +32,7 @@ export function TemplateSelector({ itemCount, selectedTemplateId, onSelect }: Pr
         <div className="space-y-4">
             <div className="flex justify-between items-center">
                 <p className="text-xs text-gray-400">Selecciona un diseño:</p>
-                <Link href="/settings/templates" target="_blank" className="text-xs text-lime-400 hover:text-lime-300 flex items-center gap-1 font-bold">
+                <Link href="/settings/templates" target="_blank" className="text-xs text-brand hover:text-brand-purple flex items-center gap-1 font-bold">
                     ⚙️ Gestionar Mis Plantillas
                 </Link>
             </div>
@@ -46,13 +46,13 @@ export function TemplateSelector({ itemCount, selectedTemplateId, onSelect }: Pr
                         className={`
                         cursor-pointer border-2 rounded-xl p-4 transition-all relative overflow-hidden group
                         ${selectedTemplateId === template.id
-                                ? 'border-lime-400 bg-lime-400/10'
+                                ? 'border-brand bg-brand/10'
                                 : 'border-white/10 hover:border-white/30 bg-white/5'}
                     `}
                     >
                         <div className="relative z-10">
                             <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-bold text-white group-hover:text-lime-400 transition-colors">
+                                <h3 className="font-bold text-white group-hover:text-brand transition-colors">
                                     {template.name}
                                 </h3>
                                 {template.is_default && (
@@ -69,13 +69,13 @@ export function TemplateSelector({ itemCount, selectedTemplateId, onSelect }: Pr
                                 <div
                                     className={`px-2 py-1 rounded-full border ${itemCount > template.max_items
                                         ? 'border-red-500/50 text-red-400 bg-red-500/10'
-                                        : 'border-lime-500/30 text-lime-400 bg-lime-500/10'
+                                        : 'border-brand/30 text-brand bg-brand/10'
                                         }`}
                                 >
                                     Capacidad: {template.max_items} items
                                 </div>
                                 {optimal?.id === template.id && (
-                                    <div className="px-2 py-1 rounded-full bg-lime-400 text-black font-bold animate-pulse">
+                                    <div className="px-2 py-1 rounded-full bg-brand text-white font-bold animate-pulse">
                                         Recomendada
                                     </div>
                                 )}

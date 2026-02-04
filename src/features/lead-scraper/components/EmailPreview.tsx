@@ -62,7 +62,7 @@ export function EmailPreview({ leads, onClose, onSend }: EmailPreviewProps) {
                             <button
                                 onClick={handleSend}
                                 disabled={isSending || selectedLeads.size === 0}
-                                className="px-6 py-2.5 bg-[#bfff00] text-black font-semibold rounded-lg hover:bg-[#a8e600] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="px-6 py-2.5 bg-[#8b5cf6] text-white font-semibold rounded-lg hover:bg-[#7c3aed] transition-all shadow-[0_0_15px_rgba(139,92,246,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {isSending ? '⏳ Enviando...' : `🚀 Enviar (${selectedLeads.size})`}
                             </button>
@@ -85,8 +85,8 @@ export function EmailPreview({ leads, onClose, onSend }: EmailPreviewProps) {
                                     key={lead.id}
                                     onClick={() => setSelectedIndex(index)}
                                     className={`p-4 rounded-lg cursor-pointer transition-all ${selectedIndex === index
-                                            ? 'bg-[#bfff00]/10 border border-[#bfff00]/30'
-                                            : 'bg-white/5 border border-white/10 hover:bg-white/10'
+                                        ? 'bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 shadow-[0_0_10px_rgba(139,92,246,0.1)]'
+                                        : 'bg-white/5 border border-white/10 hover:bg-white/10'
                                         }`}
                                 >
                                     <div className="flex items-start gap-3">
@@ -95,7 +95,7 @@ export function EmailPreview({ leads, onClose, onSend }: EmailPreviewProps) {
                                             checked={selectedLeads.has(lead.id)}
                                             onChange={() => toggleLead(lead.id)}
                                             onClick={(e) => e.stopPropagation()}
-                                            className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-[#bfff00] checked:border-[#bfff00]"
+                                            className="mt-1 w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-[#8b5cf6] checked:border-[#8b5cf6]"
                                         />
                                         <div className="flex-1 min-w-0">
                                             <div className="font-medium text-white truncate">

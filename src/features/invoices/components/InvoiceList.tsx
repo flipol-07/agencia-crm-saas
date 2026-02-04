@@ -5,6 +5,10 @@ import Link from 'next/link'
 import { useInvoices } from '../hooks/useInvoices'
 import type { InvoiceStatus, InvoiceWithDetails } from '@/types/database'
 import { InvoiceForm } from './InvoiceForm'
+import { Badge } from '@/shared/components/ui/Badge'
+import { motion, AnimatePresence } from 'framer-motion'
+import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 
 interface InvoiceListProps {
     contactId?: string
@@ -23,27 +27,19 @@ export function InvoiceList({ contactId, initialInvoices }: InvoiceListProps) {
     const isInitialLoading = loading && invoices.length === 0
     const [creating, setCreating] = useState(false)
 
-    const statusColors: Record<InvoiceStatus, string> = {
-        draft: 'bg-gray-500/20 text-gray-400',
-        sent: 'bg-blue-500/20 text-blue-400',
-        paid: 'bg-lime-500/20 text-lime-400',
-        overdue: 'bg-red-500/20 text-red-400',
-        cancelled: 'bg-white/10 text-gray-500',
-    }
-
-    const statusLabels: Record<InvoiceStatus, string> = {
-        draft: 'Borrador',
-        sent: 'Enviada',
-        paid: 'Pagada',
-        overdue: 'Vencida',
-        cancelled: 'Cancelada',
+    const statusConfig: Record<InvoiceStatus, { label: string, color: string, border: string, bg: string }> = {
+        draft: { label: 'Borrador', color: 'text-gray-400', border: 'border-gray-500/20', bg: 'bg-gray-500/10' },
+        sent: { label: 'Enviada', color: 'text-blue-400', border: 'border-blue-500/20', bg: 'bg-blue-500/10' },
+        paid: { label: 'Pagada', color: 'text-[#8b5cf6]', border: 'border-[#8b5cf6]/20', bg: 'bg-[#8b5cf6]/10' },
+        overdue: { label: 'Vencida', color: 'text-red-400', border: 'border-red-500/20', bg: 'bg-red-500/10' },
+        cancelled: { label: 'Cancelada', color: 'text-gray-500', border: 'border-gray-500/20', bg: 'bg-white/5' },
     }
 
     if (isInitialLoading && !creating) {
         return (
             <div className="space-y-3">
                 {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-16 bg-white/5 rounded-xl animate-pulse" />
+                    <div key={i} className="h-24 bg-white/5 rounded-2xl animate-pulse border border-white/5" />
                 ))}
             </div>
         )
@@ -51,77 +47,93 @@ export function InvoiceList({ contactId, initialInvoices }: InvoiceListProps) {
 
     if (creating) {
         return (
-            <InvoiceForm
-                initialContactId={contactId}
-                onSuccess={() => {
-                    setCreating(false)
-                    refetch()
-                }}
-                onCancel={() => setCreating(false)}
-            />
+            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}>
+                <InvoiceForm
+                    initialContactId={contactId}
+                    onSuccess={() => {
+                        setCreating(false)
+                        refetch()
+                    }}
+                    onCancel={() => setCreating(false)}
+                />
+            </motion.div>
         )
     }
 
     return (
-        <div className="space-y-4">
+        <div className="space-y-6">
+            <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
+                    <span className="w-1.5 h-6 bg-[#8b5cf6] rounded-full"></span>
+                    Listado de Facturas
+                </h2>
+                <button
+                    onClick={() => setCreating(true)}
+                    className="group bg-[#8b5cf6] text-white px-5 py-2.5 rounded-xl text-sm font-bold transition-all shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] hover:scale-105 flex items-center gap-2"
+                >
+                    <svg className="w-5 h-5 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Nueva Factura
+                </button>
+            </div>
+
             {invoices.length === 0 ? (
-                <div className="text-center py-16 bg-zinc-900/20 border border-white/5 rounded-2xl">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-zinc-900 rounded-full flex items-center justify-center border border-white/5 shadow-inner">
-                        <svg className="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="glass-card rounded-3xl p-12 text-center border border-white/5 relative overflow-hidden">
+                    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#8b5cf6]/5 rounded-full blur-3xl -z-10"></div>
+                    <div className="w-20 h-20 mx-auto mb-6 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 shadow-inner backdrop-blur-sm">
+                        <svg className="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                     </div>
-                    <p className="text-zinc-500 text-sm mb-6">No hay facturas registradas</p>
+                    <h3 className="text-xl font-bold text-white mb-2">No hay facturas registradas</h3>
+                    <p className="text-gray-400 text-sm mb-8 max-w-md mx-auto">Comienza a registrar tus ingresos creando tu primera factura profesional.</p>
                     <button
                         onClick={() => setCreating(true)}
-                        className="px-6 py-2 bg-lime-400 hover:bg-lime-500 text-black font-medium rounded-lg text-sm transition-colors shadow-lg shadow-lime-400/20"
+                        className="px-8 py-3 bg-white/5 hover:bg-white/10 text-white font-medium rounded-xl text-sm transition-all border border-white/10 hover:border-white/20"
                     >
-                        + Crear primera factura
+                        Crear primera factura
                     </button>
                 </div>
             ) : (
-                <>
-                    <div className="flex justify-end mb-4">
-                        <button
-                            onClick={() => setCreating(true)}
-                            className="bg-lime-400 hover:bg-lime-500 text-black px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-lg shadow-lime-400/10 flex items-center gap-2"
-                        >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                            </svg>
-                            Nueva Factura
-                        </button>
-                    </div>
-
-                    <div className="space-y-3">
-                        {invoices.map(invoice => (
-                            <div key={invoice.id} className="group relative flex items-center justify-between p-4 bg-zinc-900/40 hover:bg-zinc-900/60 rounded-xl border border-white/5 hover:border-lime-400/20 transition-all duration-300 hover:shadow-lg">
+                <div className="grid gap-4">
+                    <AnimatePresence>
+                        {invoices.map((invoice, index) => (
+                            <motion.div
+                                key={invoice.id}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="group relative flex flex-col xl:flex-row xl:items-center justify-between p-3 sm:p-4 bg-black/40 backdrop-blur-md hover:bg-white/5 rounded-xl border border-white/5 hover:border-[#8b5cf6]/30 transition-all duration-300 hover:shadow-[0_0_20px_rgba(0,0,0,0.5)] max-w-full"
+                            >
                                 <Link href={`/invoices/${invoice.id}`} className="absolute inset-0 z-10" />
 
-                                <div className="flex items-center gap-4 z-20 pointer-events-none">
-                                    <div className="hidden md:flex w-12 h-12 rounded-lg bg-zinc-800 items-center justify-center border border-white/5 group-hover:border-lime-400/20 transition-colors">
-                                        <svg className="w-6 h-6 text-zinc-500 group-hover:text-lime-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="flex items-center gap-3 z-20 pointer-events-none mb-3 xl:mb-0 min-w-0">
+                                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-white/5 flex items-center justify-center border border-white/5 group-hover:border-[#8b5cf6]/20 group-hover:bg-[#8b5cf6]/5 transition-colors shadow-inner shrink-0">
+                                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-gray-500 group-hover:text-[#8b5cf6] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                                         </svg>
                                     </div>
-                                    <div className="flex flex-col gap-0.5">
-                                        <div className="flex items-center gap-2">
-                                            <span className="text-sm font-bold text-zinc-200 group-hover:text-lime-400 transition-colors">
-                                                {invoice.invoice_number || 'Borrador'}
+                                    <div className="flex flex-col gap-0.5 min-w-0">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="text-base sm:text-lg font-bold text-white group-hover:text-[#8b5cf6] transition-colors tracking-tight font-display truncate">
+                                                {invoice.invoice_number || 'BORRADOR'}
                                             </span>
                                             {!contactId && invoice.contacts && (
-                                                <span className="text-xs text-zinc-500 bg-zinc-800/50 px-2 py-0.5 rounded-full border border-white/5">
-                                                    {invoice.contacts.company_name || 'Sin Cliente'}
+                                                <span className="text-[9px] uppercase font-bold text-gray-400 bg-white/5 px-2 py-0.5 rounded-lg border border-white/5 tracking-wider truncate max-w-[120px]">
+                                                    {invoice.contacts.company_name || 'SIN CLIENTE'}
                                                 </span>
                                             )}
                                         </div>
-                                        <span className="text-xs text-zinc-500">
-                                            {new Date(invoice.issue_date).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
-                                        </span>
+                                        <div className="flex items-center gap-2 text-[10px] sm:text-xs text-gray-500 flex-wrap">
+                                            <span className="whitespace-nowrap">Emitida: {format(new Date(invoice.issue_date), 'dd MMM yyyy', { locale: es })}</span>
+                                            <span className="hidden sm:inline-block w-0.5 h-0.5 rounded-full bg-gray-700"></span>
+                                            <span className="whitespace-nowrap">Vence: {invoice.due_date ? format(new Date(invoice.due_date), 'dd MMM yyyy', { locale: es }) : 'Sin vencim.'}</span>
+                                        </div>
                                     </div>
                                 </div>
 
-                                <div className="flex items-center gap-4 sm:gap-6 z-20 pointer-events-none">
+                                <div className="flex items-center gap-2 sm:gap-4 z-20 pointer-events-none justify-between sm:justify-end w-full sm:w-auto">
                                     <div
                                         onClick={(e) => e.stopPropagation()}
                                         className="relative group/select pointer-events-auto"
@@ -129,47 +141,48 @@ export function InvoiceList({ contactId, initialInvoices }: InvoiceListProps) {
                                         <select
                                             value={invoice.status}
                                             onChange={(e) => updateInvoiceStatus(invoice.id, e.target.value)}
-                                            className={`appearance-none cursor-pointer text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full border ${statusColors[invoice.status].replace('bg-', 'bg-opacity-10 bg-')} pr-6`}
+                                            className={`appearance-none cursor-pointer text-[9px] sm:text-[10px] uppercase tracking-wider font-bold px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg border transition-all ${statusConfig[invoice.status].bg} ${statusConfig[invoice.status].color} ${statusConfig[invoice.status].border} hover:opacity-80 pr-6 sm:pr-8`}
                                         >
-                                            {Object.entries(statusLabels).map(([key, label]) => (
-                                                <option key={key} value={key} className="bg-zinc-900 text-zinc-200">
-                                                    {label}
+                                            {Object.entries(statusConfig).map(([key, config]) => (
+                                                <option key={key} value={key} className="bg-zinc-900 text-gray-300">
+                                                    {config.label}
                                                 </option>
                                             ))}
                                         </select>
-                                        <div className="absolute inset-y-0 right-0 flex items-center pr-1.5 pointer-events-none text-current opacity-50">
-                                            <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        <div className={`absolute inset-y-0 right-0 flex items-center pr-1.5 sm:pr-2.5 pointer-events-none opacity-50 ${statusConfig[invoice.status].color}`}>
+                                            <svg className="w-2.5 h-2.5 sm:w-3 sm:h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7 7" />
                                             </svg>
                                         </div>
                                     </div>
 
-                                    <div className="text-right min-w-[80px] sm:min-w-[100px]">
-                                        <span className="text-sm font-bold text-zinc-200 block group-hover:scale-105 transition-transform origin-right">
-                                            {invoice.total.toLocaleString('es-ES', { style: 'currency', currency: invoice.currency })}
+                                    <div className="text-right min-w-[80px] sm:min-w-[100px] shrink-0">
+                                        <span className="text-lg sm:text-2xl font-bold text-white block group-hover:scale-105 transition-transform origin-right tracking-tight font-display">
+                                            {(invoice.subtotal + invoice.tax_amount).toLocaleString('es-ES', { style: 'currency', currency: invoice.currency })}
                                         </span>
+                                        <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase tracking-widest font-medium">Total</span>
                                     </div>
 
                                     <button
                                         onClick={(e) => {
                                             e.preventDefault()
-                                            e.stopPropagation() // Stop link navigation
+                                            e.stopPropagation()
                                             if (confirm('¿Estás seguro de eliminar esta factura?')) {
                                                 deleteInvoice(invoice.id)
                                             }
                                         }}
-                                        className="pointer-events-auto p-2 text-zinc-600 hover:text-red-400 hover:bg-red-400/10 rounded-lg opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0"
+                                        className="pointer-events-auto w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-600 hover:text-red-400 hover:bg-red-400/10 rounded-xl border border-transparent hover:border-red-400/20 transition-all opacity-0 group-hover:opacity-100 shrink-0"
                                         title="Eliminar factura"
                                     >
-                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                         </svg>
                                     </button>
                                 </div>
-                            </div>
+                            </motion.div>
                         ))}
-                    </div>
-                </>
+                    </AnimatePresence>
+                </div>
             )}
         </div>
     )

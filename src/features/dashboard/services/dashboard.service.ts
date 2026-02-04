@@ -321,7 +321,7 @@ export async function getExpenseDistribution(userId: string, period: DashboardPe
 
     // Color palette for categories (more vibrant and varied)
     const colors = [
-        '#bfff00', // Brand Lime
+        '#8b5cf6', // Brand Purple
         '#3b82f6', // Vivid Blue
         '#9333ea', // Purple
         '#f97316', // Orange

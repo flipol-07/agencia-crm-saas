@@ -1,0 +1,84 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - button [ref=e7] [cursor=pointer]:
+            - img [ref=e8]
+          - link "Aura AURIE" [ref=e10] [cursor=pointer]:
+            - /url: /dashboard
+            - img "Aura" [ref=e12]
+            - heading "AURIE" [level=1] [ref=e13]
+        - generic [ref=e14]:
+          - generic [ref=e15]: plorenzopizarro@gmail.com
+          - button "2" [ref=e105] [cursor=pointer]:
+            - img [ref=e106]
+            - generic [ref=e108]: "2"
+          - button "Cerrar sesión" [ref=e17] [cursor=pointer]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - complementary [ref=e21]:
+          - heading "Ajustes" [level=1] [ref=e23]
+          - navigation [ref=e24]:
+            - link "General" [ref=e25] [cursor=pointer]:
+              - /url: /settings
+            - link "Plantillas" [ref=e26] [cursor=pointer]:
+              - /url: /settings/templates
+        - main [ref=e27]:
+          - generic [ref=e109]:
+            - generic [ref=e110]:
+              - heading "Plantillas de Factura" [level=1] [ref=e111]
+              - paragraph [ref=e112]: Gestiona los diseños de tus facturas.
+            - button "+ Crear Nueva Plantilla" [ref=e113] [cursor=pointer]
+      - button [ref=e30] [cursor=pointer]:
+        - img [ref=e32]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e40] [cursor=pointer]:
+    - img [ref=e41]
+  - alert [ref=e44]
+  - generic [ref=e46]:
+    - generic [ref=e47]:
+      - link "Aura AURIE" [ref=e48] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aura" [ref=e50]
+        - generic [ref=e51]: AURIE
+      - button [ref=e52] [cursor=pointer]:
+        - img [ref=e53]
+    - navigation [ref=e55]:
+      - link "Dashboard" [ref=e56] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e58]
+        - generic [ref=e60]: Dashboard
+      - link "Pipeline" [ref=e61] [cursor=pointer]:
+        - /url: /pipeline
+        - img [ref=e63]
+        - generic [ref=e65]: Pipeline
+      - link "Contactos" [ref=e66] [cursor=pointer]:
+        - /url: /contacts
+        - img [ref=e68]
+        - generic [ref=e70]: Contactos
+      - link "Tareas" [ref=e71] [cursor=pointer]:
+        - /url: /tasks
+        - img [ref=e73]
+        - generic [ref=e75]: Tareas
+      - link "Facturas" [ref=e76] [cursor=pointer]:
+        - /url: /invoices
+        - img [ref=e78]
+        - generic [ref=e80]: Facturas
+      - link "Chat de Equipo" [ref=e81] [cursor=pointer]:
+        - /url: /team-chat
+        - img [ref=e83]
+        - generic [ref=e85]: Chat de Equipo
+      - link "Economía" [ref=e86] [cursor=pointer]:
+        - /url: /expenses
+        - img [ref=e88]
+        - generic [ref=e90]: Economía
+      - link "Lead Scraper" [ref=e91] [cursor=pointer]:
+        - /url: /lead-scraper
+        - img [ref=e93]
+        - generic [ref=e95]: Lead Scraper
+    - link "Ajustes" [ref=e97] [cursor=pointer]:
+      - /url: /settings
+      - img [ref=e99]
+      - generic [ref=e102]: Ajustes

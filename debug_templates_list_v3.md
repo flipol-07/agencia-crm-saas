@@ -1,0 +1,213 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - generic [ref=e4]:
+        - generic [ref=e5]:
+          - button [ref=e7] [cursor=pointer]:
+            - img [ref=e8]
+          - link "Aura AURIE" [ref=e10] [cursor=pointer]:
+            - /url: /dashboard
+            - img "Aura" [ref=e12]
+            - heading "AURIE" [level=1] [ref=e13]
+        - generic [ref=e14]:
+          - generic [ref=e15]: plorenzopizarro@gmail.com
+          - button "2" [ref=e47] [cursor=pointer]:
+            - img [ref=e48]
+            - generic [ref=e50]: "2"
+          - button "Cerrar sesión" [ref=e17] [cursor=pointer]
+    - main [ref=e19]:
+      - generic [ref=e20]:
+        - complementary [ref=e21]:
+          - heading "Ajustes" [level=1] [ref=e23]
+          - navigation [ref=e24]:
+            - link "General" [ref=e25] [cursor=pointer]:
+              - /url: /settings
+            - link "Plantillas" [ref=e26] [cursor=pointer]:
+              - /url: /settings/templates
+        - main [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e51]:
+              - generic [ref=e52]:
+                - heading "Plantillas de Factura" [level=1] [ref=e53]
+                - paragraph [ref=e54]: Gestiona los diseños de tus facturas.
+              - button "+ Crear Nueva Plantilla" [ref=e55] [cursor=pointer]
+            - generic [ref=e56]:
+              - generic [ref=e57]:
+                - generic [ref=e58]:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - heading "FACTURA" [level=1]
+                      - generic:
+                        - generic: "#INV-2026-001"
+                      - generic:
+                        - generic: 01/01/2026
+                      - generic:
+                        - generic:
+                          - paragraph: Tu Empresa S.L.
+                          - paragraph: Tu Dirección, Ciudad
+                          - paragraph: B-12345678
+                      - generic:
+                        - generic:
+                          - heading "Cliente" [level=3]
+                          - paragraph: Empresa Cliente
+                          - paragraph: Calle Ejemplo 123, Madrid
+                      - generic:
+                        - generic:
+                          - table:
+                            - rowgroup:
+                              - row "Descripción Cant. Total":
+                                - columnheader "Descripción"
+                                - columnheader "Cant."
+                                - columnheader "Total"
+                            - rowgroup:
+                              - row "Servicios de Diseño 1 300.00€":
+                                - cell "Servicios de Diseño":
+                                  - generic: Servicios de Diseño
+                                - cell "1":
+                                  - generic: "1"
+                                - cell "300.00€":
+                                  - generic: 300.00€
+                              - row "Consultoría Especializada 1 200.00€":
+                                - cell "Consultoría Especializada":
+                                  - generic: Consultoría Especializada
+                                - cell "1":
+                                  - generic: "1"
+                                - cell "200.00€":
+                                  - generic: 200.00€
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: SUBTOTAL
+                              - generic: 500.00€
+                            - generic:
+                              - generic: IVA (21%)
+                              - generic: 105.00€
+                            - generic:
+                              - generic: TOTAL
+                              - generic: 605.00€
+                  - link "EDITAR DISEÑO" [ref=e60] [cursor=pointer]:
+                    - /url: /settings/templates/d1c62e4d-4204-4b05-bc75-8a17fac0c323
+                - generic [ref=e61]:
+                  - generic [ref=e62]:
+                    - heading "Minimal Clean" [level=3] [ref=e63]
+                    - generic [ref=e64]: Default
+                  - paragraph [ref=e65]: Diseño limpio y moderno, ideal para freelances y agencias digitales.
+                  - generic [ref=e66]:
+                    - button "Duplicar" [ref=e67] [cursor=pointer]
+                    - button "Eliminar" [ref=e68] [cursor=pointer]
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - generic:
+                    - generic:
+                      - generic:
+                        - heading "FACTURA" [level=1]
+                      - generic:
+                        - generic: "#INV-2026-001"
+                      - generic:
+                        - generic:
+                          - paragraph: Tu Empresa S.L.
+                          - paragraph: Tu Dirección, Ciudad
+                          - paragraph: B-12345678
+                      - generic:
+                        - generic:
+                          - heading "Cliente" [level=3]
+                          - paragraph: Empresa Cliente
+                          - paragraph: Calle Ejemplo 123, Madrid
+                      - generic:
+                        - generic:
+                          - table:
+                            - rowgroup:
+                              - row "Descripción Cant. Total":
+                                - columnheader "Descripción"
+                                - columnheader "Cant."
+                                - columnheader "Total"
+                            - rowgroup:
+                              - row "Servicios de Diseño 1 300.00€":
+                                - cell "Servicios de Diseño":
+                                  - generic: Servicios de Diseño
+                                - cell "1":
+                                  - generic: "1"
+                                - cell "300.00€":
+                                  - generic: 300.00€
+                              - row "Consultoría Especializada 1 200.00€":
+                                - cell "Consultoría Especializada":
+                                  - generic: Consultoría Especializada
+                                - cell "1":
+                                  - generic: "1"
+                                - cell "200.00€":
+                                  - generic: 200.00€
+                      - generic:
+                        - generic:
+                          - generic:
+                            - generic:
+                              - generic: SUBTOTAL
+                              - generic: 500.00€
+                            - generic:
+                              - generic: IVA (21%)
+                              - generic: 105.00€
+                            - generic:
+                              - generic: TOTAL
+                              - generic: 605.00€
+                  - link "EDITAR DISEÑO" [ref=e72] [cursor=pointer]:
+                    - /url: /settings/templates/61a0a340-98af-456e-9136-dad6771630d4
+                - generic [ref=e73]:
+                  - heading "Corporate Blue" [level=3] [ref=e75]
+                  - paragraph [ref=e76]: Estilo formal y confiable, perfecto para empresas y consultorías.
+                  - generic [ref=e77]:
+                    - button "Duplicar" [ref=e78] [cursor=pointer]
+                    - button "Eliminar" [ref=e79] [cursor=pointer]
+                    - button "Usar por defecto" [ref=e80] [cursor=pointer]
+      - button [ref=e30] [cursor=pointer]:
+        - img [ref=e32]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e40] [cursor=pointer]:
+    - img [ref=e41]
+  - alert [ref=e44]
+  - generic [ref=e82]:
+    - generic [ref=e83]:
+      - link "Aura AURIE" [ref=e84] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aura" [ref=e86]
+        - generic [ref=e87]: AURIE
+      - button [ref=e88] [cursor=pointer]:
+        - img [ref=e89]
+    - navigation [ref=e91]:
+      - link "Dashboard" [ref=e92] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e94]
+        - generic [ref=e96]: Dashboard
+      - link "Pipeline" [ref=e97] [cursor=pointer]:
+        - /url: /pipeline
+        - img [ref=e99]
+        - generic [ref=e101]: Pipeline
+      - link "Contactos" [ref=e102] [cursor=pointer]:
+        - /url: /contacts
+        - img [ref=e104]
+        - generic [ref=e106]: Contactos
+      - link "Tareas" [ref=e107] [cursor=pointer]:
+        - /url: /tasks
+        - img [ref=e109]
+        - generic [ref=e111]: Tareas
+      - link "Facturas" [ref=e112] [cursor=pointer]:
+        - /url: /invoices
+        - img [ref=e114]
+        - generic [ref=e116]: Facturas
+      - link "Chat de Equipo" [ref=e117] [cursor=pointer]:
+        - /url: /team-chat
+        - img [ref=e119]
+        - generic [ref=e121]: Chat de Equipo
+      - link "Economía" [ref=e122] [cursor=pointer]:
+        - /url: /expenses
+        - img [ref=e124]
+        - generic [ref=e126]: Economía
+      - link "Lead Scraper" [ref=e127] [cursor=pointer]:
+        - /url: /lead-scraper
+        - img [ref=e129]
+        - generic [ref=e131]: Lead Scraper
+    - link "Ajustes" [ref=e133] [cursor=pointer]:
+      - /url: /settings
+      - img [ref=e135]
+      - generic [ref=e138]: Ajustes

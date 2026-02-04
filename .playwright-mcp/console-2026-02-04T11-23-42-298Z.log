@@ -1,0 +1,10 @@
+[   17461ms] [ERROR] Failed to load resource: the server responded with a status of 403 () @ https://lqgdjvecnahcdmmkncjs.supabase.co/rest/v1/invoice_templates?select=*:0
+[   17464ms] [ERROR] Error duplicating template: {code: 42501, details: null, hint: null, message: new row violates row-level security policy for table "invoice_templates"} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   23784ms] [ERROR] Failed to load resource: the server responded with a status of 400 () @ https://lqgdjvecnahcdmmkncjs.supabase.co/rest/v1/rpc/set_default_template:0
+[   23787ms] [ERROR] Error setting default template: {
+  "code": "21000",
+  "details": null,
+  "hint": null,
+  "message": "UPDATE requires a WHERE clause"
+} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[   23788ms] [ERROR] Error object: {code: 21000, details: null, hint: null, message: UPDATE requires a WHERE clause} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127

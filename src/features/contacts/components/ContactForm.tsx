@@ -67,7 +67,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         required
                         value={formData.company_name}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="Nombre de la empresa"
                     />
                 </div>
@@ -82,7 +82,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         type="url"
                         value={formData.website}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="https://ejemplo.com"
                     />
                 </div>
@@ -97,7 +97,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         type="text"
                         value={formData.contact_name}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="Nombre del contacto"
                     />
                 </div>
@@ -112,7 +112,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="email@empresa.com"
                     />
                 </div>
@@ -127,7 +127,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         type="tel"
                         value={formData.phone}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="+34 XXX XXX XXX"
                     />
                 </div>
@@ -142,7 +142,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         type="text"
                         value={formData.tax_id}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="NIF / CIF"
                     />
                 </div>
@@ -157,7 +157,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         type="text"
                         value={formData.tax_address}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="Calle, Ciudad, CP..."
                     />
                 </div>
@@ -171,7 +171,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         name="source"
                         value={formData.source}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                     >
                         <option value="outbound" className="bg-gray-900">Outbound (Prospección)</option>
                         <option value="inbound_whatsapp" className="bg-gray-900">Inbound Mensajería</option>
@@ -192,7 +192,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         type="number"
                         value={formData.estimated_value}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
                         placeholder="0.00"
                     />
                 </div>
@@ -214,7 +214,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         rows={3}
                         value={formData.notes}
                         onChange={handleChange}
-                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all resize-none"
+                        className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all resize-none"
                         placeholder="Contexto inicial del lead..."
                     />
                 </div>
@@ -233,7 +233,7 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                 <button
                     type="submit"
                     disabled={isLoading}
-                    className="px-6 py-2 bg-lime-400 text-black font-medium rounded-lg hover:bg-lime-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                    className="px-6 py-2 bg-[#8b5cf6] text-white font-medium rounded-lg hover:bg-[#7c3aed] disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                     {isLoading ? 'Guardando...' : 'Crear Contacto'}
                 </button>

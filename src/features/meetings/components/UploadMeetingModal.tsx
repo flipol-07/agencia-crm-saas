@@ -159,7 +159,7 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                             type="text"
                             value={title}
                             onChange={e => setTitle(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#8b5cf6]/50 focus:outline-none"
                             placeholder="Ej: Reunión semanal de marketing"
                             required
                         />
@@ -171,7 +171,7 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                             type="date"
                             value={date}
                             onChange={e => setDate(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#8b5cf6]/50 focus:outline-none"
                             required
                         />
                     </div>
@@ -181,7 +181,7 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                         <select
                             value={contactId}
                             onChange={e => setContactId(e.target.value)}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#8b5cf6]/50 focus:outline-none"
                         >
                             <option value="">Seleccionar contacto...</option>
                             {contacts.map(c => (
@@ -194,14 +194,14 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                         <button
                             type="button"
                             onClick={() => setUploadMode('file')}
-                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${uploadMode === 'file' ? 'bg-lime-500 text-black' : 'text-gray-400 hover:text-white'}`}
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${uploadMode === 'file' ? 'bg-[#8b5cf6] text-white' : 'text-gray-400 hover:text-white'}`}
                         >
                             Subir Archivo
                         </button>
                         <button
                             type="button"
                             onClick={() => setUploadMode('text')}
-                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${uploadMode === 'text' ? 'bg-lime-500 text-black' : 'text-gray-400 hover:text-white'}`}
+                            className={`flex-1 py-1.5 text-xs font-medium rounded-md transition-all ${uploadMode === 'text' ? 'bg-[#8b5cf6] text-white' : 'text-gray-400 hover:text-white'}`}
                         >
                             Pegar Texto
                         </button>
@@ -219,7 +219,7 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                                 />
                                 {file ? (
                                     <div className="text-center">
-                                        <p className="text-lime-400 text-sm font-medium break-all">{file.name}</p>
+                                        <p className="text-[#a78bfa] text-sm font-medium break-all">{file.name}</p>
                                         <p className="text-xs text-gray-500 mt-1">{(file.size / (1024 * 1024)).toFixed(1)} MB</p>
                                     </div>
                                 ) : (
@@ -228,7 +228,7 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                             </div>
                             <p className="text-xs text-gray-600 mt-1">
                                 {uploading && progress ? (
-                                    <span className="text-lime-400 animate-pulse">{progress}</span>
+                                    <span className="text-[#a78bfa] animate-pulse">{progress}</span>
                                 ) : "Soporta Video, Audio o Transcripciones (TXT de Fathom)."}
                             </p>
                         </div>
@@ -238,7 +238,7 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                             <textarea
                                 value={transcriptText}
                                 onChange={e => setTranscriptText(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-lime-400 focus:outline-none min-h-[150px] text-sm font-mono"
+                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#8b5cf6]/50 focus:outline-none min-h-[150px] text-sm font-mono"
                                 placeholder="Pega aquí la transcripción de Fathom..."
                                 required
                             />
@@ -257,11 +257,11 @@ export function UploadMeetingModal({ isOpen, onClose, onSuccess }: UploadMeeting
                         <button
                             type="submit"
                             disabled={uploading}
-                            className="flex-1 px-4 py-2 bg-lime-500 hover:bg-lime-400 text-black font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                            className="flex-1 px-4 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-lg transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
                         >
                             {uploading ? (
                                 <>
-                                    <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                                     Procesando...
                                 </>
                             ) : 'Procesar Reunión'}

@@ -61,7 +61,7 @@ export function EmailEyeButton({ emailId, isRead: initialIsRead, contactId, onTo
             disabled={loading}
             className={`p-1.5 rounded-full transition-all flex items-center justify-center ${isRead
                     ? 'text-gray-500 hover:text-gray-300 hover:bg-white/5'
-                    : 'text-lime-400 hover:text-lime-300 bg-lime-400/10 hover:bg-lime-400/20'
+                    : 'text-[#8b5cf6] hover:text-[#a78bfa] bg-[#8b5cf6]/10 hover:bg-[#8b5cf6]/20'
                 }`}
             title={isRead ? "Marcar como no leído" : "Marcar como leído"}
         >

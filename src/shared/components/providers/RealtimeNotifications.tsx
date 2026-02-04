@@ -292,13 +292,20 @@ export function RealtimeNotifications() {
                     }
                 }
             )
-            .subscribe((status: string) => {
-                if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
-                    console.error('RealtimeNotifications: Connection Error', status)
+            .subscribe((status: string, err?: Error) => {
+                if (status === 'CHANNEL_ERROR') {
+                    console.groupCollapsed('RealtimeNotifications: Connection Error (Safe to ignore if intermittent)')
+                    console.error('Status:', status)
+                    console.error('Error Details:', err)
+                    console.groupEnd()
+                }
+                if (status === 'TIMED_OUT') {
+                    console.warn('RealtimeNotifications: Connection timed out, retrying...')
                 }
             })
 
         return () => {
+            console.log('RealtimeNotifications: Cleaning up channel...')
             supabase.removeChannel(channel)
         }
     }, [supabase, increment, decrement, setCounts, router])

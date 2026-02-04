@@ -167,7 +167,7 @@ export function ExpenseForm({
                             type="button"
                             onClick={() => setFormData({ ...formData, type: 'income' })}
                             className={`flex-1 py-2.5 rounded-md font-medium transition-all ${formData.type === 'income'
-                                ? 'bg-lime-500/30 text-lime-400'
+                                ? 'bg-[#8b5cf6]/30 text-[#a78bfa]'
                                 : 'text-gray-400 hover:text-white'
                                 }`}
                         >
@@ -203,7 +203,7 @@ export function ExpenseForm({
                                     type="button"
                                     onClick={handleAIClassify}
                                     disabled={isAnalyzing}
-                                    className="flex items-center gap-1.5 px-2 py-1 rounded bg-lime-400/10 border border-lime-400/20 text-lime-400 text-xs font-semibold hover:bg-lime-400/20 transition-all disabled:opacity-50"
+                                    className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#8b5cf6]/10 border border-[#8b5cf6]/20 text-[#a78bfa] text-xs font-semibold hover:bg-[#8b5cf6]/20 transition-all disabled:opacity-50"
                                 >
                                     {isAnalyzing ? (
                                         <>
@@ -229,10 +229,10 @@ export function ExpenseForm({
                             value={formData.description}
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             placeholder="ej: API OpenAI enero"
-                            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-lime-400"
+                            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-[#8b5cf6]/50"
                         />
                         {aiReason && (
-                            <p className="mt-2 text-xs text-lime-400/80 flex items-start gap-1.5">
+                            <p className="mt-2 text-xs text-[#a78bfa]/80 flex items-start gap-1.5">
                                 <svg className="w-3.5 h-3.5 mt-0.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
@@ -303,12 +303,12 @@ export function ExpenseForm({
                                     type="checkbox"
                                     checked={formData.tax_deductible}
                                     onChange={(e) => setFormData({ ...formData, tax_deductible: e.target.checked })}
-                                    className="w-5 h-5 rounded border-white/20 bg-white/5 text-lime-400 focus:ring-lime-400"
+                                    className="w-5 h-5 rounded border-white/20 bg-white/5 text-[#8b5cf6] focus:ring-[#8b5cf6]/20"
                                 />
                                 <div className="flex items-center gap-2">
                                     <span className="text-white font-medium">Gasto deducible (IVA)</span>
                                     <div className="group relative">
-                                        <svg className="w-4 h-4 text-gray-400 hover:text-lime-400 transition-colors cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg className="w-4 h-4 text-gray-400 hover:text-[#a78bfa] transition-colors cursor-help" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                         </svg>
                                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-zinc-900 border border-white/10 rounded-lg text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10 shadow-xl">
@@ -330,7 +330,7 @@ export function ExpenseForm({
                                                 type="button"
                                                 onClick={() => setFormData({ ...formData, tax_rate: rate })}
                                                 className={`flex-1 py-2 rounded-lg font-medium transition-all ${formData.tax_rate === rate
-                                                    ? 'bg-lime-400 text-black'
+                                                    ? 'bg-[#8b5cf6] text-white'
                                                     : 'bg-white/10 text-gray-300 hover:bg-white/20'
                                                     }`}
                                             >
@@ -339,7 +339,7 @@ export function ExpenseForm({
                                         ))}
                                     </div>
                                     {formData.amount && (
-                                        <p className="mt-2 text-sm text-lime-400">
+                                        <p className="mt-2 text-sm text-[#a78bfa]">
                                             IVA a desgravar: {(parseFloat(formData.amount) * formData.tax_rate / 100).toFixed(2)}€
                                         </p>
                                     )}
@@ -360,7 +360,7 @@ export function ExpenseForm({
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="flex-1 py-3 rounded-lg bg-lime-400 text-black font-semibold hover:bg-lime-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="flex-1 py-3 rounded-lg bg-[#8b5cf6] text-white font-semibold hover:bg-[#7c3aed] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(139,92,246,0.2)]"
                         >
                             {isSubmitting ? 'Guardando...' : expense ? 'Actualizar' : 'Añadir'}
                         </button>

@@ -10,7 +10,7 @@
 import type { Lead, EmailTemplate, GeneratedEmail, AITemplateRequest } from '../types/lead-scraper.types';
 
 // Color de acento para highlights
-const HIGHLIGHT_COLOR = '#bfff00';
+const HIGHLIGHT_COLOR = '#8b5cf6';
 
 // ============ PROMPTS ============
 
@@ -38,7 +38,11 @@ CONTEXTO:
 - Eres un profesional que ofrece servicios de automatización con IA
 - Tu tono es profesional pero cercano, como un consultor de confianza
 - Usas "vosotros/os" y demuestras que has analizado su web/negocio
-- Destacas datos importantes con <span style="color: #bfff00;">texto</span>
+- Destacas datos importantes con <span style="color: #8b5cf6;">texto</span>
+
+CONSIGNA DE HIGHLIGHTS:
+Usa <span style="color: #8b5cf6;">texto en negrita o color</span> para destacar lo más importante.
+Ejemplo: '... cubre el <span style="color: #8b5cf6;">85%</span> del coste ...'
 
 ENTRADA:
 - Información del lead (nombre del negocio, categoría, ubicación)
@@ -48,7 +52,7 @@ SALIDA (JSON estricto):
 {
   "subject": "Asunto profesional y específico al negocio (máx 50 chars)",
   "parrafo_problema": "2-3 frases identificando UN problema o reto específico de su sector. Demuestra conocimiento de su industria. Ejemplo: 'Gestionar certificaciones ISO y mantener toda la documentación actualizada consume recursos valiosos de vuestro equipo.'",
-  "parrafo_beneficio": "La propuesta comercial profesional. Menciona el nombre de la empresa. Usa highlights con <span style='color: #bfff00;'>texto</span>. Ejemplo: 'Existe una oportunidad con el <span style=\"color: #bfff00;\">Decreto 173/2025</span> que cubre el <span style=\"color: #bfff00;\">85%</span> del coste de implementar IA en vuestros procesos. <span style=\"color: #bfff00;\">{{nombre}} solo aportaría el 15%</span>.'",
+  "parrafo_beneficio": "La propuesta comercial profesional. Menciona el nombre de la empresa. Usa highlights con <span style='color: #8b5cf6;'>texto</span>. Ejemplo: 'Existe una oportunidad con el <span style=\"color: #8b5cf6;\">Decreto 173/2025</span> que cubre el <span style=\"color: #8b5cf6;\">85%</span> del coste de implementar IA en vuestros procesos. <span style=\"color: #8b5cf6;\">{{nombre}} solo aportaría el 15%</span>.'",
   "parrafo_cierre": "Cierre profesional. Reconoce que es una hipótesis basada en tu análisis y propón una consultoría para validar. Ejemplo: 'Esta es una primera valoración basada en lo que he observado. Os propongo una breve consultoría con mi equipo para analizar vuestro caso concreto y ver si realmente podemos aportaros valor.'"
 }
 
@@ -116,7 +120,7 @@ Genera el HTML completo del email.`;
 
 ESTILO BASE:
 - Fondo oscuro (#0d0a1b) con texto claro (#ececec)
-- Color de acento: #bfff00 (verde lima neón)
+- Color de acento: #8b5cf6 (púrpura Aurie)
 - Fuente: Inter (Google Fonts)
 - Max-width: 600px, con border-radius y sombras sutiles
 - Diseño centrado en tablas (compatibilidad email)

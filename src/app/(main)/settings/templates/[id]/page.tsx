@@ -59,6 +59,7 @@ export default function TemplateEditorPage() {
     const [saving, setSaving] = useState(false)
     const [selectedElementId, setSelectedElementId] = useState<string | null>(null)
     const [showMetadataModal, setShowMetadataModal] = useState(false)
+    const [saveAction, setSaveAction] = useState<'overwrite' | 'copy'>('overwrite')
 
     useEffect(() => {
         if (id) fetchTemplate()
@@ -99,7 +100,7 @@ export default function TemplateEditorPage() {
                 profile_id: user.id
             }
 
-            if (isOwner) {
+            if (saveAction === 'overwrite' && isOwner) {
                 // Update existing
                 const { error } = await supabase
                     .from('invoice_templates')
@@ -107,7 +108,7 @@ export default function TemplateEditorPage() {
                     .eq('id', template.id)
                 if (error) throw error
             } else {
-                // Clone as new
+                // Clone as new (either by choice or because not owner)
                 const { data, error } = await supabase
                     .from('invoice_templates')
                     .insert({ ...payload, is_default: false })
@@ -133,38 +134,47 @@ export default function TemplateEditorPage() {
     if (!template) return <div className="fixed inset-0 bg-black flex items-center justify-center text-white z-[100]">Plantilla no encontrada</div>
 
     return (
-        <div className="fixed inset-0 bg-black z-[100] flex flex-col overflow-hidden text-white font-sans">
+        <div className="fixed inset-0 bg-[#09090b] z-[200] flex flex-col overflow-hidden text-white font-sans selection:bg-brand/30 selection:text-brand">
+            {/* Ambient Background */}
+            <div className="absolute inset-0 pointer-events-none z-0">
+                <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand/5 rounded-full blur-[100px] opacity-10" />
+            </div>
+
             {/* Header Area */}
-            <header className="h-16 border-b border-white/10 flex items-center justify-between px-6 bg-[#0a0a0a]">
-                <div className="flex items-center gap-4">
+            <header className="h-20 border-b border-white/5 flex items-center justify-between px-8 bg-[#09090b] z-[210] relative shrink-0">
+                <div className="flex items-center gap-6">
                     <button
                         onClick={() => router.push('/settings/templates')}
-                        className="w-10 h-10 rounded-full hover:bg-white/5 flex items-center justify-center text-gray-400 hover:text-white transition-colors border border-white/5"
+                        className="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/5 transition-all"
                         title="Salir del editor"
                     >
-                        ✕
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                     <div>
-                        <h1 className="text-sm font-black uppercase tracking-widest text-white leading-none mb-1">{template.name || 'Sin nombre'}</h1>
-                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">Editor de Precisión</p>
+                        <h1 className="text-sm font-black uppercase tracking-[0.2em] text-white leading-none mb-1.5">{template.name || 'MINIMAL CLEAN'}</h1>
+                        <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
+                            EDITOR DE PRECISIÓN
+                        </p>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setShowMetadataModal(true)}
-                        className="bg-lime-400 text-black px-8 py-2.5 rounded-full text-xs font-black hover:bg-lime-500 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-lime-400/20"
+                        className="bg-brand text-white px-10 py-3.5 rounded-full text-xs font-black hover:scale-105 active:scale-95 transition-all shadow-[0_4px_20px_rgba(139,92,246,0.3)] uppercase tracking-widest"
                     >
                         GUARDAR DISEÑO
                     </button>
                 </div>
             </header>
 
-            <div className="flex-1 flex overflow-hidden">
+            <div className="flex-1 flex overflow-hidden z-10 relative">
                 {/* Main Workspace (Canvas) */}
-                <div className="flex-1 bg-[#121212] overflow-auto flex justify-center items-start p-12 custom-scrollbar relative">
-                    {/* Centered Document */}
-                    <div className="scale-[0.85] origin-top shadow-[0_0_100px_rgba(0,0,0,0.8)] border border-white/5 rounded-sm overflow-hidden mb-20">
+                {/* Main Workspace (Canvas) with 3D Perspective */}
+                <div className="flex-1 overflow-auto flex justify-center items-start pt-20 pb-20 custom-scrollbar relative bg-transparent perspective-[2000px]">
+
+                    {/* Centered Document with 3D Float Effect */}
+                    <div className="scale-[0.85] origin-top shadow-[0_20px_60px_-15px_rgba(0,0,0,0.5)] border border-white/10 rounded-sm overflow-hidden relative bg-white z-20 group transition-transform duration-500 ease-out transform-style-3d hover:rotate-x-1">
                         <InvoiceCanvas
                             template={template}
                             invoice={MOCK_INVOICE}
@@ -175,16 +185,23 @@ export default function TemplateEditorPage() {
                             onSelectElement={setSelectedElementId}
                             onUpdateTemplate={(updates) => setTemplate({ ...template, ...updates })}
                         />
+
+                        {/* Glass overlay reflection effect */}
+                        <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent pointer-events-none z-30 opacity-50 mix-blend-overlay"></div>
                     </div>
 
                     {/* Quick Hint */}
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 text-[10px] text-gray-400 font-bold pointer-events-none uppercase tracking-widest">
-                        ARRASTRA ELEMENTOS • USA EL PANEL DERECHO
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-black/60 backdrop-blur-xl px-6 py-3 rounded-full border border-white/10 text-[10px] text-gray-400 font-bold pointer-events-none uppercase tracking-widest shadow-xl flex items-center gap-3">
+                        <span className="w-1 h-1 bg-white/50 rounded-full"></span>
+                        ARRASTRA ELEMENTOS
+                        <span className="w-1 h-1 bg-white/50 rounded-full"></span>
+                        USA EL PANEL DERECHO
+                        <span className="w-1 h-1 bg-white/50 rounded-full"></span>
                     </div>
                 </div>
 
                 {/* Right Panel: Properties */}
-                <div className="w-96 bg-[#0a0a0a] border-l border-white/10 flex flex-col shadow-2xl overflow-y-auto">
+                <div className="w-96 bg-black/60 backdrop-blur-xl border-l border-white/5 flex flex-col shadow-2xl overflow-y-auto z-30">
                     <TemplateEditor
                         template={template}
                         selectedElementId={selectedElementId}
@@ -195,10 +212,10 @@ export default function TemplateEditorPage() {
 
             {/* Metadata / Save Modal */}
             {showMetadataModal && (
-                <div className="fixed inset-0 z-[110] flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
                     <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={() => setShowMetadataModal(false)} />
-                    <div className="relative bg-[#0a0a0a] border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-                        <div className="p-8 border-b border-white/5 bg-gradient-to-br from-lime-400/5 to-transparent">
+                    <div className="relative bg-background-secondary border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+                        <div className="p-8 border-b border-white/5 bg-gradient-to-br from-brand/10 to-transparent">
                             <h2 className="text-xl font-black text-white mb-1 uppercase tracking-tight">Finalizar y Guardar</h2>
                             <p className="text-xs text-gray-500 font-medium">Revisa el nombre y la descripción antes de guardar los cambios en la nube.</p>
                         </div>
@@ -210,7 +227,7 @@ export default function TemplateEditorPage() {
                                     type="text"
                                     value={template.name}
                                     onChange={(e) => setTemplate({ ...template, name: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 outline-none transition-all font-bold"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand outline-none transition-all font-bold"
                                     placeholder="Ej: Minimal Clean 2026"
                                     autoFocus
                                 />
@@ -220,9 +237,30 @@ export default function TemplateEditorPage() {
                                 <textarea
                                     value={template.description || ''}
                                     onChange={(e) => setTemplate({ ...template, description: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-lime-400 outline-none transition-all resize-none h-24 text-sm"
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-brand outline-none transition-all resize-none h-24 text-sm"
                                     placeholder="Describe para qué sirve este diseño..."
                                 />
+                            </div>
+
+                            <div className="space-y-3">
+                                <label className="text-[10px] uppercase font-black text-gray-500 tracking-widest mb-2 block">Acción al guardar</label>
+                                <div className="grid grid-cols-2 gap-2">
+                                    <button
+                                        onClick={() => setSaveAction('overwrite')}
+                                        className={`p-3 rounded-xl border text-[10px] font-black transition-all ${saveAction === 'overwrite' ? 'border-brand bg-brand/10 text-brand' : 'border-white/10 text-gray-500'}`}
+                                    >
+                                        SOBRESCRIBIR ACTUAL
+                                    </button>
+                                    <button
+                                        onClick={() => setSaveAction('copy')}
+                                        className={`p-3 rounded-xl border text-[10px] font-black transition-all ${saveAction === 'copy' ? 'border-brand bg-brand/10 text-brand' : 'border-white/10 text-gray-500'}`}
+                                    >
+                                        GUARDAR COMO COPIA
+                                    </button>
+                                </div>
+                                {saveAction === 'copy' && (
+                                    <p className="text-[10px] text-brand/60 font-bold uppercase tracking-wider text-center">Se creará un nuevo archivo en tu galería</p>
+                                )}
                             </div>
 
                             <div className="flex gap-3 pt-4">
@@ -235,7 +273,7 @@ export default function TemplateEditorPage() {
                                 <button
                                     onClick={handleSave}
                                     disabled={saving}
-                                    className="flex-[2] bg-lime-400 text-black px-6 py-3 rounded-xl text-xs font-black hover:bg-lime-500 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-lime-400/20"
+                                    className="flex-[2] bg-brand text-white px-6 py-3 rounded-xl text-xs font-black hover:bg-brand-purple hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg shadow-brand/20"
                                 >
                                     {saving ? 'GUARDANDO...' : 'CONFIRMAR Y GUARDAR'}
                                 </button>

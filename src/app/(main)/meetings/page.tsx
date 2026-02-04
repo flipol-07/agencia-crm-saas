@@ -29,7 +29,7 @@ export default function MeetingsPage() {
                 </div>
                 <button
                     onClick={() => setShowUploadModal(true)}
-                    className="bg-lime-500 hover:bg-lime-400 text-black px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-[0_0_20px_rgba(132,204,22,0.3)]"
+                    className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white px-4 py-2 rounded-lg font-bold flex items-center gap-2 transition-colors shadow-[0_0_20px_rgba(139,92,246,0.3)]"
                 >
                     <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -45,7 +45,7 @@ export default function MeetingsPage() {
                         placeholder="Buscar por título o empresa..."
                         value={filter}
                         onChange={e => setFilter(e.target.value)}
-                        className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-3 pl-11 text-white focus:outline-none focus:border-lime-400 focus:ring-1 focus:ring-lime-400 transition-all placeholder:text-gray-600"
+                        className="w-full bg-zinc-900/50 border border-white/10 rounded-xl px-4 py-3 pl-11 text-white focus:outline-none focus:border-[#8b5cf6]/50 focus:ring-1 focus:ring-[#8b5cf6]/20 transition-all placeholder:text-gray-600"
                     />
                     <svg className="w-5 h-5 absolute left-3 top-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -56,7 +56,7 @@ export default function MeetingsPage() {
             {loading ? (
                 <div className="flex-1 flex items-center justify-center">
                     <div className="flex flex-col items-center gap-4">
-                        <div className="w-8 h-8 border-2 border-lime-400 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-8 h-8 border-2 border-[#8b5cf6] border-t-transparent rounded-full animate-spin" />
                         <p className="text-gray-500">Cargando base de conocimientos...</p>
                     </div>
                 </div>
@@ -82,7 +82,7 @@ export default function MeetingsPage() {
                                 <p className="text-sm text-gray-600 mt-1 mb-6">Sube una grabación para comenzar</p>
                                 <button
                                     onClick={() => setShowUploadModal(true)}
-                                    className="text-lime-400 hover:text-lime-300 text-sm font-medium hover:underline"
+                                    className="text-[#a78bfa] hover:text-[#c084fc] text-sm font-medium hover:underline"
                                 >
                                     Subir primera reunión
                                 </button>

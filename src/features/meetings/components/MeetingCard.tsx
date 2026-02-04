@@ -11,12 +11,12 @@ export function MeetingCard({ meeting, onClick }: MeetingCardProps) {
     return (
         <div
             onClick={onClick}
-            className="group cursor-pointer h-full bg-zinc-900/20 border border-white/5 rounded-xl p-5 hover:bg-zinc-900/40 hover:border-lime-400/20 hover:shadow-lg transition-all duration-300 relative overflow-hidden flex flex-col"
+            className="group cursor-pointer h-full bg-zinc-900/20 border border-white/5 rounded-xl p-5 hover:bg-zinc-900/40 hover:border-[#8b5cf6]/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] transition-all duration-300 relative overflow-hidden flex flex-col"
         >
-            <div className="absolute top-0 left-0 w-1 h-full bg-lime-500/50" />
+            <div className="absolute top-0 left-0 w-1 h-full bg-[#8b5cf6]/50" />
 
             <div className="flex justify-between items-start mb-2">
-                <h3 className="font-bold text-lg text-white group-hover:text-lime-400 transition-colors line-clamp-1">{meeting.title}</h3>
+                <h3 className="font-bold text-lg text-white group-hover:text-[#a78bfa] transition-colors line-clamp-1">{meeting.title}</h3>
                 <span className="text-xs text-gray-500 whitespace-nowrap">
                     {new Date(meeting.date).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' })}
                 </span>

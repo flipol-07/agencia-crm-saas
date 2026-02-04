@@ -13,7 +13,7 @@ const statusColors: Record<TaskStatus, string> = {
     in_progress: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
     in_review: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
     blocked: 'bg-red-500/20 text-red-400 border-red-500/30',
-    done: 'bg-lime-500/20 text-lime-400 border-lime-500/30',
+    done: 'bg-[#8b5cf6]/20 text-[#8b5cf6] border-[#8b5cf6]/30',
 }
 
 export function TaskStatusBadge({ status, size = 'sm' }: TaskStatusBadgeProps) {

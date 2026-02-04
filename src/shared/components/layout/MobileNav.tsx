@@ -128,7 +128,7 @@ export function MobileNav() {
 
                     {/* Drawer */}
                     <div
-                        className={`fixed inset-y-0 left-0 z-[100] w-72 bg-zinc-950 border-r border-white/10 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                        className={`fixed inset-y-0 left-0 z-[100] w-72 bg-[#080112] border-r border-white/10 transform transition-transform duration-300 ease-in-out ${isOpen ? 'translate-x-0' : '-translate-x-full'
                             }`}
                     >
                         <div className="flex flex-col h-full">
@@ -158,7 +158,7 @@ export function MobileNav() {
                                             href={link.href}
                                             onClick={() => setIsOpen(false)}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${active
-                                                ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+                                                ? 'bg-brand/10 text-white shadow-[0_0_15px_rgba(139,92,246,0.1)]'
                                                 : 'text-gray-400 hover:text-white hover:bg-white/5'
                                                 }`}
                                         >
@@ -177,7 +177,7 @@ export function MobileNav() {
                                         href={settingsLink.href}
                                         onClick={() => setIsOpen(false)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all group ${isActive(settingsLink.href)
-                                            ? 'bg-white/10 text-white shadow-[0_0_15px_rgba(255,255,255,0.1)]'
+                                            ? 'bg-brand/10 text-white shadow-[0_0_15px_rgba(139,92,246,0.1)]'
                                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                                             }`}
                                     >

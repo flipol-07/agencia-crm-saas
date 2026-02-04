@@ -14,7 +14,7 @@ import { useState, useEffect } from 'react'
 const AI_VARIABLES = [
     { name: 'nombre', description: 'Nombre del negocio', example: 'Restaurante El Buen Sabor' },
     { name: 'parrafo_problema', description: 'Problema identificado específico del negocio', example: 'Seguro que gestionar las reservas y coordinar a tantos camareros es un lío constante que os quita tiempo de lo importante.' },
-    { name: 'parrafo_oferta', description: 'Propuesta de valor con la oferta', example: 'Vengo a darte una buena noticia: ha salido el <span style="color: #bfff00;">Decreto 173/2025</span> que os paga el <span style="color: #bfff00;">85%</span> para automatizar vuestros procesos. <span style="color: #bfff00;">Tu Empresa solo tendría que poner el 15%</span>.' },
+    { name: 'parrafo_oferta', description: 'Propuesta de valor con la oferta', example: 'Vengo a darte una buena noticia: ha salido el <span style="color: #8b5cf6;">Decreto 173/2025</span> que os paga el <span style="color: #8b5cf6;">85%</span> para automatizar vuestros procesos. <span style="color: #8b5cf6;">Tu Empresa solo tendría que poner el 15%</span>.' },
     { name: 'parrafo_cierre', description: 'Disclaimer y call to action', example: '<strong>Ojo, esto es solo un ejemplo</strong> de lo que me he imaginado que os vendría bien. Te propongo una consultoría con mi equipo (los humanos de AURIE) para analizar vuestro caso real.' },
 ]
 
@@ -24,51 +24,60 @@ const DEFAULT_TEMPLATE = `<!DOCTYPE html>
 <head>
   <style>@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap');</style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #f4f4f4; color: #333; font-family: 'Inter', sans-serif;">
+<body style="margin: 0; padding: 0; background-color: #050505; color: #fff; font-family: 'Inter', sans-serif;">
   <table role="presentation" cellspacing="0" cellpadding="0" border="0" align="center" width="100%"
-    style="max-width: 600px; background-color: #0d0a1b; color: #fff; border-radius: 12px; margin-top: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.2);">
+    style="max-width: 600px; background-color: #0d0a1b; color: #fff; border-radius: 20px; margin: 20px auto; overflow: hidden; border: 1px solid rgba(139, 92, 246, 0.2); box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
     <tr>
-      <td style="padding: 45px;">
+      <td style="padding: 50px 40px; background: linear-gradient(135deg, #0d0a1b 0%, #1a1535 100%);">
         <!-- Header con Logo -->
-        <div style="text-align: center; margin-bottom: 35px;">
-          <a href="{{web_url}}"><img src="{{logo_url}}" style="width: 120px;" alt="Logo"></a>
+        <div style="text-align: center; margin-bottom: 40px;">
+          <a href="{{web_url}}"><img src="{{logo_url}}" style="width: 140px; filter: drop-shadow(0 0 10px rgba(139, 92, 246, 0.3));" alt="Logo"></a>
         </div>
 
         <!-- Contenido -->
-        <div style="font-size: 16px; line-height: 1.6; color: #ececec;">
-          <p>Hola,</p>
-          <p>Soy <strong>{{nombre_remitente}}</strong>, experto en IA de {{empresa_remitente}}.</p>
-          <p>He estado analizando vuestra web y me gustaría compartiros una oportunidad que creo que os puede interesar.</p>
-          <p>{{parrafo_problema}}</p>
+        <div style="font-size: 16px; line-height: 1.8; color: #ececec; letter-spacing: -0.01em;">
+          <p style="font-size: 20px; font-weight: 700; margin-bottom: 25px; color: #fff;">Hola,</p>
+          <p>Soy <strong>{{nombre_remitente}}</strong>, Senior AI Advisor en {{empresa_remitente}}.</p>
+          <p>He estado analizando vuestra presencia digital y he identificado una oportunidad estratégica que vuestra competencia ya está empezando a explotar.</p>
+          <div style="margin: 30px 0; padding: 25px; background: rgba(139, 92, 246, 0.05); border-left: 4px solid #8b5cf6; border-radius: 8px;">
+            <p style="margin: 0;">{{parrafo_problema}}</p>
+          </div>
           <p>{{parrafo_oferta}}</p>
           <p>{{parrafo_cierre}}</p>
         </div>
 
         <!-- Link informativo -->
-        <p style="text-align: center; margin-top: 30px; font-size: 14px;">
-          <a href="{{info_url}}" style="color: #bfff00; text-decoration: underline;">{{info_texto}}</a>
+        <p style="text-align: center; margin-top: 35px; font-size: 14px;">
+          <a href="{{info_url}}" style="color: #a78bfa; text-decoration: none; font-weight: 600;">{{info_texto}} →</a>
         </p>
 
         <!-- CTAs -->
-        <div style="text-align: center; margin: 40px 0;">
+        <div style="text-align: center; margin: 45px 0;">
           <a href="mailto:{{email_respuesta}}?subject={{email_subject}}&body=Hola, me interesa saber más."
-            style="background-color: #bfff00; color: #000; padding: 18px 25px; text-decoration: none; font-weight: 900; border-radius: 6px; display: inline-block; margin: 5px; text-transform: uppercase;">
-            RESPONDER A {{nombre_remitente}}
+            style="background-color: #8b5cf6; color: #ffffff; padding: 20px 35px; text-decoration: none; font-weight: 800; border-radius: 12px; display: inline-block; margin: 10px; text-transform: uppercase; letter-spacing: 0.05em; box-shadow: 0 10px 20px rgba(139, 92, 246, 0.3);">
+            AGENDAR CONSULTORÍA
           </a>
-          <a href="{{web_url}}"
-            style="background-color: transparent; color: #bfff00; border: 2px solid #bfff00; padding: 16px 25px; text-decoration: none; font-weight: 900; border-radius: 6px; display: inline-block; margin: 5px; text-transform: uppercase;">
-            VISITA NUESTRA WEB
-          </a>
+          <div style="margin-top: 15px;">
+            <a href="{{web_url}}"
+              style="color: #a78bfa; text-decoration: none; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.1em;">
+              O VISITA NUESTRA WEB
+            </a>
+          </div>
         </div>
 
         <!-- Footer / Firma -->
-        <div style="border-top: 1px solid #2a254a; padding-top: 30px; margin-top: 20px;">
-          <p style="font-size: 16px; margin: 0; font-weight: 700; color: #fff;">{{nombre_remitente}}</p>
-          <p style="font-size: 13px; margin: 5px 0 0; color: #bfff00; font-weight: 700;">Experto en IA | <strong>{{empresa_remitente}}</strong></p>
+        <div style="border-top: 1px solid rgba(255,255,255,0.05); padding-top: 35px; margin-top: 40px; display: flex; align-items: center; gap: 15px;">
+          <div>
+            <p style="font-size: 17px; margin: 0; font-weight: 800; color: #fff;">{{nombre_remitente}}</p>
+            <p style="font-size: 13px; margin: 5px 0 0; color: #a78bfa; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">AI Solutions Director | <strong>{{empresa_remitente}}</strong></p>
+          </div>
         </div>
       </td>
     </tr>
   </table>
+  <div style="text-align: center; padding: 20px; font-size: 12px; color: #666;">
+    Si no deseas recibir más correos, puedes <a href="{{unsubscribe_url}}" style="color: #999;">darte de baja aquí</a>.
+  </div>
 </body>
 </html>`
 
@@ -98,7 +107,7 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
         let preview = htmlContent
         AI_VARIABLES.forEach(v => {
             const regex = new RegExp(`\\{\\{${v.name}\\}\\}`, 'g')
-            preview = preview.replace(regex, `<span style="background: #bfff00; color: #000; padding: 2px 6px; border-radius: 4px;">${v.example}</span>`)
+            preview = preview.replace(regex, `<span style="background: #8b5cf6; color: #fff; padding: 2px 6px; border-radius: 4px;">${v.example}</span>`)
         })
         setPreviewHtml(preview)
     }, [htmlContent])
@@ -203,8 +212,8 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
                             onClick={handleSave}
                             disabled={isSaving}
                             className={`px-6 py-2 font-bold rounded-lg transition-colors ${saveSuccess
-                                    ? 'bg-green-500 text-white'
-                                    : 'bg-[#bfff00] text-black hover:bg-[#a8e600]'
+                                ? 'bg-green-500 text-white'
+                                : 'bg-[#8b5cf6] text-white hover:bg-[#7c3aed] shadow-[0_0_15px_rgba(139,92,246,0.3)]'
                                 } disabled:opacity-50 disabled:cursor-wait`}
                         >
                             {isSaving ? '⏳ Guardando...' : saveSuccess ? '✅ Guardado' : '💾 Guardar Template'}
@@ -229,7 +238,7 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
                     <textarea
                         value={aiPrompt}
                         onChange={(e) => setAiPrompt(e.target.value)}
-                        placeholder="Ej: Quiero un email para pitch de ventas de servicios de IA. Debe tener logo arriba, 3 párrafos de contenido, un botón de respuesta y otro para visitar la web. Estilo moderno con fondo oscuro y acentos en verde neón."
+                        placeholder="Ej: Quiero un email para pitch de ventas de servicios de IA. Debe tener logo arriba, 3 párrafos de contenido, un botón de respuesta y otro para visitar la web. Estilo moderno con fondo oscuro y acentos en púrpura."
                         className="w-full h-28 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none resize-none"
                     />
                     {aiError && (
@@ -260,7 +269,7 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
                     type="text"
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
-                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#bfff00] focus:outline-none"
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-[#8b5cf6] focus:outline-none"
                     placeholder="Ej: Outreach Restaurantes"
                 />
             </div>
@@ -273,7 +282,7 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
                         <button
                             key={v.name}
                             onClick={() => insertVariable(v.name)}
-                            className="group relative px-3 py-1.5 bg-[#bfff00]/10 border border-[#bfff00]/30 rounded-lg text-[#bfff00] text-sm hover:bg-[#bfff00]/20 transition-colors"
+                            className="group relative px-3 py-1.5 bg-[#8b5cf6]/10 border border-[#8b5cf6]/30 rounded-lg text-[#a78bfa] text-sm hover:bg-[#8b5cf6]/20 transition-colors"
                             title={v.description}
                         >
                             {`{{${v.name}}}`}
@@ -289,8 +298,8 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
             <div className="flex gap-2 border-b border-white/10">
                 <button
                     onClick={() => setActiveView('edit')}
-                    className={`px-4 py-2 text-sm font-medium transition-colors ${activeView === 'edit'
-                        ? 'text-[#bfff00] border-b-2 border-[#bfff00]'
+                    className={`px-4 py-2 text-sm font-medium transition-colors ${activeView === 'edit' || activeView === 'preview'
+                        ? 'text-[#a78bfa] border-b-2 border-[#8b5cf6]'
                         : 'text-gray-400 hover:text-white'
                         }`}
                 >
@@ -299,7 +308,7 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
                 <button
                     onClick={() => setActiveView('preview')}
                     className={`px-4 py-2 text-sm font-medium transition-colors ${activeView === 'preview'
-                        ? 'text-[#bfff00] border-b-2 border-[#bfff00]'
+                        ? 'text-[#a78bfa] border-b-2 border-[#8b5cf6]'
                         : 'text-gray-400 hover:text-white'
                         }`}
                 >
@@ -313,14 +322,14 @@ export function TemplateEditor({ onSave }: TemplateEditorProps) {
                     <textarea
                         value={htmlContent}
                         onChange={(e) => setHtmlContent(e.target.value)}
-                        className="w-full h-[500px] bg-[#0a0a0f] border border-white/10 rounded-xl p-4 text-gray-300 font-mono text-sm focus:border-[#bfff00] focus:outline-none resize-none"
+                        className="w-full h-[500px] bg-[#0a0a0f] border border-white/10 rounded-xl p-4 text-gray-300 font-mono text-sm focus:border-[#8b5cf6] focus:outline-none resize-none"
                         placeholder="Escribe el HTML de tu template aquí..."
                         spellCheck={false}
                     />
                 ) : (
                     <div className="bg-gray-100 rounded-xl p-4 min-h-[500px]">
                         <div className="text-xs text-gray-500 mb-2 text-center">
-                            Los textos en amarillo son ejemplos. La IA generará contenido único para cada lead.
+                            Los textos en púrpura son ejemplos de donde la IA insertará contenido personalizado.
                         </div>
                         <iframe
                             srcDoc={previewHtml}

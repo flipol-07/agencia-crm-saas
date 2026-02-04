@@ -144,7 +144,7 @@ function generateInvoiceHTML(invoice: any, settings: any) {
             <div style="text-align: right; margin-top: 20px;">
                 <p>Subtotal: <strong>${invoice.subtotal.toFixed(2)} €</strong></p>
                 <p>IVA (${invoice.tax_rate}%): <strong>${invoice.tax_amount.toFixed(2)} €</strong></p>
-                <h2 style="color: #84cc16;">TOTAL: ${invoice.total.toFixed(2)} €</h2>
+                <h2 style="color: #8b5cf6;">TOTAL: ${invoice.total.toFixed(2)} €</h2>
             </div>
 
             <div style="margin-top: 50px; text-align: center; color: #888; font-size: 12px;">

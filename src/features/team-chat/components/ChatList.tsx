@@ -90,7 +90,7 @@ export function ChatList() {
                 <h1 className="font-bold text-lg text-white">Chats</h1>
                 <button
                     onClick={() => setShowNewChat(true)}
-                    className="p-2 bg-lime-500 text-black rounded-lg hover:bg-lime-400 transition-colors"
+                    className="p-2 bg-[#8b5cf6] text-white rounded-lg hover:bg-[#7c3aed] transition-colors"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -117,7 +117,7 @@ export function ChatList() {
                         <p>No tienes conversaciones activas.</p>
                         <button
                             onClick={() => setShowNewChat(true)}
-                            className="text-lime-500 hover:underline mt-2 text-sm"
+                            className="text-[#8b5cf6] hover:underline mt-2 text-sm"
                         >
                             Comenzar un chat
                         </button>
@@ -135,13 +135,13 @@ export function ChatList() {
                                     key={chat.id}
                                     href={`/team-chat/${chat.id}`}
                                     className={`block p-3 rounded-xl transition-all ${isActive
-                                        ? 'bg-lime-500/10 border border-lime-500/20'
+                                        ? 'bg-[#8b5cf6]/10 border border-[#8b5cf6]/20'
                                         : 'hover:bg-white/5 border border-transparent'
                                         }`}
                                 >
                                     <div className="flex items-center gap-3">
                                         <div className="relative">
-                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden border ${isActive ? 'border-lime-500/50 text-lime-500 bg-lime-500/10' : 'border-white/10 bg-zinc-800 text-gray-400'}`}>
+                                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden border ${isActive ? 'border-[#8b5cf6]/50 text-[#8b5cf6] bg-[#8b5cf6]/10' : 'border-white/10 bg-zinc-800 text-gray-400'}`}>
                                                 {info.avatar ? (
                                                     <img src={info.avatar} alt="" className="w-full h-full object-cover" />
                                                 ) : (
@@ -151,14 +151,14 @@ export function ChatList() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline mb-0.5">
-                                                <h3 className={`font-medium text-sm truncate ${isActive ? 'text-lime-400' : 'text-gray-200'}`}>
+                                                <h3 className={`font-medium text-sm truncate ${isActive ? 'text-[#a78bfa]' : 'text-gray-200'}`}>
                                                     {info.name}
                                                 </h3>
                                                 <span className="text-[10px] text-gray-500 whitespace-nowrap ml-2">
                                                     {chat.updated_at && formatDistanceToNow(new Date(chat.updated_at), { addSuffix: false, locale: es })}
                                                 </span>
                                             </div>
-                                            <p className={`text-xs truncate ${isActive ? 'text-lime-500/70' : 'text-gray-500'}`}>
+                                            <p className={`text-xs truncate ${isActive ? 'text-[#8b5cf6]/70' : 'text-gray-500'}`}>
                                                 {chat.last_message_preview || 'Nueva conversación'}
                                             </p>
                                         </div>

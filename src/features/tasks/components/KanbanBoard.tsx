@@ -66,7 +66,7 @@ function KanbanColumn({
         in_progress: 'border-t-blue-500',
         in_review: 'border-t-purple-500',
         blocked: 'border-t-red-500',
-        done: 'border-t-lime-500',
+        done: 'border-t-[#8b5cf6]',
     }
 
     return (
@@ -160,7 +160,7 @@ export function KanbanBoard({ tasks, onOpenTask, onStatusChange, showCompleted }
                     >
                         {grouped[status]?.map(task => (
                             <DraggableTask key={task.id} task={task}>
-                                <div className="bg-white/5 rounded-lg border border-white/5 hover:border-lime-500/30 hover:bg-white/10 transition-all">
+                                <div className="bg-white/5 rounded-lg border border-white/5 hover:border-[#8b5cf6]/30 hover:bg-white/10 transition-all">
                                     <div
                                         onClick={() => onOpenTask(task)}
                                         className="p-3 cursor-pointer"
@@ -173,7 +173,7 @@ export function KanbanBoard({ tasks, onOpenTask, onStatusChange, showCompleted }
                                                         e.stopPropagation();
                                                         onOpenTask(task);
                                                     }}
-                                                    className="flex items-center gap-1 bg-white/10 hover:bg-lime-500/20 text-gray-400 hover:text-lime-400 px-1.5 py-0.5 rounded-full text-[10px] transition-colors whitespace-nowrap"
+                                                    className="flex items-center gap-1 bg-white/10 hover:bg-[#8b5cf6]/20 text-gray-400 hover:text-[#8b5cf6] px-1.5 py-0.5 rounded-full text-[10px] transition-colors whitespace-nowrap"
                                                 >
                                                     💬 {task.task_comments.length}
                                                 </button>
@@ -213,7 +213,7 @@ export function KanbanBoard({ tasks, onOpenTask, onStatusChange, showCompleted }
                             task={activeTask}
                             onOpen={() => { }}
                             onStatusChange={() => { }}
-                            className="bg-[#1a1a1a] shadow-2xl border-lime-500/50 scale-95"
+                            className="bg-[#1a1a1a] shadow-2xl border-[#8b5cf6]/50 scale-95"
                         />
                     </div>
                 ) : null}

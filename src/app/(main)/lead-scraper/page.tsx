@@ -123,7 +123,7 @@ export default function LeadScraperPage() {
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         className={`flex items-center gap-2 px-4 py-2 rounded-t-lg transition-colors whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
-                            ? 'bg-[#bfff00]/10 text-[#bfff00] border-b-2 border-[#bfff00]'
+                            ? 'bg-[#8b5cf6]/10 text-[#a78bfa] border-b-2 border-[#8b5cf6]'
                             : 'text-gray-400 hover:text-white hover:bg-white/5'
                             }`}
                     >
@@ -199,7 +199,7 @@ export default function LeadScraperPage() {
                         <p>Selecciona una campaña para gestionar el envío.</p>
                         <button
                             onClick={() => setShowCampaigns(true)}
-                            className="mt-4 px-4 py-2 bg-[#bfff00]/10 text-[#bfff00] rounded-lg hover:bg-[#bfff00]/20 transition-colors"
+                            className="mt-4 px-4 py-2 bg-[#8b5cf6]/10 text-[#a78bfa] rounded-lg hover:bg-[#8b5cf6]/20 transition-colors border border-[#8b5cf6]/20"
                         >
                             Ver Campañas
                         </button>

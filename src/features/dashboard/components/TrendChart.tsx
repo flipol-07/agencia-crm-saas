@@ -102,10 +102,10 @@ export function TrendChart({ data, loading }: TrendChartProps) {
                                 type="monotone"
                                 dataKey="income"
                                 name="Ingresos"
-                                stroke="#a3e635"
+                                stroke="#8b5cf6"
                                 strokeWidth={2}
-                                dot={{ fill: '#a3e635', strokeWidth: 0, r: 4 }}
-                                activeDot={{ r: 6, fill: '#a3e635' }}
+                                dot={{ fill: '#8b5cf6', strokeWidth: 0, r: 4 }}
+                                activeDot={{ r: 6, fill: '#8b5cf6' }}
                             />
                             <Line
                                 type="monotone"

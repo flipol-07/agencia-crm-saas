@@ -119,8 +119,8 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
         const badges: Record<string, { bg: string; text: string; label: string }> = {
             prospect: { bg: 'bg-gray-500/20', text: 'text-gray-400', label: 'Prospecto' },
             qualified: { bg: 'bg-blue-500/20', text: 'text-blue-400', label: 'Cualificado' },
-            proposal: { bg: 'bg-purple-500/20', text: 'text-purple-400', label: 'Propuesta' },
-            won: { bg: 'bg-lime-500/20', text: 'text-lime-400', label: 'Ganado' },
+            proposal: { bg: 'bg-indigo-500/20', text: 'text-indigo-400', label: 'Propuesta' },
+            won: { bg: 'bg-[#8b5cf6]/20', text: 'text-[#8b5cf6]', label: 'Ganado' },
             active: { bg: 'bg-green-500/20', text: 'text-green-400', label: 'Activo' },
             maintenance: { bg: 'bg-cyan-500/20', text: 'text-cyan-400', label: 'Mantenimiento' },
             lost: { bg: 'bg-red-500/20', text: 'text-red-400', label: 'Perdido' },
@@ -157,9 +157,9 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                             <span className="text-xs text-gray-400 mb-1">Probabilidad</span>
                             {contact.probability_close !== null ? (
                                 <div className="relative">
-                                    <span className={`text-3xl font-bold ${contact.probability_close >= 70 ? 'text-lime-400' :
-                                            contact.probability_close >= 40 ? 'text-blue-400' :
-                                                'text-gray-400'
+                                    <span className={`text-3xl font-bold ${contact.probability_close >= 70 ? 'text-[#8b5cf6]' :
+                                        contact.probability_close >= 40 ? 'text-blue-400' :
+                                            'text-gray-400'
                                         }`}>
                                         {contact.probability_close}%
                                     </span>
@@ -175,8 +175,8 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                             {contact.inactivity_status ? (
                                 <div className="flex items-center gap-2">
                                     <span className={`w-3 h-3 rounded-full ${contact.inactivity_status === 'active' ? 'bg-green-500 shadow-[0_0_8px_#22c55e]' :
-                                            contact.inactivity_status === 'warning' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' :
-                                                'bg-red-500 shadow-[0_0_8px_#ef4444]'
+                                        contact.inactivity_status === 'warning' ? 'bg-amber-500 shadow-[0_0_8px_#f59e0b]' :
+                                            'bg-red-500 shadow-[0_0_8px_#ef4444]'
                                         }`} />
                                     <span className="text-white capitalize font-medium">
                                         {contact.inactivity_status === 'active' ? 'Activo (Reciente)' :
@@ -221,7 +221,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                             {!isEditingDetails && (
                                 <button
                                     onClick={() => setIsEditingDetails(true)}
-                                    className="text-xs text-lime-400 hover:text-lime-300 border border-lime-400/30 rounded px-2 py-0.5"
+                                    className="text-xs text-purple-400 hover:text-purple-300 border border-purple-400/30 rounded px-2 py-0.5"
                                 >
                                     Editar
                                 </button>
@@ -240,7 +240,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                     type="text"
                                     value={detailsData.company_name}
                                     onChange={e => setDetailsData(prev => ({ ...prev, company_name: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                 />
                             </div>
                             <div>
@@ -249,7 +249,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                     type="number"
                                     value={detailsData.estimated_value}
                                     onChange={e => setDetailsData(prev => ({ ...prev, estimated_value: Number(e.target.value) }))}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                     placeholder="0.00"
                                 />
                             </div>
@@ -271,7 +271,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                         type="text"
                                         value={detailsData.contact_name}
                                         onChange={e => setDetailsData(prev => ({ ...prev, contact_name: e.target.value }))}
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                     />
                                 </div>
                                 <div>
@@ -280,7 +280,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                         type="text"
                                         value={detailsData.tax_id}
                                         onChange={e => setDetailsData(prev => ({ ...prev, tax_id: e.target.value }))}
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                         placeholder="NIF / CIF"
                                     />
                                 </div>
@@ -290,7 +290,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                         type="text"
                                         value={detailsData.tax_address}
                                         onChange={e => setDetailsData(prev => ({ ...prev, tax_address: e.target.value }))}
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                         placeholder="Calle, Ciudad, CP..."
                                     />
                                 </div>
@@ -301,7 +301,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                     type="text"
                                     value={detailsData.website}
                                     onChange={e => setDetailsData(prev => ({ ...prev, website: e.target.value }))}
-                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                    className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-3">
@@ -311,7 +311,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                         type="email"
                                         value={detailsData.email}
                                         onChange={e => setDetailsData(prev => ({ ...prev, email: e.target.value }))}
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                     />
                                 </div>
                                 <div>
@@ -320,7 +320,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                         type="text"
                                         value={detailsData.phone}
                                         onChange={e => setDetailsData(prev => ({ ...prev, phone: e.target.value }))}
-                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-lime-400 outline-none"
+                                        className="w-full px-3 py-2 bg-white/5 border border-white/10 rounded-md text-white focus:border-purple-400 outline-none"
                                     />
                                 </div>
                             </div>
@@ -342,7 +342,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                     <button
                                         onClick={handleSaveDetails}
                                         disabled={saving}
-                                        className="px-4 py-1.5 text-sm bg-lime-400 text-black rounded hover:bg-lime-300 disabled:opacity-50"
+                                        className="px-4 py-1.5 text-sm bg-purple-500 text-white rounded hover:bg-purple-600 disabled:opacity-50"
                                     >
                                         {saving ? 'Guardando...' : 'Guardar'}
                                     </button>
@@ -358,7 +358,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                 {contact.services && contact.services.length > 0 && (
                                     <div className="flex flex-wrap gap-2 mt-2">
                                         {contact.services.map(tag => (
-                                            <span key={tag} className="text-xs bg-lime-400/10 text-lime-400 border border-lime-400/20 px-2 py-0.5 rounded">
+                                            <span key={tag} className="text-xs bg-purple-500/10 text-purple-400 border border-purple-500/20 px-2 py-0.5 rounded">
                                                 {tag}
                                             </span>
                                         ))}
@@ -369,7 +369,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                             {contact.estimated_value != null && contact.estimated_value > 0 && (
                                 <div>
                                     <span className="text-sm text-gray-500">Valor Estimado</span>
-                                    <p className="text-white font-semibold text-lime-400">
+                                    <p className="text-white font-semibold text-purple-400">
                                         {new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(contact.estimated_value)}
                                     </p>
                                 </div>
@@ -382,7 +382,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                         href={contact.website}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="text-lime-400 hover:text-lime-300 block truncate flex items-center gap-1"
+                                        className="text-purple-400 hover:text-purple-300 block truncate flex items-center gap-1"
                                     >
                                         {contact.website}
                                         <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -402,7 +402,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                             {contact.email && (
                                 <div>
                                     <span className="text-sm text-gray-500">Email</span>
-                                    <a href={`mailto:${contact.email}`} className="text-lime-400 hover:text-lime-300 block">
+                                    <a href={`mailto:${contact.email}`} className="text-purple-400 hover:text-purple-300 block">
                                         {contact.email}
                                     </a>
                                 </div>
@@ -411,7 +411,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                             {contact.phone && (
                                 <div>
                                     <span className="text-sm text-gray-500">Teléfono</span>
-                                    <a href={`tel:${contact.phone}`} className="text-lime-400 hover:text-lime-300 block">
+                                    <a href={`tel:${contact.phone}`} className="text-purple-400 hover:text-purple-300 block">
                                         {contact.phone}
                                     </a>
                                 </div>
@@ -460,7 +460,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                 {/* Análisis de Negocio (IA) */}
                 <div className="glass rounded-xl p-6 relative overflow-hidden">
                     <div className="absolute top-0 right-0 p-4 opacity-10">
-                        <svg className="w-24 h-24 text-lime-400" fill="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-24 h-24 text-purple-500" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" /><path d="M12 6a1 1 0 0 0-1 1v4.59l-3.29-3.3a1 1 0 0 0-1.42 1.42l5 5a1 1 0 0 0 1.42 0l5-5a1 1 0 0 0-1.42-1.42l-3.29 3.3V7a1 1 0 0 0-1-1z" />
                         </svg>
                     </div>
@@ -472,7 +472,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                             <button
                                 onClick={handleAnalyze}
                                 disabled={isAnalyzing}
-                                className="text-xs bg-lime-400 text-black px-2 py-1 rounded font-medium hover:bg-lime-300 transition-colors disabled:opacity-50"
+                                className="text-xs bg-[#8b5cf6] text-white px-2 py-1 rounded font-medium hover:bg-[#7c3aed] transition-colors disabled:opacity-50"
                             >
                                 {isAnalyzing ? 'Analizando...' : 'Generar Análisis'}
                             </button>
@@ -481,7 +481,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
 
                     <div className="relative z-10">
                         {contact.ai_description ? (
-                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap border-l-2 border-lime-400 pl-3">
+                            <p className="text-gray-300 text-sm leading-relaxed whitespace-pre-wrap border-l-2 border-purple-500 pl-3">
                                 {contact.ai_description}
                             </p>
                         ) : (
@@ -522,7 +522,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                         {!isEditingNotes && (
                             <button
                                 onClick={() => setIsEditingNotes(true)}
-                                className="text-sm text-lime-400 hover:text-lime-300"
+                                className="text-sm text-purple-400 hover:text-purple-300"
                             >
                                 Editar
                             </button>
@@ -535,7 +535,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                 value={notesData}
                                 onChange={e => setNotesData(e.target.value)}
                                 rows={6}
-                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 resize-none"
+                                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 resize-none"
                                 placeholder="Añade notas sobre este cliente..."
                             />
                             <div className="flex justify-end gap-2">
@@ -548,7 +548,7 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                                 <button
                                     onClick={handleSaveNotes}
                                     disabled={saving}
-                                    className="px-4 py-1 text-sm bg-lime-400 text-black rounded-lg hover:bg-lime-300 disabled:opacity-50"
+                                    className="px-4 py-1 text-sm bg-purple-500 text-white rounded-lg hover:bg-purple-600 disabled:opacity-50"
                                 >
                                     {saving ? 'Guardando...' : 'Guardar'}
                                 </button>

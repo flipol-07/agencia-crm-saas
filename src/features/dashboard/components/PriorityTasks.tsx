@@ -1,5 +1,4 @@
 import Link from 'next/link'
-import { Card } from '@/shared/components/ui/Card'
 import { Badge } from '@/shared/components/ui/Badge'
 import { getPriorityTasks, type TaskWithProject } from '../services/dashboard.service'
 
@@ -11,41 +10,47 @@ export async function PriorityTasks({ userId }: { userId: string }) {
         const isOverdue = dueDate && dueDate < today
 
         if (isOverdue) {
-            return <Badge variant="error">Vencida</Badge>
+            return <Badge variant="error" className="bg-red-500/10 text-red-500 border-red-500/20">Vencida</Badge>
         }
 
         switch (priority) {
             case 'urgent':
-                return <Badge variant="error">Urgente</Badge>
+                return <Badge variant="error" className="bg-red-500/10 text-red-500 border-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.2)]">Urgente</Badge>
             case 'high':
-                return <Badge variant="warning">Alta</Badge>
+                return <Badge variant="warning" className="bg-amber-500/10 text-amber-500 border-amber-500/20">Alta</Badge>
             case 'medium':
-                return <Badge variant="info">Media</Badge>
+                return <Badge variant="info" className="bg-blue-500/10 text-blue-500 border-blue-500/20">Media</Badge>
             default:
-                return <Badge variant="default">Baja</Badge>
+                return <Badge variant="default" className="bg-white/5 text-gray-400 border-white/10">Baja</Badge>
         }
     }
 
     return (
-        <Card className="p-6 h-full flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-semibold text-text-primary flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-400 shadow-[0_0_10px_rgba(248,113,113,0.5)]"></span>
-                    Tareas Pendientes
+        <div className="glass-card p-6 h-full flex flex-col rounded-2xl border border-white/5 relative overflow-hidden group">
+            {/* Background Gradient */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/5 rounded-full blur-[100px] pointer-events-none" />
+
+            <div className="flex items-center justify-between mb-6 relative z-10">
+                <h3 className="text-lg font-bold text-white flex items-center gap-3">
+                    <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                    </span>
+                    Tareas Prioritarias
                 </h3>
-                <Link href="/tasks" className="text-xs text-text-muted hover:text-brand transition-colors">
-                    Ver todas →
+                <Link href="/tasks" className="text-xs font-medium text-gray-400 hover:text-white transition-colors bg-white/5 hover:bg-white/10 px-3 py-1.5 rounded-lg border border-white/5">
+                    Ver todas
                 </Link>
             </div>
 
-            <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-3 flex-1 overflow-y-auto pr-2 custom-scrollbar relative z-10">
                 {tasks.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                        <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center mb-3">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-500/20 to-emerald-500/5 flex items-center justify-center mb-4 border border-green-500/20">
                             <span className="text-2xl">🎉</span>
                         </div>
-                        <p className="text-text-muted text-sm">¡Todo al día!</p>
-                        <p className="text-text-muted/60 text-xs mt-1">No hay tareas pendientes</p>
+                        <p className="text-white font-medium">¡Todo al día!</p>
+                        <p className="text-gray-500 text-sm mt-1">No tienes tareas urgentes pendientes.</p>
                     </div>
                 ) : (
                     tasks.map(task => {
@@ -54,31 +59,31 @@ export async function PriorityTasks({ userId }: { userId: string }) {
                         return (
                             <div
                                 key={task.id}
-                                className={`group p-4 rounded-xl border transition-all duration-300 ${isOverdue
+                                className={`group/item p-4 rounded-xl border transition-all duration-300 ${isOverdue
                                     ? 'bg-red-500/5 border-red-500/20 hover:border-red-500/40'
-                                    : 'bg-white/5 border-white/5 hover:border-white/10'
+                                    : 'bg-white/5 border-white/5 hover:border-brand-neon-blue/30 hover:bg-white/10'
                                     }`}
                             >
                                 <div className="flex justify-between items-start mb-2">
-                                    <p className="font-medium text-text-primary text-sm line-clamp-1 group-hover:text-brand transition-colors">
+                                    <p className="font-medium text-gray-200 text-sm line-clamp-1 group-hover/item:text-brand-neon-blue transition-colors">
                                         {task.title}
                                     </p>
                                     {getPriorityBadge(task.priority, task.due_date)}
                                 </div>
 
                                 <div className="flex items-center gap-2 mb-3">
-                                    <span className="text-xs text-text-muted bg-white/5 px-2 py-0.5 rounded-md border border-white/5">
+                                    <span className="text-[10px] uppercase font-semibold text-gray-500 bg-black/40 px-2 py-0.5 rounded-md border border-white/5">
                                         {task.projects?.contacts?.company_name || 'Sin cliente'}
                                     </span>
-                                    <span className="text-xs text-text-muted">•</span>
-                                    <span className="text-xs text-text-muted truncate">
+                                    <span className="text-xs text-gray-600">•</span>
+                                    <span className="text-xs text-gray-400 truncate max-w-[120px]">
                                         {task.projects?.name || 'Sin proyecto'}
                                     </span>
                                 </div>
 
                                 {task.due_date && (
                                     <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                                        <p className={`text-xs flex items-center gap-1.5 ${isOverdue ? 'text-red-400' : 'text-text-muted'}`}>
+                                        <p className={`text-xs flex items-center gap-1.5 font-medium ${isOverdue ? 'text-red-400' : 'text-gray-400'}`}>
                                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
@@ -92,6 +97,6 @@ export async function PriorityTasks({ userId }: { userId: string }) {
                     })
                 )}
             </div>
-        </Card>
+        </div>
     )
 }

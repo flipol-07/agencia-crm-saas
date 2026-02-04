@@ -69,7 +69,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onP
                             type="checkbox"
                             checked={allSelected}
                             onChange={() => allSelected ? clearSelection() : selectAllLeads()}
-                            className="w-4 h-4 rounded border-white/20 text-[#bfff00] focus:ring-[#bfff00]"
+                            className="w-4 h-4 rounded border-white/20 text-[#8b5cf6] focus:ring-[#8b5cf6]"
                         />
                         <span className="text-sm text-gray-400">
                             {someSelected ? `${selectedLeads.length} seleccionados` : 'Seleccionar todos'}
@@ -98,7 +98,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onP
                             <button
                                 onClick={handleGenerateEmails}
                                 disabled={isGenerating}
-                                className="px-3 py-1.5 bg-[#bfff00]/10 text-[#bfff00] rounded-lg text-sm hover:bg-[#bfff00]/20 transition-colors disabled:opacity-50 disabled:cursor-wait font-medium"
+                                className="px-3 py-1.5 bg-[#8b5cf6]/10 text-[#a78bfa] rounded-lg text-sm hover:bg-[#8b5cf6]/20 transition-colors disabled:opacity-50 disabled:cursor-wait font-medium border border-[#8b5cf6]/20"
                             >
                                 {isGenerating ? '⏳ Generando...' : '✉️ Generar Emails'}
                             </button>
@@ -131,7 +131,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onP
                         {leads.map((lead) => (
                             <tr
                                 key={lead.id}
-                                className={`hover:bg-white/5 transition-colors ${selectedLeads.includes(lead.id || '') ? 'bg-[#bfff00]/5' : ''
+                                className={`hover:bg-white/5 transition-colors ${selectedLeads.includes(lead.id || '') ? 'bg-[#8b5cf6]/5' : ''
                                     }`}
                             >
                                 <td className="px-4 py-3">
@@ -139,7 +139,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onP
                                         type="checkbox"
                                         checked={selectedLeads.includes(lead.id || '')}
                                         onChange={() => toggleLeadSelection(lead.id || '')}
-                                        className="w-4 h-4 rounded border-white/20 text-[#bfff00] focus:ring-[#bfff00]"
+                                        className="w-4 h-4 rounded border-white/20 text-[#8b5cf6] focus:ring-[#8b5cf6]"
                                     />
                                 </td>
                                 <td className="px-4 py-3">
@@ -153,7 +153,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onP
                                 </td>
                                 <td className="px-4 py-3">
                                     {lead.email ? (
-                                        <a href={`mailto:${lead.email}`} className="text-[#bfff00] text-sm hover:underline">
+                                        <a href={`mailto:${lead.email}`} className="text-[#a78bfa] text-sm hover:underline">
                                             {lead.email}
                                         </a>
                                     ) : (
@@ -177,7 +177,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onP
                                         {lead.emailStatus === 'generated' && onPreviewLead && (
                                             <button
                                                 onClick={() => onPreviewLead(lead.id)}
-                                                className="p-1 hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-[#bfff00]"
+                                                className="p-1 hover:bg-white/10 rounded transition-colors text-gray-400 hover:text-[#a78bfa]"
                                                 title="Previsualizar Email"
                                             >
                                                 👁️
@@ -197,7 +197,7 @@ export function LeadsTable({ leads, isLoading, onGenerateEmails, onAddLeads, onP
 function StatusBadge({ status }: { status: Lead['emailStatus'] }) {
     const config = {
         pending: { label: 'Pendiente', bg: 'bg-gray-500/20', text: 'text-gray-400' },
-        generated: { label: 'Generado', bg: 'bg-[#bfff00]/20', text: 'text-[#bfff00]' },
+        generated: { label: 'Generado', bg: 'bg-[#8b5cf6]/20', text: 'text-[#a78bfa]' },
         sent: { label: 'Enviado', bg: 'bg-green-500/20', text: 'text-green-400' },
         error: { label: 'Error', bg: 'bg-red-500/20', text: 'text-red-400' },
     }

@@ -210,7 +210,7 @@ export function InvoiceCanvas({
                     <div
                         key={el.id}
                         onMouseDown={(e) => handleElementMouseDown(e, el.id)}
-                        className={`absolute ${editable ? 'cursor-move group' : ''} transition-all duration-75 ${isSelected ? 'ring-2 ring-lime-400 ring-offset-2 z-50' : ''}`}
+                        className={`absolute ${editable ? 'cursor-move group' : ''} transition-all duration-200 ease-out ${isSelected ? 'ring-1 ring-brand ring-offset-0 z-50 shadow-[0_0_30px_rgba(139,92,246,0.3)]' : ''}`}
                         style={{
                             left: `${el.x}mm`,
                             top: `${el.y}mm`,
@@ -230,7 +230,7 @@ export function InvoiceCanvas({
                                 contentEditable={editable}
                                 suppressContentEditableWarning
                                 onBlur={(e) => handleContentEdit(el.id, e.currentTarget.innerText)}
-                                className="m-0 p-0 leading-tight focus:outline-none focus:bg-lime-50/50"
+                                className="m-0 p-0 leading-tight focus:outline-none focus:bg-brand/5 focus:ring-2 focus:ring-brand/20 rounded px-1 transition-all"
                                 style={{ fontSize: 'inherit', fontWeight: 'inherit' }}
                             >
                                 {el.content || 'TITULO'}
@@ -241,7 +241,7 @@ export function InvoiceCanvas({
                                 contentEditable={editable}
                                 suppressContentEditableWarning
                                 onBlur={(e) => handleContentEdit(el.id, e.currentTarget.innerText)}
-                                className="m-0 p-0 leading-normal whitespace-pre-line focus:outline-none focus:bg-lime-50/50"
+                                className="m-0 p-0 leading-normal whitespace-pre-line focus:outline-none focus:bg-brand/5 focus:ring-2 focus:ring-brand/20 rounded px-1 transition-all"
                                 style={{ fontSize: 'inherit', fontWeight: 'inherit' }}
                             >
                                 {el.content || 'Escribe algo...'}
@@ -252,7 +252,7 @@ export function InvoiceCanvas({
                                 contentEditable={editable}
                                 suppressContentEditableWarning
                                 onBlur={(e) => onUpdateInvoice?.({ invoice_number: e.currentTarget.innerText.replace('#', '') })}
-                                className="m-0 p-0 font-mono focus:outline-none focus:bg-lime-50/50"
+                                className="m-0 p-0 font-mono focus:outline-none focus:bg-[#8b5cf6]/5"
                                 style={{ fontSize: 'inherit' }}
                             >
                                 #{invoice.invoice_number}
@@ -263,7 +263,7 @@ export function InvoiceCanvas({
                                 contentEditable={editable}
                                 suppressContentEditableWarning
                                 onBlur={(e) => onUpdateInvoice?.({ issue_date: e.currentTarget.innerText })}
-                                className="m-0 p-0 focus:outline-none focus:bg-lime-50/50"
+                                className="m-0 p-0 focus:outline-none focus:bg-[#8b5cf6]/5"
                                 style={{ fontSize: 'inherit' }}
                             >
                                 {invoice.issue_date}
@@ -294,27 +294,27 @@ export function InvoiceCanvas({
                             <div className="w-full" style={{ fontSize: 'inherit', textAlign: 'inherit' }}>
                                 <table className="w-full border-collapse" style={{ color: 'inherit' }}>
                                     <thead>
-                                        <tr style={{ borderBottom: `2px solid ${el.color || '#000'}` }}>
-                                            <th className="py-2 text-left" style={{ fontSize: '0.9em', color: 'inherit' }}>Descripción</th>
-                                            <th className="py-2 text-center" style={{ fontSize: '0.9em', color: 'inherit' }}>Cant.</th>
-                                            <th className="py-2 text-right" style={{ fontSize: '0.9em', color: 'inherit' }}>Total</th>
+                                        <tr style={{ borderBottom: `1px solid ${el.color || '#e5e7eb'}` }}>
+                                            <th className="py-3 text-left font-bold uppercase tracking-wider opacity-60" style={{ fontSize: '0.7em', color: 'inherit' }}>Descripción</th>
+                                            <th className="py-3 text-center font-bold uppercase tracking-wider opacity-60" style={{ fontSize: '0.7em', color: 'inherit' }}>Cant.</th>
+                                            <th className="py-3 text-right font-bold uppercase tracking-wider opacity-60" style={{ fontSize: '0.7em', color: 'inherit' }}>Total</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {items.slice(0, 15).map((item: any) => (
-                                            <tr key={item.id} className="border-b border-gray-100" style={{ color: 'inherit' }}>
-                                                <td className="py-2">
+                                        {items.slice(0, 15).map((item: any, idx: number) => (
+                                            <tr key={item.id} className={`border-b border-gray-50/50 ${idx % 2 === 0 ? 'bg-transparent' : 'bg-gray-50/30'}`} style={{ color: 'inherit' }}>
+                                                <td className="py-3 pl-2">
                                                     <div
                                                         contentEditable={editable}
                                                         suppressContentEditableWarning
                                                         onBlur={(e) => onUpdateItem?.(item.id, { description: e.currentTarget.innerText })}
-                                                        className="focus:outline-none focus:bg-lime-50/50"
-                                                        style={{ fontSize: '1em', color: 'inherit' }}
+                                                        className="focus:outline-none focus:bg-brand/5 focus:ring-1 focus:ring-brand/20 rounded px-1"
+                                                        style={{ fontSize: '0.9em', color: 'inherit', fontWeight: 500 }}
                                                     >
                                                         {item.description}
                                                     </div>
                                                 </td>
-                                                <td className="py-2 text-center">
+                                                <td className="py-3 text-center">
                                                     <div
                                                         contentEditable={editable}
                                                         suppressContentEditableWarning
@@ -325,13 +325,13 @@ export function InvoiceCanvas({
                                                                 total_price: qty * (item.unit_price || 0)
                                                             })
                                                         }}
-                                                        className="focus:outline-none focus:bg-lime-50/50"
-                                                        style={{ fontSize: '1em', color: 'inherit' }}
+                                                        className="focus:outline-none focus:bg-brand/5 focus:ring-1 focus:ring-brand/20 rounded px-1"
+                                                        style={{ fontSize: '0.9em', color: 'inherit', opacity: 0.8 }}
                                                     >
                                                         {item.quantity}
                                                     </div>
                                                 </td>
-                                                <td className="py-2 text-right font-bold">
+                                                <td className="py-3 text-right pr-2 font-bold tabular-nums">
                                                     <div
                                                         contentEditable={editable}
                                                         suppressContentEditableWarning
@@ -339,8 +339,8 @@ export function InvoiceCanvas({
                                                             const total = parseFloat(e.currentTarget.innerText.replace('€', '').replace(',', '.')) || 0
                                                             onUpdateItem?.(item.id, { total_price: total })
                                                         }}
-                                                        className="focus:outline-none focus:bg-lime-50/50"
-                                                        style={{ fontSize: '1em', color: 'inherit' }}
+                                                        className="focus:outline-none focus:bg-brand/5 focus:ring-1 focus:ring-brand/20 rounded px-1"
+                                                        style={{ fontSize: '0.9em', color: 'inherit' }}
                                                     >
                                                         {item.total_price.toFixed(2)}€
                                                     </div>
@@ -361,7 +361,7 @@ export function InvoiceCanvas({
                                             contentEditable={editable}
                                             suppressContentEditableWarning
                                             onBlur={(e) => onUpdateInvoice?.({ subtotal: parseFloat(e.currentTarget.innerText.replace('€', '').replace(',', '.')) || 0 })}
-                                            className="focus:outline-none focus:bg-lime-50/50"
+                                            className="focus:outline-none focus:bg-[#8b5cf6]/5"
                                         >
                                             {invoice.subtotal.toFixed(2)}€
                                         </div>
@@ -372,7 +372,7 @@ export function InvoiceCanvas({
                                             contentEditable={editable}
                                             suppressContentEditableWarning
                                             onBlur={(e) => onUpdateInvoice?.({ tax_amount: parseFloat(e.currentTarget.innerText.replace('€', '').replace(',', '.')) || 0 })}
-                                            className="focus:outline-none focus:bg-lime-50/50"
+                                            className="focus:outline-none focus:bg-[#8b5cf6]/5"
                                         >
                                             {invoice.tax_amount.toFixed(2)}€
                                         </div>
@@ -383,9 +383,9 @@ export function InvoiceCanvas({
                                             contentEditable={editable}
                                             suppressContentEditableWarning
                                             onBlur={(e) => onUpdateInvoice?.({ total: parseFloat(e.currentTarget.innerText.replace('€', '').replace(',', '.')) || 0 })}
-                                            className="focus:outline-none focus:bg-lime-50/50"
+                                            className="focus:outline-none focus:bg-[#8b5cf6]/5"
                                         >
-                                            {invoice.total.toFixed(2)}€
+                                            {(invoice.subtotal + invoice.tax_amount).toFixed(2)}€
                                         </div>
                                     </div>
                                 </div>
@@ -395,20 +395,20 @@ export function InvoiceCanvas({
                         {/* Resize Handles */}
                         {isSelected && (
                             <>
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'nw', el.id)} className="absolute -left-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-lime-400 cursor-nw-resize z-[60]" />
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'n', el.id)} className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-1 bg-lime-400 cursor-n-resize z-[60]" />
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'ne', el.id)} className="absolute -right-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-lime-400 cursor-ne-resize z-[60]" />
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'e', el.id)} className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-1 h-3 bg-lime-400 cursor-e-resize z-[60]" />
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'se', el.id)} className="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-lime-400 cursor-se-resize z-[60]" />
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 's', el.id)} className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-1 bg-lime-400 cursor-s-resize z-[60]" />
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'sw', el.id)} className="absolute -left-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-lime-400 cursor-sw-resize z-[60]" />
-                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'w', el.id)} className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-1 h-3 bg-lime-400 cursor-w-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'nw', el.id)} className="absolute -left-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-[#8b5cf6] cursor-nw-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'n', el.id)} className="absolute left-1/2 -translate-x-1/2 -top-1.5 w-3 h-1 bg-[#8b5cf6] cursor-n-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'ne', el.id)} className="absolute -right-1.5 -top-1.5 w-3 h-3 bg-white border-2 border-[#8b5cf6] cursor-ne-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'e', el.id)} className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-1 h-3 bg-[#8b5cf6] cursor-e-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'se', el.id)} className="absolute -right-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-[#8b5cf6] cursor-se-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 's', el.id)} className="absolute left-1/2 -translate-x-1/2 -bottom-1.5 w-3 h-1 bg-[#8b5cf6] cursor-s-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'sw', el.id)} className="absolute -left-1.5 -bottom-1.5 w-3 h-3 bg-white border-2 border-[#8b5cf6] cursor-sw-resize z-[60]" />
+                                <div onMouseDown={(e) => handleResizeMouseDown(e, 'w', el.id)} className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-1 h-3 bg-[#8b5cf6] cursor-w-resize z-[60]" />
                             </>
                         )}
 
                         {/* Border for selection in editor */}
                         {editable && !isSelected && (
-                            <div className="absolute inset-0 border border-lime-400/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                            <div className="absolute inset-0 border border-[#8b5cf6]/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                         )}
                     </div>
                 )

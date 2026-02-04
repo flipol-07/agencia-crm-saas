@@ -75,7 +75,7 @@ export function SearchConfigurator() {
             <form onSubmit={handleSubmit} className="lg:col-span-2 space-y-6">
                 <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-xl p-6 space-y-6">
                     <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                        <svg className="w-6 h-6 text-[#bfff00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-6 h-6 text-[#8b5cf6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-7.714 2.143L11 21l-2.286-6.857L1 12l7.714-2.143L11 3z" />
                         </svg>
                         Configurar Búsqueda
@@ -91,7 +91,7 @@ export function SearchConfigurator() {
                             value={campaignName}
                             onChange={(e) => setCampaignName(e.target.value)}
                             placeholder="Ej: Restaurantes Madrid Q1 2026"
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#bfff00]/50 focus:border-[#bfff00]"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/50 focus:border-[#8b5cf6]"
                         />
                     </div>
 
@@ -105,7 +105,7 @@ export function SearchConfigurator() {
                             value={sector}
                             onChange={(e) => setSector(e.target.value)}
                             placeholder="Ej: Restaurantes, Clínicas dentales..."
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#bfff00]/50 focus:border-[#bfff00]"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/50 focus:border-[#8b5cf6]"
                             required
                         />
                         <div className="flex flex-wrap gap-2 mt-3">
@@ -115,7 +115,7 @@ export function SearchConfigurator() {
                                     type="button"
                                     onClick={() => setSector(s)}
                                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${sector === s
-                                        ? 'bg-[#bfff00] text-black font-medium'
+                                        ? 'bg-[#8b5cf6] text-white font-medium shadow-[0_0_10px_rgba(139,92,246,0.3)]'
                                         : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                                         }`}
                                 >
@@ -135,7 +135,7 @@ export function SearchConfigurator() {
                             value={ubicacion}
                             onChange={(e) => setUbicacion(e.target.value)}
                             placeholder="Ej: Madrid, Barcelona, Extremadura..."
-                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#bfff00]/50 focus:border-[#bfff00]"
+                            className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#8b5cf6]/50 focus:border-[#8b5cf6]"
                             required
                         />
                         <div className="flex flex-wrap gap-2 mt-3">
@@ -145,7 +145,7 @@ export function SearchConfigurator() {
                                     type="button"
                                     onClick={() => setUbicacion(u)}
                                     className={`px-3 py-1.5 rounded-full text-sm transition-colors ${ubicacion === u
-                                        ? 'bg-[#bfff00] text-black font-medium'
+                                        ? 'bg-[#8b5cf6] text-white font-medium shadow-[0_0_10px_rgba(139,92,246,0.3)]'
                                         : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white'
                                         }`}
                                 >
@@ -167,7 +167,7 @@ export function SearchConfigurator() {
                                 max={500}
                                 value={cantidad}
                                 onChange={(e) => setCantidad(Math.max(1, Math.min(500, Number(e.target.value))))}
-                                className="w-20 px-2 py-1 bg-black/40 border border-white/20 rounded text-right text-[#bfff00] font-bold focus:outline-none focus:border-[#bfff00]"
+                                className="w-20 px-2 py-1 bg-black/40 border border-white/20 rounded text-right text-[#a78bfa] font-bold focus:outline-none focus:border-[#8b5cf6]"
                             />
                         </div>
                         <input
@@ -177,7 +177,7 @@ export function SearchConfigurator() {
                             step={1}
                             value={Math.min(cantidad, 200)}
                             onChange={(e) => setCantidad(Number(e.target.value))}
-                            className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#bfff00]"
+                            className="w-full h-2 bg-white/10 rounded-lg appearance-none cursor-pointer accent-[#8b5cf6]"
                         />
                         <div className="flex justify-between text-xs text-gray-500 mt-1">
                             <span>1</span>
@@ -198,7 +198,7 @@ export function SearchConfigurator() {
                                 type="checkbox"
                                 checked={requiereEmail}
                                 onChange={(e) => setRequiereEmail(e.target.checked)}
-                                className="w-5 h-5 rounded border-white/20 text-[#bfff00] focus:ring-[#bfff00]"
+                                className="w-5 h-5 rounded border-white/20 text-[#8b5cf6] focus:ring-[#8b5cf6]"
                             />
                             <div>
                                 <p className="text-white text-sm font-medium">Solo con Email</p>
@@ -211,7 +211,7 @@ export function SearchConfigurator() {
                                 type="checkbox"
                                 checked={requiereWebsite}
                                 onChange={(e) => setRequiereWebsite(e.target.checked)}
-                                className="w-5 h-5 rounded border-white/20 text-[#bfff00] focus:ring-[#bfff00]"
+                                className="w-5 h-5 rounded border-white/20 text-[#8b5cf6] focus:ring-[#8b5cf6]"
                             />
                             <div>
                                 <p className="text-white text-sm font-medium">Solo con Web</p>
@@ -239,7 +239,7 @@ export function SearchConfigurator() {
                 <button
                     type="submit"
                     disabled={isLoading || !sector || !ubicacion}
-                    className="w-full py-4 bg-[#bfff00] hover:bg-[#a8e600] disabled:bg-gray-600 disabled:cursor-not-allowed text-black font-bold rounded-xl transition-colors flex items-center justify-center gap-3 text-lg"
+                    className="w-full py-4 bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all flex items-center justify-center gap-3 text-lg shadow-[0_0_20px_rgba(139,92,246,0.3)]"
                 >
                     {isLoading ? (
                         <>
@@ -257,23 +257,23 @@ export function SearchConfigurator() {
 
             {/* Info Panel */}
             <div className="space-y-6">
-                <div className="bg-gradient-to-br from-[#bfff00]/10 to-transparent border border-[#bfff00]/20 rounded-xl p-6">
+                <div className="bg-gradient-to-br from-[#8b5cf6]/10 to-transparent border border-[#8b5cf6]/20 rounded-xl p-6">
                     <h3 className="text-lg font-semibold text-white mb-4">💡 ¿Cómo funciona?</h3>
                     <ol className="space-y-3 text-sm text-gray-300">
                         <li className="flex gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 bg-[#bfff00]/20 text-[#bfff00] rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#8b5cf6]/20 text-[#a78bfa] rounded-full flex items-center justify-center text-xs font-bold">1</span>
                             <span>Buscamos negocios en Google Maps según tu sector y ubicación</span>
                         </li>
                         <li className="flex gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 bg-[#bfff00]/20 text-[#bfff00] rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#8b5cf6]/20 text-[#a78bfa] rounded-full flex items-center justify-center text-xs font-bold">2</span>
                             <span>Visitamos sus webs para encontrar emails corporativos</span>
                         </li>
                         <li className="flex gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 bg-[#bfff00]/20 text-[#bfff00] rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#8b5cf6]/20 text-[#a78bfa] rounded-full flex items-center justify-center text-xs font-bold">3</span>
                             <span>La IA genera emails personalizados para cada negocio</span>
                         </li>
                         <li className="flex gap-3">
-                            <span className="flex-shrink-0 w-6 h-6 bg-[#bfff00]/20 text-[#bfff00] rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                            <span className="flex-shrink-0 w-6 h-6 bg-[#8b5cf6]/20 text-[#a78bfa] rounded-full flex items-center justify-center text-xs font-bold">4</span>
                             <span>Envías las campañas con rate limiting automático</span>
                         </li>
                     </ol>

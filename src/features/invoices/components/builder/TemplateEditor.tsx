@@ -89,7 +89,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
     return (
         <div className="h-full p-4 overflow-y-auto w-full transition-all duration-300">
             <h2 className="text-sm font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tighter">
-                <span className="text-lime-400">⚡</span> Propiedades de Diseño
+                <span className="text-brand">⚡</span> Propiedades de Diseño
             </h2>
 
             {/* ELEMENTS ADDER */}
@@ -111,7 +111,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
             {selectedElement ? (
                 <div className="space-y-6 animate-in fade-in duration-200">
                     <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                        <h3 className="text-lime-400 font-bold uppercase text-xs">Propiedades ({selectedElement.type})</h3>
+                        <h3 className="text-brand font-bold uppercase text-xs">Propiedades ({selectedElement.type})</h3>
                         <button onClick={() => deleteElement(selectedElement.id)} className="text-red-400 hover:text-red-300 text-xs font-bold">Eliminar</button>
                     </div>
 
@@ -123,7 +123,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                 <textarea
                                     value={selectedElement.content || ''}
                                     onChange={(e) => updateSelected({ content: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-lime-400 outline-none h-24"
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-brand outline-none h-24"
                                 />
                             </div>
                         )}
@@ -136,7 +136,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                     <button
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={uploading}
-                                        className="w-full bg-lime-400/10 border border-lime-400/30 text-lime-400 py-2 rounded-lg text-xs font-black hover:bg-lime-400/20 transition-all uppercase"
+                                        className="w-full bg-brand/10 border border-brand/30 text-brand py-2 rounded-lg text-xs font-black hover:bg-brand/20 transition-all uppercase"
                                     >
                                         {uploading ? 'SUBIENDO...' : 'ELegir de Galería / Subir'}
                                     </button>
@@ -156,7 +156,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                         type="text"
                                         value={selectedElement.src || ''}
                                         onChange={(e) => updateSelected({ src: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-lime-400"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-brand"
                                         placeholder="https://..."
                                     />
                                 </div>
@@ -174,7 +174,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                         const val = parseInt(e.target.value)
                                         updateSelected({ fontSize: isNaN(val) ? 10 : val })
                                     }}
-                                    className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:border-lime-400"
+                                    className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:border-brand"
                                 />
                             </div>
 
@@ -183,7 +183,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                 <select
                                     value={selectedElement.fontWeight || '400'}
                                     onChange={(e) => updateSelected({ fontWeight: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:border-lime-400 [&>option]:bg-black"
+                                    className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:border-brand [&>option]:bg-black"
                                 >
                                     <option value="400">Normal</option>
                                     <option value="600">Semibold</option>
@@ -212,7 +212,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                     step="0.1"
                                     value={selectedElement.opacity || 1}
                                     onChange={(e) => updateSelected({ opacity: parseFloat(e.target.value) })}
-                                    className="w-full accent-lime-400 h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                                    className="w-full accent-brand h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
                                 />
                             </div>
                             <div>
@@ -237,7 +237,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                     <button
                                         key={align}
                                         onClick={() => updateSelected({ align: align as any })}
-                                        className={`flex-1 py-2 text-xs font-bold rounded capitalize tracking-widest transition-all ${selectedElement.align === align ? 'bg-lime-400 text-black' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
+                                        className={`flex-1 py-2 text-xs font-bold rounded capitalize tracking-widest transition-all ${selectedElement.align === align ? 'bg-brand text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
                                     >
                                         {align}
                                     </button>
@@ -255,7 +255,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                         type="number"
                                         value={Math.round(selectedElement.x) || 0}
                                         onChange={(e) => updateSelected({ x: parseInt(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-lime-400"
+                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
                                 <div>
@@ -264,7 +264,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                         type="number"
                                         value={Math.round(selectedElement.y) || 0}
                                         onChange={(e) => updateSelected({ y: parseInt(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-lime-400"
+                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
                                 <div>
@@ -273,7 +273,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                         type="number"
                                         value={Math.round(selectedElement.width || 0)}
                                         onChange={(e) => updateSelected({ width: parseInt(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-lime-400"
+                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
                                 <div>
@@ -282,7 +282,7 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                         type="number"
                                         value={Math.round(selectedElement.height || 0)}
                                         onChange={(e) => updateSelected({ height: parseInt(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-lime-400"
+                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
                             </div>
@@ -326,11 +326,11 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                         placeholder="URL de Imagen de Fondo..."
                         value={template.config?.background_url || ''}
                         onChange={(e) => onChange({ config: { ...template.config, background_url: e.target.value } })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-lime-400"
+                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-brand"
                     />
 
-                    <div className="p-4 bg-lime-400/5 border border-lime-400/10 rounded-xl">
-                        <p className="text-[10px] text-lime-400 font-bold uppercase mb-1">Tip de Diseño:</p>
+                    <div className="p-4 bg-brand/5 border border-brand/10 rounded-xl">
+                        <p className="text-[10px] text-brand font-bold uppercase mb-1">Tip de Diseño:</p>
                         <p className="text-[10px] text-gray-400 leading-relaxed">Para mejores resultados, exporta tu diseño de Canva en formato A4 y súbelo aquí. Usa Aurie para añadir los datos dinámicos encima.</p>
                     </div>
                 </div>

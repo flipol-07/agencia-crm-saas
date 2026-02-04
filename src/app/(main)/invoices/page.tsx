@@ -9,14 +9,20 @@ export const metadata = {
 
 export default function InvoicesPage() {
     return (
-        <div className="max-w-7xl mx-auto space-y-8 animate-fade-in">
-            <div className="flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto space-y-8 pb-10 relative">
+            {/* Background Ambience */}
+            <div className="fixed inset-0 pointer-events-none z-[-1]">
+                <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-brand-neon-lime/5 rounded-full blur-[128px]" />
+                <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-[128px]" />
+            </div>
+
+            <div className="flex items-center justify-between pb-6 border-b border-white/5">
                 <div>
-                    <h1 className="text-3xl font-black text-white tracking-wider uppercase">
+                    <h1 className="text-4xl font-display font-black text-white tracking-tight uppercase">
                         Facturas
                     </h1>
-                    <p className="text-zinc-400 mt-1">
-                        Gestiona tus facturas y cobros
+                    <p className="text-gray-400 mt-1 flex items-center gap-2">
+                        Gestiona tus ingresos y cobros
                     </p>
                 </div>
             </div>

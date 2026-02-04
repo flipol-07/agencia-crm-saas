@@ -129,7 +129,7 @@ export function CreateTaskModal({
                             value={title}
                             onChange={(e) => setTitle(e.target.value)}
                             placeholder="¿Qué hay que hacer?"
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-lime-400"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#8b5cf6]"
                             autoFocus
                         />
                     </div>
@@ -143,7 +143,7 @@ export function CreateTaskModal({
                             <select
                                 value={contactId}
                                 onChange={(e) => setContactId(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-lime-400"
+                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#8b5cf6]"
                                 disabled={loadingContacts}
                             >
                                 <option value="" className="bg-gray-900 text-gray-500">Ninguno</option>
@@ -163,7 +163,7 @@ export function CreateTaskModal({
                             <select
                                 value={projectId}
                                 onChange={(e) => setProjectId(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-lime-400"
+                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-[#8b5cf6]"
                                 disabled={loadingProjects}
                             >
                                 <option value="" className="bg-gray-900 text-gray-500">Ninguno</option>
@@ -212,7 +212,7 @@ export function CreateTaskModal({
                                 type="date"
                                 value={dueDate}
                                 onChange={(e) => setDueDate(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-lime-400 text-sm"
+                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8b5cf6] text-sm"
                             />
                         </div>
                     </div>
@@ -227,7 +227,7 @@ export function CreateTaskModal({
                             onChange={(e) => setDescription(e.target.value)}
                             placeholder="Detalles adicionales..."
                             rows={3}
-                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-lime-400 resize-none"
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-[#8b5cf6] resize-none"
                         />
                     </div>
 
@@ -243,7 +243,7 @@ export function CreateTaskModal({
                         <button
                             type="submit"
                             disabled={saving || !title.trim()}
-                            className="flex-1 px-4 py-3 bg-lime-500 hover:bg-lime-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-bold rounded-lg transition-colors uppercase tracking-wider text-xs"
+                            className="flex-1 px-4 py-3 bg-[#8b5cf6] hover:bg-[#7c3aed] disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold rounded-lg transition-colors uppercase tracking-wider text-xs"
                         >
                             {saving ? 'Creando...' : 'Crear Tarea'}
                         </button>

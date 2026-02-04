@@ -90,7 +90,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
                         setEditingExpense(null)
                         setShowForm(true)
                     }}
-                    className="flex items-center gap-2 px-5 py-3 bg-lime-400 text-black font-semibold rounded-lg hover:bg-lime-300 transition-colors"
+                    className="flex items-center gap-2 px-5 py-3 bg-[#8b5cf6] text-white font-semibold rounded-lg hover:bg-[#7c3aed] transition-colors shadow-[0_0_20px_rgba(139,92,246,0.2)]"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -148,7 +148,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
                             <select
                                 value={filters.type || 'all'}
                                 onChange={(e) => setFilters({ ...filters, type: e.target.value as 'all' | 'expense' | 'income' })}
-                                className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-lime-400 [&>option]:bg-zinc-900 [&>option]:text-white"
+                                className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#8b5cf6]/50 [&>option]:bg-zinc-900 [&>option]:text-white"
                             >
                                 <option value="all">Todos</option>
                                 <option value="income">Ingresos</option>
@@ -160,7 +160,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
                                 <select
                                     value={filters.sector_id || ''}
                                     onChange={(e) => setFilters({ ...filters, sector_id: e.target.value || null })}
-                                    className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-lime-400 [&>option]:bg-zinc-900 [&>option]:text-white"
+                                    className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#8b5cf6]/50 [&>option]:bg-zinc-900 [&>option]:text-white"
                                 >
                                     <option value="">Todos los sectores</option>
                                     {sectors.map((s) => (
@@ -173,7 +173,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
                             <select
                                 value={filters.category_id || ''}
                                 onChange={(e) => setFilters({ ...filters, category_id: e.target.value || null })}
-                                className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-lime-400 [&>option]:bg-zinc-900 [&>option]:text-white"
+                                className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#8b5cf6]/50 [&>option]:bg-zinc-900 [&>option]:text-white"
                             >
                                 <option value="">Todas las categorías</option>
                                 {categories.map((c) => (

@@ -30,19 +30,28 @@ export default async function DashboardPage({ searchParams }: Props) {
   ]
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="max-w-[1600px] mx-auto space-y-8 pb-10">
+      {/* Background Ambience */}
+      <div className="fixed inset-0 pointer-events-none z-[-1]">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-purple/5 rounded-full blur-[128px]" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-brand-neon-blue/5 rounded-full blur-[128px]" />
+      </div>
+
       {/* Page Shell (Instant) */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pb-2 border-b border-white/5">
         <div>
-          <h1 className="text-3xl font-bold text-white tracking-wider uppercase">Dashboard</h1>
-          <p className="text-gray-400 mt-1">El cerebro de tu agencia • <span className="capitalize">{currentMonth}</span></p>
+          <h1 className="text-4xl font-display font-black text-white tracking-tight uppercase">Dashboard</h1>
+          <p className="text-gray-400 mt-1 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+            Sistema Operativo <span className="text-white/20">|</span> <span className="capitalize text-[#8b5cf6]">{currentMonth}</span>
+          </p>
         </div>
 
         <div className="flex flex-col sm:items-end gap-3">
           <PeriodSelector periods={periods} />
-          <div className="flex items-center gap-2 text-[10px] text-text-muted bg-white/5 px-2 py-1 rounded-md border border-white/10 self-start sm:self-auto">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse"></span>
-            Datos inteligentes (Next.js 16)
+          <div className="flex items-center gap-2 text-[10px] text-brand-neon-blue bg-brand-neon-blue/5 px-3 py-1.5 rounded-full border border-brand-neon-blue/20 self-start sm:self-auto font-medium">
+            <span className="w-1.5 h-1.5 rounded-full bg-brand-neon-blue animate-pulse"></span>
+            Next.js 16 Turbo Engine
           </div>
         </div>
       </div>

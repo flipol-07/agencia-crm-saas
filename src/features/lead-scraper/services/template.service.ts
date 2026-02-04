@@ -191,7 +191,7 @@ export const DEFAULT_EMAIL_TEMPLATE = `<!DOCTYPE html>
         <!-- CTA -->
         <div style="text-align: center; margin: 40px 0;">
           <a href="#"
-            style="background-color: #bfff00; color: #000; padding: 18px 25px; text-decoration: none; font-weight: 900; border-radius: 6px; display: inline-block; text-transform: uppercase;">
+            style="background-color: #8b5cf6; color: #fff; padding: 18px 25px; text-decoration: none; font-weight: 900; border-radius: 6px; display: inline-block; text-transform: uppercase;">
             AGENDAR DEMO
           </a>
         </div>
@@ -199,7 +199,7 @@ export const DEFAULT_EMAIL_TEMPLATE = `<!DOCTYPE html>
         <!-- Footer -->
         <div style="border-top: 1px solid #2a254a; padding-top: 30px; margin-top: 20px;">
           <p style="font-size: 16px; margin: 0; font-weight: 700; color: #fff;">Antigravity Team</p>
-          <p style="font-size: 13px; margin: 5px 0 0; color: #bfff00; font-weight: 700;">AI Automation Specialists</p>
+          <p style="font-size: 13px; margin: 5px 0 0; color: #8b5cf6; font-weight: 700;">AI Automation Specialists</p>
         </div>
       </td>
     </tr>

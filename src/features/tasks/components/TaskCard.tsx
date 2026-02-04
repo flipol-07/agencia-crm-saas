@@ -51,14 +51,14 @@ export function TaskCard({
             <div className="flex items-start gap-3">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-medium text-white truncate group-hover:text-lime-400 transition-colors">{task.title}</h3>
+                        <h3 className="font-medium text-white truncate group-hover:text-[#8b5cf6] transition-colors">{task.title}</h3>
                         {commentCount > 0 && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     onOpen()
                                 }}
-                                className="flex items-center gap-1.5 bg-white/5 hover:bg-lime-500/20 text-gray-500 hover:text-lime-400 px-2 py-0.5 rounded-full text-[10px] transition-all border border-white/5"
+                                className="flex items-center gap-1.5 bg-white/5 hover:bg-[#8b5cf6]/20 text-gray-500 hover:text-[#8b5cf6] px-2 py-0.5 rounded-full text-[10px] transition-all border border-white/5"
                                 title="Ver comentarios"
                             >
                                 💬 {commentCount}
@@ -71,7 +71,7 @@ export function TaskCard({
                             <>
                                 <Link
                                     href={`/contacts/${task.projects.contact_id}`}
-                                    className="text-gray-400 hover:text-lime-400 transition-colors"
+                                    className="text-gray-400 hover:text-[#8b5cf6] transition-colors"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     🏢 {task.projects.contacts?.company_name}

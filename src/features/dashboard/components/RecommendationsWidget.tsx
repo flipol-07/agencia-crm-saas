@@ -2,7 +2,6 @@
 import { getDashboardRecommendations } from '../services/dashboard.service'
 import { Recommendation } from '../lib/recommendation-engine'
 import Link from 'next/link'
-
 import { AuraTrigger } from './AuraTrigger'
 
 export async function RecommendationsWidget({ userId }: { userId: string }) {
@@ -25,7 +24,7 @@ export async function RecommendationsWidget({ userId }: { userId: string }) {
                     ))}
                 </div>
             ) : (
-                <div className="bg-white/5 border border-white/10 rounded-xl p-8 text-center">
+                <div className="glass-card rounded-2xl p-8 text-center border border-white/5">
                     <p className="text-sm text-gray-400">No hay recomendaciones adicionales en este momento.</p>
                 </div>
             )}
@@ -38,18 +37,42 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
     const { type, title, message, actionLabel, actionUrl } = recommendation
 
     const styleMap = {
-        success: { bg: 'bg-green-500/10', border: 'border-green-500/20', icon: 'text-green-400', title: 'text-green-500' },
-        warning: { bg: 'bg-amber-500/10', border: 'border-amber-500/20', icon: 'text-amber-400', title: 'text-amber-500' },
-        critical: { bg: 'bg-red-500/10', border: 'border-red-500/20', icon: 'text-red-400', title: 'text-red-500' },
-        info: { bg: 'bg-blue-500/10', border: 'border-blue-500/20', icon: 'text-blue-400', title: 'text-blue-500' },
+        success: {
+            bg: 'bg-green-500/5',
+            border: 'border-green-500/20',
+            icon: 'text-green-400',
+            title: 'text-green-400',
+            hover: 'hover:border-green-500/40 hover:shadow-[0_0_15px_rgba(34,197,94,0.1)]'
+        },
+        warning: {
+            bg: 'bg-amber-500/5',
+            border: 'border-amber-500/20',
+            icon: 'text-amber-400',
+            title: 'text-amber-400',
+            hover: 'hover:border-amber-500/40 hover:shadow-[0_0_15px_rgba(245,158,11,0.1)]'
+        },
+        critical: {
+            bg: 'bg-red-500/5',
+            border: 'border-red-500/20',
+            icon: 'text-red-400',
+            title: 'text-red-400',
+            hover: 'hover:border-red-500/40 hover:shadow-[0_0_15px_rgba(239,68,68,0.1)]'
+        },
+        info: {
+            bg: 'bg-blue-500/5',
+            border: 'border-blue-500/20',
+            icon: 'text-blue-400',
+            title: 'text-blue-400',
+            hover: 'hover:border-blue-500/40 hover:shadow-[0_0_15px_rgba(59,130,246,0.1)]'
+        },
     }
 
     const styles = styleMap[type] || styleMap.info
 
     return (
-        <div className={`rounded-xl p-5 border ${styles.bg} ${styles.border} flex flex-col gap-3 transition-transform hover:scale-[1.01]`}>
-            <div className="flex items-start gap-3">
-                <div className={`mt-1 p-2 rounded-lg bg-black/20 ${styles.icon}`}>
+        <div className={`glass-card rounded-2xl p-6 border ${styles.bg} ${styles.border} flex flex-col gap-4 transition-all duration-300 ${styles.hover} group`}>
+            <div className="flex items-start gap-4">
+                <div className={`p-2.5 rounded-xl bg-black/40 backdrop-blur-sm border border-white/5 ${styles.icon}`}>
                     {type === 'success' && (
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
                     )}
@@ -64,8 +87,8 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
                     )}
                 </div>
                 <div>
-                    <h3 className={`font-semibold ${styles.title}`}>{title}</h3>
-                    <p className="text-sm text-gray-400 mt-1 leading-relaxed">{message}</p>
+                    <h3 className={`text-sm font-bold uppercase tracking-wide ${styles.title}`}>{title}</h3>
+                    <p className="text-sm text-gray-400 mt-1.5 leading-relaxed">{message}</p>
                 </div>
             </div>
 
@@ -73,9 +96,10 @@ function RecommendationCard({ recommendation }: { recommendation: Recommendation
                 <div className="mt-auto pt-2 flex justify-end">
                     <Link
                         href={actionUrl}
-                        className={`text-xs font-medium px-3 py-1.5 rounded-md bg-white/5 hover:bg-white/10 transition-colors ${styles.title}`}
+                        className={`text-xs font-bold px-4 py-2 rounded-lg bg-black/40 border border-white/5 hover:bg-white/5 transition-all flex items-center gap-2 ${styles.title}`}
                     >
-                        {actionLabel} →
+                        {actionLabel}
+                        <span className="transform transition-transform group-hover:translate-x-1">→</span>
                     </Link>
                 </div>
             )}

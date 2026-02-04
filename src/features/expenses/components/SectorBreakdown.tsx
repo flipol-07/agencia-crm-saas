@@ -72,7 +72,7 @@ export function SectorBreakdown({ data, isLoading }: SectorBreakdownProps) {
                                     />
                                     <span className="text-white font-medium">{sector.sector_name}</span>
                                 </div>
-                                <span className={`text-sm font-medium ${balance >= 0 ? 'text-lime-400' : 'text-red-400'}`}>
+                                <span className={`text-sm font-medium ${balance >= 0 ? 'text-[#a78bfa]' : 'text-red-400'}`}>
                                     {balance >= 0 ? '+' : ''}{formatCurrency(balance)}
                                 </span>
                             </div>

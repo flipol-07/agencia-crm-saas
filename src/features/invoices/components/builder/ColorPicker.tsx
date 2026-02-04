@@ -1,7 +1,7 @@
 import { memo } from 'react'
 
 const PRESET_COLORS = [
-    '#000000', '#FFFFFF', '#6B7280', '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#a3e635'
+    '#000000', '#FFFFFF', '#6B7280', '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#8b5cf6'
 ]
 
 interface Props {
@@ -32,7 +32,7 @@ export const ColorPicker = memo(function ColorPicker({ value = '#000000', onChan
                         type="text"
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white flex-1 font-mono uppercase focus:border-lime-400 outline-none"
+                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white flex-1 font-mono uppercase focus:border-brand outline-none"
                     />
                 </div>
 
@@ -42,7 +42,7 @@ export const ColorPicker = memo(function ColorPicker({ value = '#000000', onChan
                         <button
                             key={color}
                             onClick={() => onChange(color)}
-                            className={`w-6 h-6 rounded-full border border-white/10 transition-transform hover:scale-110 ${value === color ? 'ring-2 ring-lime-400 ring-offset-2 ring-offset-black' : ''}`}
+                            className={`w-6 h-6 rounded-full border border-white/10 transition-transform hover:scale-110 ${value === color ? 'ring-2 ring-brand ring-offset-2 ring-offset-black' : ''}`}
                             style={{ backgroundColor: color }}
                             title={color}
                         />

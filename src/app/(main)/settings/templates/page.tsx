@@ -71,6 +71,12 @@ export default function TemplatesPage() {
         if (!confirm('¿Duplicar esta plantilla?')) return
 
         try {
+            const { data: { user } } = await supabase.auth.getUser()
+            if (!user) {
+                alert('Debes iniciar sesión para duplicar plantillas')
+                return
+            }
+
             const { data, error } = await supabase
                 .from('invoice_templates')
                 .insert({
@@ -79,6 +85,7 @@ export default function TemplatesPage() {
                     config: template.config,
                     max_items: template.max_items,
                     background_url: template.background_url,
+                    profile_id: user.id,
                     is_default: false
                 })
                 .select()
@@ -139,10 +146,16 @@ export default function TemplatesPage() {
             })
 
             if (error) throw error
-            fetchTemplates()
-        } catch (error) {
-            console.error('Error setting default template:', error)
-            alert('Error al establecer como predeterminada')
+
+            // Update local state: only the selected one is default now
+            setTemplates(prev => prev.map(t => ({
+                ...t,
+                is_default: t.id === id
+            })))
+        } catch (error: any) {
+            console.error('Error setting default template:', JSON.stringify(error, null, 2))
+            console.error('Error object:', error)
+            alert('Error al establecer como predeterminada: ' + (error?.message || error?.error_description || 'Error desconocido'))
         }
     }
 
@@ -156,10 +169,13 @@ export default function TemplatesPage() {
                 .eq('id', id)
 
             if (error) throw error
-            fetchTemplates()
-        } catch (error) {
-            console.error('Error deleting template:', error)
-            alert('Error al eliminar. Asegúrate de que no esté siendo usada en ninguna factura.')
+
+            // Update local state instead of refetching everything
+            setTemplates(prev => prev.filter(t => t.id !== id))
+        } catch (error: any) {
+            console.error('Error deleting template:', JSON.stringify(error, null, 2))
+            console.error('Error object:', error)
+            alert('Error al eliminar: ' + (error?.message || error?.error_description || 'Asegúrate de que no existan restricciones de integridad'))
         }
     }
 
@@ -174,7 +190,7 @@ export default function TemplatesPage() {
                 </div>
                 <button
                     onClick={handleCreateNew}
-                    className="bg-lime-400 text-black px-4 py-2 rounded-lg text-sm font-bold hover:bg-lime-500 transition-colors shadow-lg shadow-lime-400/20"
+                    className="bg-brand text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-brand-purple transition-colors shadow-lg shadow-brand/20"
                 >
                     + Crear Nueva Plantilla
                 </button>
@@ -182,7 +198,7 @@ export default function TemplatesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {templates.map(template => (
-                    <div key={template.id} className="bg-white/5 rounded-2xl border border-white/10 shadow-xl hover:shadow-2xl hover:border-lime-400/30 transition-all overflow-hidden group flex flex-col">
+                    <div key={template.id} className="bg-white/5 rounded-2xl border border-white/10 shadow-xl hover:shadow-2xl hover:border-brand/30 transition-all overflow-hidden group flex flex-col">
                         <div className="aspect-[210/297] bg-white relative overflow-hidden flex justify-center p-4">
                             {/* Real Preview using InvoiceCanvas */}
                             <div className="scale-[0.25] origin-top shadow-2xl pointer-events-none">
@@ -198,7 +214,7 @@ export default function TemplatesPage() {
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
                                 <Link
                                     href={`/settings/templates/${template.id}`}
-                                    className="bg-lime-400 text-black px-6 py-2 rounded-full text-sm font-black hover:scale-105 transition-transform"
+                                    className="bg-brand text-white px-6 py-2 rounded-full text-sm font-black hover:scale-105 transition-transform shadow-[0_0_20px_rgba(139,92,246,0.3)]"
                                 >
                                     EDITAR DISEÑO
                                 </Link>
@@ -208,7 +224,7 @@ export default function TemplatesPage() {
                             <div className="flex justify-between items-start mb-2">
                                 <h3 className="font-bold text-white text-lg">{template.name}</h3>
                                 {template.is_default && (
-                                    <span className="bg-lime-400 text-black text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-tighter">Default</span>
+                                    <span className="bg-brand text-white text-[9px] px-2 py-0.5 rounded-full font-black uppercase tracking-tighter shadow-[0_0_10px_rgba(139,92,246,0.2)]">Default</span>
                                 )}
                             </div>
                             <p className="text-xs text-gray-400 line-clamp-2 h-8 mb-6">{template.description || 'Sin descripción'}</p>
@@ -229,7 +245,7 @@ export default function TemplatesPage() {
                                 {!template.is_default && (
                                     <button
                                         onClick={() => handleSetDefault(template.id)}
-                                        className="text-xs text-lime-400 hover:text-lime-300 font-bold transition-colors"
+                                        className="text-xs text-brand hover:text-brand-purple font-bold transition-colors"
                                     >
                                         Usar por defecto
                                     </button>

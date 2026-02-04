@@ -12,7 +12,7 @@ export function ScrapingProgress({ progress }: ScrapingProgressProps) {
     const phaseConfig: Record<string, { label: string; icon: string; color: string }> = {
         places: { label: 'Buscando negocios', icon: '🔍', color: 'bg-blue-500' },
         emails: { label: 'Buscando emails', icon: '📧', color: 'bg-purple-500' },
-        generating: { label: 'Generando contenido', icon: '✨', color: 'bg-yellow-500' },
+        generating: { label: 'Generando contenido', icon: '✨', color: 'bg-[#8b5cf6]' },
         sending: { label: 'Enviando emails', icon: '🚀', color: 'bg-orange-500' },
         saving: { label: 'Guardando', icon: '💾', color: 'bg-green-500' },
     }
@@ -20,13 +20,13 @@ export function ScrapingProgress({ progress }: ScrapingProgressProps) {
     const phase = phaseConfig[progress.phase]
 
     return (
-        <div className="bg-gradient-to-r from-[#bfff00]/10 to-purple-500/10 border border-[#bfff00]/20 rounded-xl p-6">
+        <div className="bg-gradient-to-r from-[#8b5cf6]/20 to-[#7c3aed]/5 border border-[#8b5cf6]/30 rounded-xl p-6 shadow-[0_0_20px_rgba(139,92,246,0.1)]">
             <div className="flex items-center gap-4 mb-4">
                 <div className="text-3xl animate-pulse">{phase.icon}</div>
                 <div className="flex-1">
                     <div className="flex items-center justify-between mb-1">
                         <span className="text-white font-medium">{phase.label}</span>
-                        <span className="text-[#bfff00] font-bold">{percentage}%</span>
+                        <span className="text-[#a78bfa] font-bold">{percentage}%</span>
                     </div>
                     <p className="text-gray-400 text-sm">{progress.message}</p>
                 </div>

@@ -227,7 +227,7 @@ export default function TasksPage() {
                     {/* Create Task Button */}
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="px-4 py-2 bg-lime-500 hover:bg-lime-400 text-black font-bold rounded-lg transition-all flex items-center gap-2"
+                        className="px-4 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-lg transition-all flex items-center gap-2"
                     >
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -239,7 +239,7 @@ export default function TasksPage() {
                         <button
                             onClick={() => setViewMode('list')}
                             className={`px-3 py-2 text-sm transition-all ${viewMode === 'list'
-                                ? 'bg-lime-400 text-black'
+                                ? 'bg-[#8b5cf6] text-white'
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                             title="Vista Lista"
@@ -251,7 +251,7 @@ export default function TasksPage() {
                         <button
                             onClick={() => setViewMode('kanban')}
                             className={`px-3 py-2 text-sm transition-all ${viewMode === 'kanban'
-                                ? 'bg-lime-400 text-black'
+                                ? 'bg-[#8b5cf6] text-white'
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                             title="Vista Kanban"
@@ -267,7 +267,7 @@ export default function TasksPage() {
                         <button
                             onClick={() => setFilterMode('all')}
                             className={`px-4 py-2 text-sm transition-all ${filterMode === 'all'
-                                ? 'bg-lime-400 text-black'
+                                ? 'bg-[#8b5cf6] text-white'
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                         >
@@ -276,7 +276,7 @@ export default function TasksPage() {
                         <button
                             onClick={() => setFilterMode('mine')}
                             className={`px-4 py-2 text-sm transition-all ${filterMode === 'mine'
-                                ? 'bg-lime-400 text-black'
+                                ? 'bg-[#8b5cf6] text-white'
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
                         >
@@ -298,7 +298,7 @@ export default function TasksPage() {
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Buscar tareas..."
-                        className="w-full pl-10 pr-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-lime-400"
+                        className="w-full pl-10 pr-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-[#8b5cf6]"
                     />
                     {searchQuery && (
                         <button
@@ -314,7 +314,7 @@ export default function TasksPage() {
                 <select
                     value={filterPriority}
                     onChange={(e) => setFilterPriority(e.target.value as TaskPriority | '')}
-                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-lime-400"
+                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#8b5cf6]"
                 >
                     <option value="" className="bg-gray-900">Todas las prioridades</option>
                     {TASK_PRIORITIES.map(p => (
@@ -328,7 +328,7 @@ export default function TasksPage() {
                 <select
                     value={filterAssignee}
                     onChange={(e) => setFilterAssignee(e.target.value)}
-                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-lime-400"
+                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#8b5cf6]"
                 >
                     <option value="" className="bg-gray-900">Todos los miembros</option>
                     {members.map(m => (
@@ -342,7 +342,7 @@ export default function TasksPage() {
                 <button
                     onClick={() => setShowCompleted(!showCompleted)}
                     className={`px-4 py-2 text-sm rounded-lg border transition-all ${showCompleted
-                        ? 'bg-lime-500/20 text-lime-400 border-lime-500/30'
+                        ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] border-[#8b5cf6]/30'
                         : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/20'
                         }`}
                 >
@@ -377,13 +377,13 @@ export default function TasksPage() {
                 </div>
             ) : filteredTasks.length === 0 ? (
                 <div className="glass rounded-xl p-12 text-center">
-                    <div className="w-16 h-16 mx-auto mb-4 bg-lime-400/10 rounded-full flex items-center justify-center">
+                    <div className="w-16 h-16 mx-auto mb-4 bg-[#8b5cf6]/10 rounded-full flex items-center justify-center">
                         {hasFilters ? (
-                            <svg className="w-8 h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-8 h-8 text-[#8b5cf6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
                         ) : (
-                            <svg className="w-8 h-8 text-lime-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-8 h-8 text-[#8b5cf6]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                         )}

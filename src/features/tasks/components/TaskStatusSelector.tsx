@@ -16,7 +16,7 @@ const statusColors: Record<TaskStatus, { bg: string; hover: string; border: stri
     in_progress: { bg: 'bg-blue-500/20', hover: 'hover:bg-blue-500/30', border: 'border-blue-500/30' },
     in_review: { bg: 'bg-purple-500/20', hover: 'hover:bg-purple-500/30', border: 'border-purple-500/30' },
     blocked: { bg: 'bg-red-500/20', hover: 'hover:bg-red-500/30', border: 'border-red-500/30' },
-    done: { bg: 'bg-lime-500/20', hover: 'hover:bg-lime-500/30', border: 'border-lime-500/30' },
+    done: { bg: 'bg-[#8b5cf6]/20', hover: 'hover:bg-[#8b5cf6]/30', border: 'border-[#8b5cf6]/30' },
 }
 
 export function TaskStatusSelector({ status, onChange, disabled, onOpenChange }: TaskStatusSelectorProps) {
@@ -78,7 +78,7 @@ export function TaskStatusSelector({ status, onChange, disabled, onOpenChange }:
                             <span>{s.icon}</span>
                             <span>{s.label}</span>
                             {s.id === status && (
-                                <svg className="w-4 h-4 ml-auto text-lime-400" fill="currentColor" viewBox="0 0 20 20">
+                                <svg className="w-4 h-4 ml-auto text-[#8b5cf6]" fill="currentColor" viewBox="0 0 20 20">
                                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                 </svg>
                             )}

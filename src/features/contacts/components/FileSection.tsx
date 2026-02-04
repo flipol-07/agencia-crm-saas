@@ -149,7 +149,7 @@ export function FileSection({ contactId }: FileSectionProps) {
                     />
                     <button
                         disabled={uploading}
-                        className="flex items-center gap-2 text-sm bg-lime-400 text-black px-3 py-1.5 rounded-lg hover:bg-lime-300 disabled:opacity-50 transition-colors font-medium"
+                        className="flex items-center gap-2 text-sm bg-[#8b5cf6] text-white px-3 py-1.5 rounded-lg hover:bg-[#7c3aed] disabled:opacity-50 transition-colors font-medium shadow-lg shadow-purple-500/20"
                     >
                         {uploading ? (
                             <>
@@ -196,7 +196,7 @@ export function FileSection({ contactId }: FileSectionProps) {
                             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <button
                                     onClick={() => handleDownload(file.file_path, file.name)}
-                                    className="p-1.5 text-gray-400 hover:text-lime-400 transition-colors"
+                                    className="p-1.5 text-gray-400 hover:text-[#8b5cf6] transition-colors"
                                     title="Ver / Descargar"
                                 >
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

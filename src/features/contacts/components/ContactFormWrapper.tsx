@@ -64,7 +64,7 @@ export function ContactFormWrapper() {
         <>
             <button
                 onClick={() => setShowForm(!showForm)}
-                className="px-4 py-2 bg-lime-400 text-black font-medium rounded-lg hover:bg-lime-300 transition-all flex items-center gap-2"
+                className="px-4 py-2 bg-[#8b5cf6] text-white font-medium rounded-lg hover:bg-[#7c3aed] hover:shadow-[0_0_15px_rgba(139,92,246,0.5)] transition-all flex items-center gap-2"
             >
                 {showForm ? (
                     <>
