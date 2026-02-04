@@ -13,14 +13,38 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
     }
 
     return (
-        <div className="flex h-full bg-black relative overflow-hidden selection:bg-brand/30 selection:text-brand">
+        <div className="flex flex-col lg:flex-row h-full bg-black relative overflow-hidden selection:bg-brand/30 selection:text-brand">
             {/* Global Ambient Background for Settings */}
             <div className="absolute inset-0 pointer-events-none z-0">
                 <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-brand/10 rounded-full blur-[120px] opacity-40 animate-pulse-slow" />
                 <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-brand-purple/10 rounded-full blur-[120px] opacity-30 animate-pulse-slow delay-1000" />
             </div>
 
-            <aside className="w-72 border-r border-white/5 p-6 bg-black/40 backdrop-blur-xl z-10 flex flex-col">
+            {/* Mobile Tab Navigation */}
+            <nav className="flex lg:hidden items-center gap-2 p-4 border-b border-white/5 bg-black/40 backdrop-blur-xl z-20 sticky top-0 overflow-x-auto scrollbar-hide">
+                <Link
+                    href="/settings"
+                    className={`whitespace-nowrap flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all border ${isActive('/settings')
+                        ? 'bg-brand/10 text-brand border-brand/20 shadow-[0_0_15px_rgba(139,92,246,0.1)]'
+                        : 'text-gray-500 border-transparent hover:text-white'
+                        }`}
+                >
+                    <span className={`w-1 h-1 rounded-full ${isActive('/settings') ? 'bg-brand' : 'bg-gray-600'}`}></span>
+                    Fiscal / CRM
+                </Link>
+                <Link
+                    href="/settings/templates"
+                    className={`whitespace-nowrap flex items-center gap-2 px-5 py-2.5 text-[10px] font-bold uppercase tracking-widest rounded-full transition-all border ${isActive('/settings/templates')
+                        ? 'bg-brand/10 text-brand border-brand/20 shadow-[0_0_15px_rgba(139,92,246,0.1)]'
+                        : 'text-gray-500 border-transparent hover:text-white'
+                        }`}
+                >
+                    <span className={`w-1 h-1 rounded-full ${isActive('/settings/templates') ? 'bg-brand' : 'bg-gray-600'}`}></span>
+                    Plantillas
+                </Link>
+            </nav>
+
+            <aside className="hidden lg:flex w-72 border-r border-white/5 p-6 bg-black/40 backdrop-blur-xl z-10 flex-col">
                 <div className="mb-10 pl-2 border-l-2 border-brand">
                     <h1 className="text-xl font-display font-black text-white uppercase tracking-widest leading-none">Ajustes</h1>
                     <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Configuración General</span>
@@ -55,7 +79,7 @@ export default function SettingsLayout({ children }: { children: React.ReactNode
                     </p>
                 </div>
             </aside>
-            <main className="flex-1 overflow-auto relative z-10 custom-scrollbar p-8">
+            <main className="flex-1 overflow-auto relative z-10 custom-scrollbar p-5 lg:p-8">
                 {children}
             </main>
         </div>

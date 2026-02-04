@@ -93,10 +93,10 @@ export function SettingsForm() {
             </div>
 
             {/* Datos Personales (CRM) */}
-            <div className="glass-card p-8 rounded-3xl space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+            <div className="glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl space-y-6 sm:space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-[80px] pointer-events-none -z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-                <h2 className="text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
+                <h2 className="text-xl sm:text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
                     <span className="text-brand text-lg">01.</span>
                     Perfil de Usuario (CRM)
                 </h2>
@@ -143,8 +143,8 @@ export function SettingsForm() {
             </div>
 
             {/* Datos Fiscales */}
-            <div className="glass-card p-8 rounded-3xl space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
-                <h2 className="text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
+            <div className="glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl space-y-6 sm:space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+                <h2 className="text-xl sm:text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
                     <span className="text-brand text-lg">02.</span>
                     Datos Fiscales (Facturación)
                 </h2>
@@ -187,8 +187,8 @@ export function SettingsForm() {
             </div>
 
             {/* Configuración de Facturación */}
-            <div className="glass-card p-8 rounded-3xl space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
-                <h2 className="text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
+            <div className="glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl space-y-6 sm:space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+                <h2 className="text-xl sm:text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
                     <span className="text-brand text-lg">03.</span>
                     Secuencia y Configuración
                 </h2>
@@ -233,8 +233,8 @@ export function SettingsForm() {
             </div>
 
             {/* Datos de Contacto y Pago */}
-            <div className="glass-card p-8 rounded-3xl space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
-                <h2 className="text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
+            <div className="glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl space-y-6 sm:space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+                <h2 className="text-xl sm:text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
                     <span className="text-brand text-lg">04.</span>
                     Información Bancaria y Contacto
                 </h2>
@@ -286,7 +286,7 @@ export function SettingsForm() {
                 <button
                     type="submit"
                     disabled={saving}
-                    className="pointer-events-auto bg-brand text-white font-black uppercase tracking-wider px-10 py-4 rounded-full hover:bg-brand-purple hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale transition-all shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] border-2 border-transparent hover:border-white/20"
+                    className="pointer-events-auto bg-brand text-white font-black uppercase tracking-wider px-8 sm:px-10 py-4 rounded-xl sm:rounded-full hover:bg-brand-purple hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:grayscale transition-all shadow-[0_0_20px_rgba(139,92,246,0.3)] hover:shadow-[0_0_40px_rgba(139,92,246,0.5)] border-2 border-transparent hover:border-white/20 w-full sm:w-auto"
                 >
                     {saving ? 'Guardando...' : 'Guardar Cambios'}
                 </button>
