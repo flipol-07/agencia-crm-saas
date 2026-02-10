@@ -194,18 +194,12 @@ export function LoginForm() {
                         <span className="relative z-10">Google</span>
                     </button>
 
-                    <div className="flex items-center justify-between text-sm mt-6 pt-2">
+                    <div className="flex justify-center text-sm mt-6 pt-2">
                         <Link
                             href="/forgot-password"
                             className="text-text-secondary hover:text-brand-neon-purple transition-colors text-xs"
                         >
                             ¿Olvidaste tu contraseña?
-                        </Link>
-                        <Link
-                            href="/signup"
-                            className="text-brand-purple hover:text-brand-neon-purple transition-colors font-medium hover:underline text-xs"
-                        >
-                            Crear cuenta nueva
                         </Link>
                     </div>
                 </div>
