@@ -36,14 +36,15 @@ export interface Meeting {
     date: string
     contact_id: string | null
     summary: string | null
-    transcription: string | null
-    key_points: string[] | null
-    conclusions: string[] | null
-    feedback: any | null
+    transcription?: string | null
+    key_points?: string[] | null
+    conclusions?: string[] | null
+    feedback?: any | null
     external_id: string | null
     meeting_url: string | null
-    attendees: string[] | null
+    attendees?: string[] | null
     user_id: string | null
+    status?: string | null
     created_at: string | null
     updated_at: string | null
 }

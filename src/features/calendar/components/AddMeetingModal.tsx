@@ -134,7 +134,7 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                     setSuccessData(null)
                 }, 5000)
             } else {
-                toast.error(result.error || 'Failed to sync with Google Calendar')
+                toast.error((result as any).error || 'Failed to sync with Google Calendar')
             }
         } catch (error: any) {
             console.error('AddMeetingModal Error:', JSON.stringify(error, null, 2))

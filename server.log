@@ -49,3 +49,4 @@
  GET /calendar 200 in 2.6s (compile: 21ms, proxy.ts: 338ms, render: 2.2s)
  POST /calendar 200 in 1584ms (compile: 16ms, proxy.ts: 168ms, render: 1400ms)
  GET /calendar 200 in 912ms (compile: 17ms, proxy.ts: 253ms, render: 642ms)
+[?25h
