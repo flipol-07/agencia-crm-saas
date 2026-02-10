@@ -4,14 +4,16 @@ export interface Meeting {
     date: string
     contact_id: string | null
     summary: string | null
-    transcription: string | null
-    key_points: string[] | null
-    conclusions: string[] | null
-    feedback: {
+    transcription?: string | null
+    key_points?: string[] | null
+    conclusions?: string[] | null
+    feedback?: {
         seller_feedback: { name: string, improvements: string[] }[]
         general_feedback: string | null
         customer_sentiment: string | null
     } | null
+    attendees?: string[] | null
+    meeting_url?: string | null
     external_id: string | null
     user_id: string
     created_at: string

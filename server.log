@@ -1,0 +1,51 @@
+
+> saas-factory-app@0.1.0 dev
+> NODE_OPTIONS='--no-deprecation' next dev --turbopack
+
+▲ Next.js 16.1.4 (Turbopack, Cache Components)
+- Local:         http://localhost:3000
+- Network:       http://10.255.255.254:3000
+- Environments: .env.local
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 5.3s
+ GET /calendar 200 in 6.5s (compile: 4.5s, proxy.ts: 473ms, render: 1527ms)
+ GET /manifest.webmanifest 200 in 326ms (compile: 247ms, proxy.ts: 29ms, render: 50ms)
+ HEAD / 307 in 216ms (compile: 91ms, proxy.ts: 9ms, render: 116ms)
+ GET /calendar 200 in 758ms (compile: 17ms, proxy.ts: 241ms, render: 500ms)
+ GET /manifest.webmanifest 200 in 24ms (compile: 6ms, proxy.ts: 11ms, render: 7ms)
+ POST /calendar 200 in 2.1s (compile: 7ms, proxy.ts: 418ms, render: 1710ms)
+ GET /calendar 200 in 678ms (compile: 8ms, proxy.ts: 178ms, render: 492ms)
+ GET /manifest.webmanifest 200 in 17ms (compile: 5ms, proxy.ts: 6ms, render: 6ms)
+ POST /calendar 200 in 1931ms (compile: 10ms, proxy.ts: 195ms, render: 1725ms)
+ GET /calendar 200 in 870ms (compile: 7ms, proxy.ts: 262ms, render: 601ms)
+ GET /manifest.webmanifest 200 in 24ms (compile: 8ms, proxy.ts: 9ms, render: 7ms)
+✓ Compiled in 3.4s
+ GET /calendar 200 in 3.3s (compile: 2.1s, proxy.ts: 264ms, render: 988ms)
+ GET /manifest.webmanifest 200 in 27ms (compile: 7ms, proxy.ts: 11ms, render: 9ms)
+ POST /calendar 200 in 2.3s (compile: 19ms, proxy.ts: 247ms, render: 1993ms)
+✓ Compiled in 280ms
+✓ Compiled in 179ms
+ GET /calendar 200 in 3.3s (compile: 2.1s, proxy.ts: 209ms, render: 1026ms)
+ GET /manifest.webmanifest 200 in 32ms (compile: 8ms, proxy.ts: 9ms, render: 15ms)
+ POST /calendar 200 in 2.2s (compile: 19ms, proxy.ts: 242ms, render: 1934ms)
+✓ Compiled in 176ms
+✓ Compiled in 190ms
+ GET /calendar 200 in 3.1s (compile: 1660ms, proxy.ts: 366ms, render: 1067ms)
+ GET /manifest.webmanifest 200 in 15ms (compile: 4ms, proxy.ts: 6ms, render: 6ms)
+ POST /calendar 200 in 2.2s (compile: 10ms, proxy.ts: 245ms, render: 1954ms)
+ GET /calendar 200 in 1442ms (compile: 36ms, proxy.ts: 370ms, render: 1037ms)
+✓ Compiled in 1315ms
+✓ Compiled in 7.9s
+✓ Compiled in 448ms
+ GET /calendar 200 in 24.9s (compile: 18.4s, proxy.ts: 2.5s, render: 4.1s)
+ GET /manifest.webmanifest 200 in 123ms (compile: 39ms, proxy.ts: 59ms, render: 25ms)
+ GET /calendar 200 in 1048ms (compile: 31ms, proxy.ts: 244ms, render: 774ms)
+ GET /manifest.webmanifest 200 in 56ms (compile: 20ms, proxy.ts: 15ms, render: 20ms)
+ GET /calendar 200 in 2.1s (compile: 67ms, proxy.ts: 993ms, render: 1065ms)
+ GET /calendar 200 in 1068ms (compile: 28ms, proxy.ts: 355ms, render: 684ms)
+ POST /calendar 200 in 2.7s (compile: 21ms, proxy.ts: 199ms, render: 2.5s)
+ GET /calendar 200 in 2.6s (compile: 21ms, proxy.ts: 338ms, render: 2.2s)
+ POST /calendar 200 in 1584ms (compile: 16ms, proxy.ts: 168ms, render: 1400ms)
+ GET /calendar 200 in 912ms (compile: 17ms, proxy.ts: 253ms, render: 642ms)

@@ -436,6 +436,26 @@ export interface TeamChatWithMembers extends TeamChat {
     }[]
 }
 
+// ============================================
+// Event Types (Calendar)
+// ============================================
+
+export interface Event {
+    id: string
+    title: string
+    description: string | null
+    start_time: string
+    end_time: string
+    all_day: boolean
+    color: string | null
+    user_id: string | null
+    created_at: string
+    updated_at: string
+}
+
+export type EventInsert = Omit<Event, 'id' | 'created_at' | 'updated_at'>
+export type EventUpdate = Partial<Omit<Event, 'id' | 'created_at'>>
+
 // Database type para Supabase
 export type Database = {
     public: {
@@ -886,6 +906,20 @@ export type Database = {
                     {
                         foreignKeyName: "team_messages_sender_id_fkey"
                         columns: ["sender_id"]
+                        isOneToOne: false
+                        referencedRelation: "profiles"
+                        referencedColumns: ["id"]
+                    }
+                ]
+            }
+            events: {
+                Row: Event
+                Insert: EventInsert
+                Update: EventUpdate
+                Relationships: [
+                    {
+                        foreignKeyName: "events_user_id_fkey"
+                        columns: ["user_id"]
                         isOneToOne: false
                         referencedRelation: "profiles"
                         referencedColumns: ["id"]

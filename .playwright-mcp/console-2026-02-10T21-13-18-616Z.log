@@ -1,0 +1,2 @@
+[ 2507178ms] [ERROR] Status: CHANNEL_ERROR @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[ 2507178ms] [ERROR] Error Details: undefined @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127

@@ -14,6 +14,7 @@ export const meetingService = {
                     contact_name
                 )
             `)
+            .neq('status', 'scheduled')
             .order('date', { ascending: false })
 
         if (error) {

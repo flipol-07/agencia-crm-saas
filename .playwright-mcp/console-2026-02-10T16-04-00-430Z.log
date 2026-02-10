@@ -1,0 +1,478 @@
+[  250180ms] [ERROR] ./node_modules/google-auth-library/build/src/auth/googleauth.js:17:25
+Module not found: Can't resolve 'child_process'
+  15 | Object.defineProperty(exports, "__esModule", { value: true });
+  16 | exports.GoogleAuth = exports.GoogleAuthExceptionMessages = void 0;
+> 17 | const child_process_1 = require("child_process");
+     |                         ^^^^^^^^^^^^^^^^^^^^^^^^
+  18 | const fs = require("fs");
+  19 | const gaxios_1 = require("gaxios");
+  20 | const gcpMetadata = require("gcp-metadata");
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/google-auth-library/build/src/auth/googleauth.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/google-auth-library/build/src/auth/googleauth.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250195ms] [ERROR] ./node_modules/google-auth-library/build/src/auth/pluggable-auth-handler.js:18:22
+Module not found: Can't resolve 'child_process'
+  16 | exports.PluggableAuthHandler = exports.ExecutableError = void 0;
+  17 | const executable_response_1 = require("./executable-response");
+> 18 | const childProcess = require("child_process");
+     |                      ^^^^^^^^^^^^^^^^^^^^^^^^
+  19 | const fs = require("fs");
+  20 | /**
+  21 |  * Error thrown from the executable run by PluggableAuthClient.
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-handler.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-client.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-handler.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-client.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250196ms] [ERROR] ./node_modules/gcp-metadata/build/src/gcp-residency.js:24:14
+Module not found: Can't resolve 'fs'
+  22 | exports.isGoogleComputeEngine = isGoogleComputeEngine;
+  23 | exports.detectGCPResidency = detectGCPResidency;
+> 24 | const fs_1 = require("fs");
+     |              ^^^^^^^^^^^^^
+  25 | const os_1 = require("os");
+  26 | /**
+  27 |  * Known paths unique to Google Compute Engine Linux instances
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/gcp-metadata/build/src/gcp-residency.js [Client Component Browser]
+    ./node_modules/gcp-metadata/build/src/index.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/gcp-metadata/build/src/gcp-residency.js [Client Component SSR]
+    ./node_modules/gcp-metadata/build/src/index.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250197ms] [ERROR] ./node_modules/google-auth-library/build/src/auth/certificatesubjecttokensupplier.js:18:12
+Module not found: Can't resolve 'fs'
+  16 | exports.CertificateSubjectTokenSupplier = exports.InvalidConfigurationError = exports.CertificateSourceUnavailableError = exports.CERTIFICATE_CONFIGURATION_ENV_VARIABLE = void 0;
+  17 | const util_1 = require("../util");
+> 18 | const fs = require("fs");
+     |            ^^^^^^^^^^^^^
+  19 | const crypto_1 = require("crypto");
+  20 | const https = require("https");
+  21 | exports.CERTIFICATE_CONFIGURATION_ENV_VARIABLE = 'GOOGLE_API_CERTIFICATE_CONFIG';
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/google-auth-library/build/src/auth/certificatesubjecttokensupplier.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/auth/identitypoolclient.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/google-auth-library/build/src/auth/certificatesubjecttokensupplier.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/auth/identitypoolclient.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250199ms] [ERROR] ./node_modules/google-auth-library/build/src/auth/filesubjecttokensupplier.js:18:12
+Module not found: Can't resolve 'fs'
+  16 | exports.FileSubjectTokenSupplier = void 0;
+  17 | const util_1 = require("util");
+> 18 | const fs = require("fs");
+     |            ^^^^^^^^^^^^^
+  19 | // fs.readfile is undefined in browser karma tests causing
+  20 | // `npm run browser-test` to fail as test.oauth2.ts imports this file via
+  21 | // src/index.ts.
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/google-auth-library/build/src/auth/filesubjecttokensupplier.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/auth/identitypoolclient.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/google-auth-library/build/src/auth/filesubjecttokensupplier.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/auth/identitypoolclient.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250200ms] [ERROR] ./node_modules/google-auth-library/build/src/auth/googleauth.js:18:12
+Module not found: Can't resolve 'fs'
+  16 | exports.GoogleAuth = exports.GoogleAuthExceptionMessages = void 0;
+  17 | const child_process_1 = require("child_process");
+> 18 | const fs = require("fs");
+     |            ^^^^^^^^^^^^^
+  19 | const gaxios_1 = require("gaxios");
+  20 | const gcpMetadata = require("gcp-metadata");
+  21 | const os = require("os");
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/google-auth-library/build/src/auth/googleauth.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/google-auth-library/build/src/auth/googleauth.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250200ms] [ERROR] ./node_modules/google-auth-library/build/src/auth/pluggable-auth-handler.js:19:12
+Module not found: Can't resolve 'fs'
+  17 | const executable_response_1 = require("./executable-response");
+  18 | const childProcess = require("child_process");
+> 19 | const fs = require("fs");
+     |            ^^^^^^^^^^^^^
+  20 | /**
+  21 |  * Error thrown from the executable run by PluggableAuthClient.
+  22 |  */
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-handler.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-client.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-handler.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/auth/pluggable-auth-client.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250201ms] [ERROR] ./node_modules/google-auth-library/build/src/util.js:22:12
+Module not found: Can't resolve 'fs'
+  20 | exports.isValidFile = isValidFile;
+  21 | exports.getWellKnownCertificateConfigFileLocation = getWellKnownCertificateConfigFileLocation;
+> 22 | const fs = require("fs");
+     |            ^^^^^^^^^^^^^
+  23 | const os = require("os");
+  24 | const path = require("path");
+  25 | const WELL_KNOWN_CERTIFICATE_CONFIG_FILE = 'certificate_config.json';
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/google-auth-library/build/src/util.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/auth/baseexternalclient.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/google-auth-library/build/src/util.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/auth/baseexternalclient.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250202ms] [ERROR] ./node_modules/googleapis-common/build/src/discovery.js:16:12
+Module not found: Can't resolve 'fs'
+  14 | Object.defineProperty(exports, "__esModule", { value: true });
+  15 | exports.Discovery = void 0;
+> 16 | const fs = require("fs");
+     |            ^^^^^^^^^^^^^
+  17 | const gaxios_1 = require("gaxios");
+  18 | const resolve = require("url");
+  19 | const util = require("util");
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/googleapis-common/build/src/discovery.js [Client Component Browser]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/googleapis-common/build/src/discovery.js [Client Component SSR]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250203ms] [ERROR] ./node_modules/gtoken/build/cjs/src/index.cjs:7:34
+Module not found: Can't resolve 'fs'
+   5 | });
+   6 | exports.GoogleToken = void 0;
+>  7 | var fs = _interopRequireWildcard(require("fs"));
+     |                                  ^^^^^^^^^^^^^
+   8 | var _gaxios = require("gaxios");
+   9 | var jws = _interopRequireWildcard(require("jws"));
+  10 | var path = _interopRequireWildcard(require("path"));
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/gtoken/build/cjs/src/index.cjs [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/auth/jwtclient.js [Client Component Browser]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/gtoken/build/cjs/src/index.cjs [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/auth/jwtclient.js [Client Component SSR]
+    ./node_modules/google-auth-library/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250203ms] [ERROR] ./node_modules/googleapis-common/build/src/http2.js:18:15
+Module not found: Can't resolve 'http2'
+  16 | exports.request = request;
+  17 | exports.closeSession = closeSession;
+> 18 | const http2 = require("http2");
+     |               ^^^^^^^^^^^^^^^^
+  19 | const zlib = require("zlib");
+  20 | const url_1 = require("url");
+  21 | const qs = require("qs");
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/googleapis-common/build/src/http2.js [Client Component Browser]
+    ./node_modules/googleapis-common/build/src/apirequest.js [Client Component Browser]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/googleapis-common/build/src/http2.js [Client Component SSR]
+    ./node_modules/googleapis-common/build/src/apirequest.js [Client Component SSR]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250204ms] [ERROR] ./node_modules/gaxios/node_modules/agent-base/dist/index.js:30:26
+Module not found: Can't resolve 'net'
+  28 | Object.defineProperty(exports, "__esModule", { value: true });
+  29 | exports.Agent = void 0;
+> 30 | const net = __importStar(require("net"));
+     |                          ^^^^^^^^^^^^^^
+  31 | const http = __importStar(require("http"));
+  32 | const https_1 = require("https");
+  33 | __exportStar(require("./helpers"), exports);
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/gaxios/node_modules/agent-base/dist/index.js [Client Component Browser]
+    ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js [Client Component Browser]
+    ./node_modules/gaxios/build/cjs/src/gaxios.js [Client Component Browser]
+    ./node_modules/gaxios/build/cjs/src/index.js [Client Component Browser]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/gaxios/node_modules/agent-base/dist/index.js [Client Component SSR]
+    ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js [Client Component SSR]
+    ./node_modules/gaxios/build/cjs/src/gaxios.js [Client Component SSR]
+    ./node_modules/gaxios/build/cjs/src/index.js [Client Component SSR]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250204ms] [ERROR] ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js:30:26
+Module not found: Can't resolve 'net'
+  28 | Object.defineProperty(exports, "__esModule", { value: true });
+  29 | exports.HttpsProxyAgent = void 0;
+> 30 | const net = __importStar(require("net"));
+     |                          ^^^^^^^^^^^^^^
+  31 | const tls = __importStar(require("tls"));
+  32 | const assert_1 = __importDefault(require("assert"));
+  33 | const debug_1 = __importDefault(require("debug"));
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js [Client Component Browser]
+    ./node_modules/gaxios/build/cjs/src/gaxios.js [Client Component Browser]
+    ./node_modules/gaxios/build/cjs/src/index.js [Client Component Browser]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js [Client Component SSR]
+    ./node_modules/gaxios/build/cjs/src/gaxios.js [Client Component SSR]
+    ./node_modules/gaxios/build/cjs/src/index.js [Client Component SSR]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
+[  250205ms] [ERROR] ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js:31:26
+Module not found: Can't resolve 'tls'
+  29 | exports.HttpsProxyAgent = void 0;
+  30 | const net = __importStar(require("net"));
+> 31 | const tls = __importStar(require("tls"));
+     |                          ^^^^^^^^^^^^^^
+  32 | const assert_1 = __importDefault(require("assert"));
+  33 | const debug_1 = __importDefault(require("debug"));
+  34 | const agent_base_1 = require("agent-base");
+
+Import traces:
+  Client Component Browser:
+    ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js [Client Component Browser]
+    ./node_modules/gaxios/build/cjs/src/gaxios.js [Client Component Browser]
+    ./node_modules/gaxios/build/cjs/src/index.js [Client Component Browser]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component Browser]
+    ./node_modules/googleapis/build/src/index.js [Client Component Browser]
+    ./src/shared/services/googleService.ts [Client Component Browser]
+    ./src/features/calendar/services/calendarService.ts [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component Browser]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./node_modules/gaxios/node_modules/https-proxy-agent/dist/index.js [Client Component SSR]
+    ./node_modules/gaxios/build/cjs/src/gaxios.js [Client Component SSR]
+    ./node_modules/gaxios/build/cjs/src/index.js [Client Component SSR]
+    ./node_modules/googleapis-common/build/src/index.js [Client Component SSR]
+    ./node_modules/googleapis/build/src/index.js [Client Component SSR]
+    ./src/shared/services/googleService.ts [Client Component SSR]
+    ./src/features/calendar/services/calendarService.ts [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Client Component SSR]
+    ./src/features/calendar/components/CalendarView.tsx [Server Component]
+    ./src/app/(main)/calendar/page.tsx [Server Component]
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
