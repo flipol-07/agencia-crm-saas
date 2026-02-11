@@ -44,18 +44,63 @@ export async function middleware(request: NextRequest) {
         data: { user },
     } = await supabase.auth.getUser()
 
-    // Protección de rutas protegidas
-    if (!user && request.nextUrl.pathname.startsWith('/dashboard')) {
+    const path = request.nextUrl.pathname;
+
+    // Defines paths that are publicly accessible
+    const publicPaths = [
+        '/login',
+        '/signup',
+        '/auth/callback',
+        '/reset-password',
+        '/update-password'
+    ];
+
+    // Check if the current path is public
+    const isPublicPath = publicPaths.some(publicPath =>
+        path === publicPath || path.startsWith(publicPath + '/')
+    );
+
+    // ============================================
+    // 🛡️ SECURITY: RATE LIMITING
+    // ============================================
+    if (path.startsWith('/api/') || path === '/login') {
+        const ip = request.headers.get('x-forwarded-for') || 'unknown'
+        // Simple rate limit check via Supabase RPC (if implemented) or Edge Config
+        // Note: Full DB rate limiting in Middleware can be slow. 
+        // Ideally use Upstash/Redis. 
+        // For now, we delegate to the API route itself OR use a lightweight check if possible.
+
+        // Since we are in middleware (Edge), direct DB calls are tricky without proper setup.
+        // We will SKIP DB-based rate limiting here to avoid latency issues in this MVP.
+        // Instead, we rely on the implementation in specific API Routes (using lib/rate-limit.ts)
+        // OR we implement a basic cookie-based or in-memory limiter (not persistent across lambdas).
+
+        // RECOMMENDATION: Move rate limiting to individual API routes or per-server logic
+        // to properly use our `rateLimit` helper which uses `createClient` (server).
+        // Middleware `createServerClient` is for Auth mostly.
+    }
+
+    // ============================================
+    // 🛡️ AUTHENTICATION WALL
+    // ============================================
+
+    // Si NO es ruta pública y NO hay usuario, redirigir a login
+    if (!user && !isPublicPath) {
         return NextResponse.redirect(new URL('/login', request.url))
     }
 
-    if (!user && request.nextUrl.pathname.startsWith('/contacts')) {
-        return NextResponse.redirect(new URL('/login', request.url))
-    }
-
-    // Redirección si ya está logueado
-    if (user && request.nextUrl.pathname === '/login') {
+    // Si YA hay usuario y trata de ir a login/signup, mandar al dashboard
+    if (user && isPublicPath && !path.startsWith('/auth/callback')) {
         return NextResponse.redirect(new URL('/dashboard', request.url))
+    }
+
+    // Si es la raíz '/', redirigir según estado
+    if (path === '/') {
+        if (user) {
+            return NextResponse.redirect(new URL('/dashboard', request.url))
+        } else {
+            return NextResponse.redirect(new URL('/login', request.url))
+        }
     }
 
     return response
@@ -68,9 +113,8 @@ export const config = {
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
-         * - api (API routes, though we might want to protect them too, letting them pass for now as they usually handle their own 401s or use RLS)
-         * - public files (images, etc)
+         * - public files (images, etc - handled by negative lookahead in regex)
          */
-        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|webmanifest|manifest|json)$).*)',
     ],
 }

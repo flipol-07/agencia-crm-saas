@@ -4,8 +4,13 @@
 import { useEffect, useState } from 'react'
 import { useBillingProfile } from '../hooks/useBillingProfile'
 
+import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/hooks/useAuth'
+
 export function SettingsForm() {
+    const { user } = useAuth()
     const { profile, loading, saving, saveBillingProfile } = useBillingProfile()
+    const [uploading, setUploading] = useState(false)
 
     const [formData, setFormData] = useState({
         full_name: '',
@@ -18,6 +23,7 @@ export function SettingsForm() {
         invoice_prefix: 'INV-',
         next_invoice_number: 1,
         logo_url: '',
+        avatar_url: '',
         professional_role: '',
         professional_description: '',
         default_irpf_rate: 7
@@ -36,6 +42,7 @@ export function SettingsForm() {
                 invoice_prefix: profile.invoice_prefix || 'INV-',
                 next_invoice_number: profile.next_invoice_number || 1,
                 logo_url: '', // Placeholder
+                avatar_url: profile.avatar_url || '',
                 professional_role: profile.professional_role || '',
                 professional_description: profile.professional_description || '',
                 default_irpf_rate: profile.default_irpf_rate ?? 7
@@ -50,6 +57,38 @@ export function SettingsForm() {
             ...prev,
             [name]: name === 'next_invoice_number' || name === 'default_irpf_rate' ? parseInt(value) || 0 : value
         }))
+    }
+
+    const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0 || !user) return
+
+        const file = e.target.files[0]
+        const fileExt = file.name.split('.').pop()
+        const fileName = `profiles/${user.id}-${Date.now()}.${fileExt}`
+        const supabase = createClient()
+
+        setUploading(true)
+        try {
+            const { error: uploadError } = await supabase.storage
+                .from('images')
+                .upload(fileName, file)
+
+            if (uploadError) throw uploadError
+
+            const { data: { publicUrl } } = supabase.storage
+                .from('images')
+                .getPublicUrl(fileName)
+
+            setFormData(prev => ({ ...prev, avatar_url: publicUrl }))
+
+            // Optionally save immediately
+            // await saveBillingProfile({ avatar_url: publicUrl }) 
+        } catch (error) {
+            console.error('Error uploading avatar:', error)
+            alert('Error al subir la imagen')
+        } finally {
+            setUploading(false)
+        }
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -112,6 +151,58 @@ export function SettingsForm() {
                             placeholder="Tu Nombre (Ej: Juan Pérez)"
                         />
                         <p className="text-[10px] text-gray-600 pl-1 font-medium">Nombre público en la plataforma.</p>
+                    </div>
+
+                    <div className="space-y-3">
+                        <label className="text-[10px] uppercase font-bold text-gray-400 tracking-widest pl-1">Foto de Perfil</label>
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-full bg-zinc-800 border border-white/10 overflow-hidden relative group cursor-pointer" onClick={() => document.getElementById('avatar-upload')?.click()}>
+                                {formData.avatar_url ? (
+                                    <img src={formData.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-500">
+                                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                {uploading && (
+                                    <div className="absolute inset-0 bg-black/80 flex items-center justify-center z-10">
+                                        <svg className="w-6 h-6 text-brand animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                )}
+                            </div>
+                            <div>
+                                <input
+                                    id="avatar-upload"
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={handleAvatarUpload}
+                                    disabled={uploading}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => document.getElementById('avatar-upload')?.click()}
+                                    disabled={uploading}
+                                    className="text-xs text-brand hover:text-brand-light font-bold uppercase tracking-wider"
+                                >
+                                    {uploading ? 'Subiendo...' : 'Cambiar Foto'}
+                                </button>
+                                <p className="text-[10px] text-gray-600 font-medium mt-1">
+                                    JPG, PNG o WEBP. Máx 5MB.
+                                </p>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="space-y-3">

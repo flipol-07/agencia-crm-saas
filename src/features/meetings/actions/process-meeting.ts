@@ -11,9 +11,17 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 /**
  * Función interna para analizar el texto de la reunión con GPT-4o
  */
-export async function analyzeMeetingText(transcriptionText: string) {
+export async function analyzeMeetingText(transcriptionText: string, profiles: { full_name: string | null, email: string }[] = []) {
+    const profilesContext = profiles
+        .filter(p => p.full_name)
+        .map(p => `- ${p.full_name} (${p.email})`)
+        .join('\n')
+
     const systemPrompt = `Eres un experto consultor de ventas y analista de reuniones.
 Analiza la siguiente transcripción (que puede ser un diálogo con nombres de personas o un texto plano).
+
+CONTEXTO DE USUARIOS DE LA APP (Equipo Interno):
+${profilesContext}
 
 Debes generar un JSON con la siguiente estructura:
 {
@@ -35,7 +43,13 @@ Debes generar un JSON con la siguiente estructura:
 }
 
 REGLAS DE ANÁLISIS:
-1. IDENTIFICACIÓN DE ASISTENTES: Extrae TODOS los nombres de las personas que participan. Si es evidente su rol (Vendedor/Cliente), inclúyelo entre paréntesis.
+1. IDENTIFICACIÓN DE ASISTENTES:
+   - Extrae los nombres de los participantes del diálogo o del contexto.
+   - Compara los nombres encontrados con la lista "CONTEXTO DE USUARIOS DE LA APP".
+   - Si encuentras un nombre parcial (ej: "Antón", "Loredo") que coincida con un usuario de la lista, USA EL NOMBRE COMPLETO DEL USUARIO (ej: "Antón Loredo").
+   - REGLA ESPECÍFICA: Si en la transcripción aparece "Aurie" o "Auri", DEBES mapearlo al usuario "Antón Loredo" (si existe en la lista) o al nombre más similar del equipo.
+   - Si es un cliente externo (no está en la lista), mantén su nombre original y añade "(Cliente)" o "(Externo)" si es evidente.
+
 2. Si detectas nombres de personas (estilo guión: "Juan: Hola..." o "0:00 - Juan: Hola..."), úsalos para populate "attendees" y "seller_feedback".
 3. Proporciona sugerencias de mejora PERSONALIZADAS para cada vendedor en "seller_feedback".
 4. Si NO hay nombres (texto plano de Whisper), da un "general_feedback" analizando la estrategia de venta global y deja "attendees" vacío o con "Desconocido".
@@ -150,7 +164,8 @@ export async function processMeeting(formData: FormData) {
 
         // 5. Analysis
         console.log('5. Analizando con GPT-4o...')
-        const analysis = await analyzeMeetingText(transcriptionText)
+        const { data: profiles } = await supabase.from('profiles').select('full_name, email')
+        const analysis = await analyzeMeetingText(transcriptionText, profiles || [])
 
         // 6. Formatear título con fecha
         const meetingDate = new Date(date)
@@ -179,7 +194,8 @@ export async function processMeeting(formData: FormData) {
             summary: analysis.summary,
             key_points: analysis.key_points,
             conclusions: analysis.conclusions,
-            feedback: { ...analysis.feedback, attendees: analysis.attendees }
+            feedback: { ...analysis.feedback, attendees: analysis.attendees },
+            status: 'completed'
         }).select().single()
 
         if (dbError) throw new Error(`Error guardando en DB: ${dbError.message}`)

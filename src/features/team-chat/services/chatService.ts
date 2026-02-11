@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/client'
 import { TeamChatWithMembers, TeamMessage, Profile } from '@/types/database'
 
 export const teamChatService = {
-    async getChats(): Promise<TeamChatWithMembers[]> {
+    async getChats(): Promise<(TeamChatWithMembers & { unread_count: number })[]> {
         const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
         if (!user) return []
@@ -13,7 +13,13 @@ export const teamChatService = {
             .select(`
                 *,
                 participants:team_chat_participants(
+                    last_read_at,
                     profiles(id, full_name, email, avatar_url)
+                ),
+                messages:team_messages(
+                    id,
+                    created_at,
+                    sender_id
                 )
             `)
             .order('updated_at', { ascending: false })
@@ -23,10 +29,29 @@ export const teamChatService = {
             return []
         }
 
-        // Filter out chats where the current user is a participant (RLS handles this but filtering in Select confirms structure)
-        // And also, for 1:1 chats, the "participants" array contains both. 
-        // We probably want to map it to a cleaner structure in the component, but let's return raw for now.
-        return data as unknown as TeamChatWithMembers[]
+        // Process data to calculate unread count
+        const chatsWithUnread = data.map((chat: any) => {
+            const myParticipant = chat.participants?.find((p: any) => p.profiles?.id === user.id)
+            const lastReadAt = myParticipant?.last_read_at ? new Date(myParticipant.last_read_at) : new Date(0)
+
+            const unreadCount = chat.messages
+                ? chat.messages.filter((m: any) =>
+                    m.sender_id !== user.id &&
+                    new Date(m.created_at) > lastReadAt
+                ).length
+                : 0
+
+            // Remove messages from the object to return clean TeamChatWithMembers + unread_count
+            // (Optional, but keeps object small)
+            const { messages, ...rest } = chat
+            return {
+                ...rest,
+                unread_count: unreadCount,
+                participants: rest.participants || []
+            }
+        })
+
+        return chatsWithUnread as (TeamChatWithMembers & { unread_count: number })[]
     },
 
     async searchUsers(query: string): Promise<Profile[]> {
@@ -67,6 +92,60 @@ export const teamChatService = {
         }
 
         return data
+    },
+
+    async createGroupChat(name: string, participantIds: string[]): Promise<string> {
+        const supabase = createClient()
+
+        // Ensure current user is in participants list (though RPC adds it, good to be explicit/safe or let RPC handle)
+        // RPC 'create_group_chat' handles adding the admin (current user)
+
+        const { data, error } = await supabase.rpc('create_group_chat', {
+            group_name: name,
+            participant_ids: participantIds
+        })
+
+        if (error) {
+            console.error('Error creating group chat:', error)
+            throw error
+        }
+
+        return data
+    },
+
+    async markChatAsRead(chatId: string) {
+        const supabase = createClient()
+
+        const { data: { user }, error: authError } = await supabase.auth.getUser()
+        if (authError || !user) {
+            console.error('UserId check failed:', authError)
+            return
+        }
+
+        console.log('Marking chat as read:', { chatId, userId: user.id })
+
+        const { data, error } = await supabase.rpc('mark_messages_read', {
+            p_chat_id: chatId
+        })
+
+        if (error) {
+            console.error('Error marking chat as read (RPC) RAW:', error)
+            // JSON.stringify with replacer to handle Error objects
+            const errorString = JSON.stringify(error, Object.getOwnPropertyNames(error))
+            console.error('Error marking chat as read (RPC) STRINGIFIED:', errorString)
+
+            console.error('RPC Error details:', {
+                // Try accessing properties directly again just in case
+                message: (error as any)?.message,
+                code: (error as any)?.code,
+                details: (error as any)?.details,
+                hint: (error as any)?.hint,
+                chatId,
+                userId: user.id
+            })
+        } else {
+            console.log('Marked chat as read (RPC) result:', { chatId, success: data })
+        }
     },
 
     async getChat(chatId: string): Promise<TeamChatWithMembers | null> {
@@ -137,5 +216,38 @@ export const teamChatService = {
             .eq('id', chatId)
 
         return data
+    },
+    async updateChat(chatId: string, updates: { name?: string, avatar_url?: string }): Promise<void> {
+        const supabase = createClient()
+        const { error } = await supabase
+            .from('team_chats')
+            .update(updates)
+            .eq('id', chatId)
+
+        if (error) {
+            console.error('Error updating chat:', error)
+            throw error
+        }
+    },
+
+    async uploadGroupAvatar(chatId: string, file: File): Promise<string> {
+        const supabase = createClient()
+        const fileExt = file.name.split('.').pop()
+        const fileName = `chat-avatars/${chatId}-${Date.now()}.${fileExt}`
+
+        const { error: uploadError } = await supabase.storage
+            .from('images')
+            .upload(fileName, file)
+
+        if (uploadError) {
+            console.error('Error uploading avatar:', uploadError)
+            throw uploadError
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+            .from('images')
+            .getPublicUrl(fileName)
+
+        return publicUrl
     }
 }

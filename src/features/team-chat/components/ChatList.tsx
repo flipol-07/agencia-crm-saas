@@ -7,6 +7,7 @@ import { useAuth } from '@/hooks/useAuth'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { UserSelectorModal } from './UserSelectorModal'
+import { CreateGroupModal } from './CreateGroupModal'
 import { createClient } from '@/lib/supabase/client'
 import { formatDistanceToNow } from 'date-fns'
 import { es } from 'date-fns/locale'
@@ -18,12 +19,12 @@ export function ChatList() {
     const params = useParams()
     const activeChatId = params?.chatId as string
 
-    const [chats, setChats] = useState<TeamChatWithMembers[]>([])
+    const [chats, setChats] = useState<(TeamChatWithMembers & { unread_count: number })[]>([])
     const [loading, setLoading] = useState(true)
     const [showNewChat, setShowNewChat] = useState(false)
+    const [showNewGroup, setShowNewGroup] = useState(false)
 
     const fetchChats = async () => {
-        // Don't set loading true if refreshing?
         const data = await teamChatService.getChats()
         setChats(data)
         setLoading(false)
@@ -34,14 +35,13 @@ export function ChatList() {
             fetchChats()
             clearTeam()
 
-            // Subscribe to new chats or updates
             const supabase = createClient()
             const channel = supabase
                 .channel('chat_list_updates')
                 .on('postgres_changes', {
                     event: '*',
                     schema: 'public',
-                    table: 'team_chats' // We should filter by participation ideally, but RLS on Select helps. Realtime filter is limited.
+                    table: 'team_chats'
                 }, () => {
                     fetchChats()
                 })
@@ -52,11 +52,12 @@ export function ChatList() {
                     filter: `user_id=eq.${user.id}`
                 }, () => fetchChats())
                 .on('postgres_changes', {
-                    event: 'INSERT',
+                    event: '*',
                     schema: 'public',
                     table: 'team_messages'
-                }, () => {
-                    fetchChats() // Update last message preview
+                }, (payload: any) => {
+                    console.log('Realtime update:', payload)
+                    fetchChats()
                 })
                 .subscribe()
 
@@ -66,21 +67,29 @@ export function ChatList() {
         }
     }, [user])
 
-    const getOtherParticipant = (chat: TeamChatWithMembers) => {
+    const getOtherParticipant = (chat: TeamChatWithMembers & { unread_count: number }) => {
         if (!user) return null
         return chat.participants.find(p => p.profiles?.id !== user.id)?.profiles
     }
 
-    // Helper to get self if chat has no other participant (e.g. self chat)
-    // Or handle groups later.
-    const getChatDisplayInfo = (chat: TeamChatWithMembers) => {
+    const getChatDisplayInfo = (chat: TeamChatWithMembers & { unread_count: number }) => {
+        if (chat.is_group) {
+            return {
+                name: chat.name || 'Grupo sin nombre',
+                avatar: chat.avatar_url,
+                initial: (chat.name || 'G')[0].toUpperCase(),
+                isGroup: true
+            }
+        }
+
         const other = getOtherParticipant(chat)
         if (other) return {
             name: other.full_name || other.email || 'Usuario',
             avatar: other.avatar_url,
-            initial: (other.full_name || other.email || '?')[0].toUpperCase()
+            initial: (other.full_name || other.email || '?')[0].toUpperCase(),
+            isGroup: false
         }
-        return null // Don't show if no other participant (unless group, handled later)
+        return null
     }
 
     return (
@@ -88,14 +97,26 @@ export function ChatList() {
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex justify-between items-center bg-black/20">
                 <h1 className="font-bold text-lg text-white">Chats</h1>
-                <button
-                    onClick={() => setShowNewChat(true)}
-                    className="p-2 bg-[#8b5cf6] text-white rounded-lg hover:bg-[#7c3aed] transition-colors"
-                >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                </button>
+                <div className="flex gap-2">
+                    <button
+                        onClick={() => setShowNewGroup(true)}
+                        className="p-2 bg-zinc-800 text-gray-400 rounded-lg hover:bg-zinc-700 hover:text-white transition-colors"
+                        title="Nuevo Grupo"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                    <button
+                        onClick={() => setShowNewChat(true)}
+                        className="p-2 bg-[#8b5cf6] text-white rounded-lg hover:bg-[#7c3aed] transition-colors"
+                        title="Nuevo Chat Individual"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             {/* List */}
@@ -144,6 +165,8 @@ export function ChatList() {
                                             <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm overflow-hidden border ${isActive ? 'border-[#8b5cf6]/50 text-[#8b5cf6] bg-[#8b5cf6]/10' : 'border-white/10 bg-zinc-800 text-gray-400'}`}>
                                                 {info.avatar ? (
                                                     <img src={info.avatar} alt="" className="w-full h-full object-cover" />
+                                                ) : info.isGroup ? (
+                                                    <span className="text-xs">GRP</span>
                                                 ) : (
                                                     info.initial
                                                 )}
@@ -151,16 +174,23 @@ export function ChatList() {
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <div className="flex justify-between items-baseline mb-0.5">
-                                                <h3 className={`font-medium text-sm truncate ${isActive ? 'text-[#a78bfa]' : 'text-gray-200'}`}>
+                                                <h3 className={`font-medium text-sm truncate ${isActive ? 'text-[#a78bfa]' : chat.unread_count > 0 ? 'text-white font-bold' : 'text-gray-200'}`}>
                                                     {info.name}
                                                 </h3>
                                                 <span className="text-[10px] text-gray-500 whitespace-nowrap ml-2">
                                                     {chat.updated_at && formatDistanceToNow(new Date(chat.updated_at), { addSuffix: false, locale: es })}
                                                 </span>
                                             </div>
-                                            <p className={`text-xs truncate ${isActive ? 'text-[#8b5cf6]/70' : 'text-gray-500'}`}>
-                                                {chat.last_message_preview || 'Nueva conversación'}
-                                            </p>
+                                            <div className="flex justify-between items-center">
+                                                <p className={`text-xs truncate ${isActive ? 'text-[#8b5cf6]/70' : chat.unread_count > 0 ? 'text-white font-medium' : 'text-gray-500'}`}>
+                                                    {chat.last_message_preview || 'Nueva conversación'}
+                                                </p>
+                                                {chat.unread_count > 0 && (
+                                                    <span className="bg-[#8b5cf6] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full min-w-[18px] text-center ml-2">
+                                                        {chat.unread_count}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </div>
                                 </Link>
@@ -171,6 +201,9 @@ export function ChatList() {
             </div>
 
             <UserSelectorModal isOpen={showNewChat} onClose={() => setShowNewChat(false)} />
-        </div>
+            {showNewGroup && (
+                <CreateGroupModal isOpen={showNewGroup} onClose={() => setShowNewGroup(false)} />
+            )}
+        </div >
     )
 }

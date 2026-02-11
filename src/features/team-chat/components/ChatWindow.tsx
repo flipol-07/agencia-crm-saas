@@ -20,12 +20,17 @@ export function ChatWindow({ chatId }: Props) {
     const { user } = useAuth()
     const { clearTeam } = useNotificationStore()
     const [messages, setMessages] = useState<TeamMessage[]>([])
-    const [chatInfo, setChatInfo] = useState<{ name: string, avatar: string | null } | null>(null)
+    const [chatInfo, setChatInfo] = useState<{ name: string, avatar: string | null, isGroup?: boolean } | null>(null)
     const [newMessage, setNewMessage] = useState('')
     const [sending, setSending] = useState(false)
     const [loading, setLoading] = useState(true)
     const messagesEndRef = useRef<HTMLDivElement>(null)
     const router = useRouter()
+
+    const [editingGroup, setEditingGroup] = useState(false)
+    const [groupName, setGroupName] = useState('')
+    const [uploading, setUploading] = useState(false)
+    const fileInputRef = useRef<HTMLInputElement>(null)
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -49,7 +54,6 @@ export function ChatWindow({ chatId }: Props) {
                 const newMsg = payload.new
                 if (newMsg.sender_id !== user.id) {
                     markChatAsRead(chatId)
-                    clearTeam()
                 }
 
                 setMessages(prev => {
@@ -58,6 +62,15 @@ export function ChatWindow({ chatId }: Props) {
                     return [...prev, newMsg]
                 })
                 setTimeout(scrollToBottom, 100)
+            })
+            // Subscribe to chat updates (name/avatar changes)
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'team_chats',
+                filter: `id=eq.${chatId}`
+            }, () => {
+                loadData()
             })
             .subscribe()
 
@@ -73,22 +86,64 @@ export function ChatWindow({ chatId }: Props) {
             teamChatService.getChat(chatId)
         ])
         setMessages(msgs)
-        markChatAsRead(chatId)
 
         if (chat && user) {
-            const other = chat.participants.find(p => p.profiles?.id !== user.id)?.profiles
-            if (other) {
+            if (chat.is_group) {
                 setChatInfo({
-                    name: other.full_name || other.email || 'Usuario',
-                    avatar: other.avatar_url
+                    name: chat.name || 'Grupo',
+                    avatar: chat.avatar_url || null,
+                    isGroup: true
                 })
+                setGroupName(chat.name || 'Grupo')
             } else {
-                setChatInfo({ name: 'Chat', avatar: null })
+                const other = chat.participants.find(p => p.profiles?.id !== user.id)?.profiles
+                if (other) {
+                    setChatInfo({
+                        name: other.full_name || other.email || 'Usuario',
+                        avatar: other.avatar_url,
+                        isGroup: false
+                    })
+                } else {
+                    setChatInfo({ name: 'Chat', avatar: null, isGroup: false })
+                }
             }
+            // Mark both 1:1 and groups as read
+            await teamChatService.markChatAsRead(chatId)
         }
 
         setLoading(false)
         setTimeout(scrollToBottom, 200)
+    }
+
+    const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (!e.target.files || e.target.files.length === 0) return
+
+        const file = e.target.files[0]
+        setUploading(true)
+        try {
+            const publicUrl = await teamChatService.uploadGroupAvatar(chatId, file)
+            // Save immediately as part of the flow? Or just preview?
+            // Let's allow preview or just save immediately. 
+            // Saving immediately is easier for UX here.
+            await teamChatService.updateChat(chatId, { avatar_url: publicUrl })
+            setChatInfo(prev => prev ? { ...prev, avatar: publicUrl } : null)
+        } catch (error) {
+            console.error(error)
+            alert('Error subiendo imagen')
+        } finally {
+            setUploading(false)
+        }
+    }
+
+    const handleUpdateGroup = async () => {
+        try {
+            await teamChatService.updateChat(chatId, { name: groupName })
+            setChatInfo(prev => prev ? { ...prev, name: groupName } : null)
+            setEditingGroup(false)
+        } catch (error) {
+            console.error(error)
+            alert('Error actualizando grupo')
+        }
     }
 
     const handleSend = async (e?: React.FormEvent) => {
@@ -135,10 +190,10 @@ export function ChatWindow({ chatId }: Props) {
         }
     }
 
-    if (loading) return <div className="flex-1 flex items-center justify-center text-gray-500">Cargando conversación...</div>
+    if (loading && !messages.length) return <div className="flex-1 flex items-center justify-center text-gray-500">Cargando conversación...</div>
 
     return (
-        <div className="flex flex-col h-full bg-transparent">
+        <div className="flex flex-col h-full bg-transparent relative">
             {/* Header */}
             <div className="p-4 border-b border-white/5 flex items-center gap-4 bg-black/20">
                 <Link href="/team-chat" className="md:hidden text-gray-400 hover:text-white">
@@ -147,16 +202,31 @@ export function ChatWindow({ chatId }: Props) {
                     </svg>
                 </Link>
 
-                <div className="w-10 h-10 rounded-full bg-[#8b5cf6]/20 flex items-center justify-center overflow-hidden border border-white/10">
+                <div className="w-10 h-10 rounded-full bg-[#8b5cf6]/20 flex items-center justify-center overflow-hidden border border-white/10 shrink-0">
                     {chatInfo?.avatar ? (
                         <img src={chatInfo.avatar} alt="" className="w-full h-full object-cover" />
                     ) : (
-                        <span className="text-[#8b5cf6] font-bold">{chatInfo?.name?.[0]?.toUpperCase() || '#'}</span>
+                        <span className="text-[#8b5cf6] font-bold text-lg">{chatInfo?.name?.[0]?.toUpperCase() || '#'}</span>
                     )}
                 </div>
-                <div>
-                    <h2 className="font-bold text-white leading-tight">{chatInfo?.name || 'Cargando...'}</h2>
+                <div className="flex-1 min-w-0">
+                    <h2 className="font-bold text-white leading-tight truncate">{chatInfo?.name || 'Cargando...'}</h2>
+                    {chatInfo?.isGroup && (
+                        <p className="text-xs text-gray-400">Grupo</p>
+                    )}
                 </div>
+
+                {chatInfo?.isGroup && (
+                    <button
+                        onClick={() => setEditingGroup(true)}
+                        className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
+                        title="Editar grupo"
+                    >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                    </button>
+                )}
             </div>
 
             {/* Messages Area */}
@@ -173,7 +243,7 @@ export function ChatWindow({ chatId }: Props) {
                                 }`}>
                                 <p className="whitespace-pre-wrap text-sm md:text-base">{msg.content}</p>
                                 <div className={`text-[10px] mt-1 text-right ${isMe ? 'text-white/60' : 'text-gray-400'}`}>
-                                    {format(new Date(msg.created_at), 'HH:mm', { locale: es })}
+                                    {msg.created_at ? format(new Date(msg.created_at), 'HH:mm', { locale: es }) : ''}
                                     {isMe && (
                                         <span className="ml-1">
                                             {msg.read_at ? '✓✓' : '✓'}
@@ -218,6 +288,82 @@ export function ChatWindow({ chatId }: Props) {
                     </button>
                 </form>
             </div>
+
+            {/* Edit Group Modal */}
+            {editingGroup && (
+                <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+                    <div className="bg-zinc-900 border border-white/10 rounded-2xl p-6 w-full max-w-sm shadow-xl">
+                        <div className="flex justify-between items-center mb-6">
+                            <h3 className="text-lg font-bold text-white">Editar Grupo</h3>
+                            <button
+                                onClick={() => setEditingGroup(false)}
+                                className="text-gray-400 hover:text-white"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="flex flex-col items-center gap-4">
+                                <div className="w-24 h-24 rounded-full bg-zinc-800 border-2 border-dashed border-zinc-600 flex items-center justify-center relative overflow-hidden group cursor-pointer"
+                                    onClick={() => fileInputRef.current?.click()}
+                                >
+                                    {chatInfo?.avatar ? (
+                                        <img src={chatInfo.avatar} alt="" className="w-full h-full object-cover" />
+                                    ) : (
+                                        <div className="text-zinc-500 group-hover:text-zinc-300 transition-colors">
+                                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                        </div>
+                                    )}
+                                    {uploading && (
+                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                                            <svg className="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                            </svg>
+                                        </div>
+                                    )}
+                                </div>
+                                <button
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="text-xs text-[#8b5cf6] hover:text-[#7c3aed] font-medium"
+                                >
+                                    Cambiar foto
+                                </button>
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    className="hidden"
+                                    accept="image/*"
+                                    onChange={handleAvatarChange}
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-gray-400">Nombre del grupo</label>
+                                <input
+                                    type="text"
+                                    value={groupName}
+                                    onChange={(e) => setGroupName(e.target.value)}
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-[#8b5cf6] focus:border-transparent outline-none transition-all"
+                                    placeholder="Nombre del grupo"
+                                />
+                            </div>
+
+                            <button
+                                onClick={handleUpdateGroup}
+                                className="w-full bg-[#8b5cf6] text-white font-bold py-3 rounded-xl hover:bg-[#7c3aed] transition-colors"
+                            >
+                                Guardar cambios
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     )
 }

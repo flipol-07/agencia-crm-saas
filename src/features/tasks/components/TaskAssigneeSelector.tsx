@@ -58,10 +58,16 @@ export function TaskAssigneeSelector({ assignees, onAssign, onUnassign, disabled
                         {assignees.slice(0, 3).map((a) => (
                             <div
                                 key={a.user_id}
-                                className="w-6 h-6 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 flex items-center justify-center text-[10px] font-bold text-black ring-2 ring-gray-900"
+                                className="w-6 h-6 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 overflow-hidden ring-2 ring-gray-900"
                                 title={a.profiles.full_name || a.profiles.email}
                             >
-                                {getInitials(a.profiles.full_name, a.profiles.email)}
+                                {a.profiles.avatar_url ? (
+                                    <img src={a.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                                ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-black">
+                                        {getInitials(a.profiles.full_name, a.profiles.email)}
+                                    </div>
+                                )}
                             </div>
                         ))}
                         {assignees.length > 3 && (
@@ -96,8 +102,14 @@ export function TaskAssigneeSelector({ assignees, onAssign, onUnassign, disabled
                                         ${assignedIds.includes(member.id) ? 'bg-lime-500/10' : 'hover:bg-white/5'}
                                     `}
                                 >
-                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 flex items-center justify-center text-xs font-bold text-black">
-                                        {getInitials(member.full_name, member.email)}
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 overflow-hidden shrink-0">
+                                        {(member as any).avatar_url ? (
+                                            <img src={(member as any).avatar_url} alt="" className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-xs font-bold text-black">
+                                                {getInitials(member.full_name, member.email)}
+                                            </div>
+                                        )}
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <p className="font-medium text-white truncate">
@@ -138,10 +150,16 @@ export function TaskAssigneeAvatars({ assignees }: { assignees: TaskAssigneeSele
             {assignees.slice(0, 3).map((a) => (
                 <div
                     key={a.user_id}
-                    className="w-6 h-6 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 flex items-center justify-center text-[10px] font-bold text-black ring-2 ring-gray-900"
+                    className="w-6 h-6 rounded-full bg-gradient-to-br from-lime-400 to-emerald-500 overflow-hidden ring-2 ring-gray-900"
                     title={a.profiles.full_name || a.profiles.email}
                 >
-                    {getInitials(a.profiles.full_name, a.profiles.email)}
+                    {a.profiles.avatar_url ? (
+                        <img src={a.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-[10px] font-bold text-black">
+                            {getInitials(a.profiles.full_name, a.profiles.email)}
+                        </div>
+                    )}
                 </div>
             ))}
             {assignees.length > 3 && (

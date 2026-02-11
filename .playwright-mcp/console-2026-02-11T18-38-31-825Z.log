@@ -1,0 +1,24 @@
+[  564168ms] [ERROR] ./src/features/team-chat/services/chatService.ts:220:5
+Parsing ecmascript source code failed
+  218 |         return data
+  219 |     }
+> 220 |     async updateChat(chatId: string, updates: { name?: string, avatar_url?: string }): Promise<void> {
+      |     ^^^^^
+  221 |         const supabase = createClient()
+  222 |         const { error } = await supabase
+  223 |             .from('team_chats')
+
+Expected ',', got 'async'
+
+Import traces:
+  Client Component Browser:
+    ./src/features/team-chat/services/chatService.ts [Client Component Browser]
+    ./src/features/team-chat/components/ChatList.tsx [Client Component Browser]
+    ./src/app/(main)/team-chat/layout.tsx [Client Component Browser]
+    ./src/app/(main)/team-chat/layout.tsx [Server Component]
+
+  Client Component SSR:
+    ./src/features/team-chat/services/chatService.ts [Client Component SSR]
+    ./src/features/team-chat/components/ChatList.tsx [Client Component SSR]
+    ./src/app/(main)/team-chat/layout.tsx [Client Component SSR]
+    ./src/app/(main)/team-chat/layout.tsx [Server Component] @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:3127
