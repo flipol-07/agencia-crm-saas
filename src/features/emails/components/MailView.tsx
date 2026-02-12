@@ -17,9 +17,10 @@ interface Conversation {
 interface MailViewProps {
     conversation: Conversation
     onReply: (to: string, subject: string, context: string) => void
+    onBack: () => void
 }
 
-export function MailView({ conversation, onReply }: MailViewProps) {
+export function MailView({ conversation, onReply, onBack }: MailViewProps) {
     const latestEmail = conversation.emails[conversation.emails.length - 1]
 
     const handleReply = () => {
@@ -35,29 +36,43 @@ export function MailView({ conversation, onReply }: MailViewProps) {
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-black/40">
+        <div className="flex-1 flex flex-col h-full bg-black/40 animate-in slide-in-from-right duration-300">
             {/* Header */}
-            <div className="p-6 border-b border-white/10">
-                <div className="flex justify-between items-start mb-4">
-                    <h2 className="text-xl font-bold text-white">{conversation.subject}</h2>
+            <div className="p-4 md:p-6 border-b border-white/10">
+                <div className="flex items-center gap-4 mb-4">
+                    <button
+                        onClick={onBack}
+                        className="md:hidden p-2 -ml-2 text-gray-400 hover:text-white transition-colors"
+                        title="Volver a la lista"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
+                    <h2 className="text-lg md:text-xl font-bold text-white flex-1 truncate">{conversation.subject}</h2>
                     <div className="flex gap-2">
                         <button
                             onClick={handleReply}
-                            className="px-4 py-2 bg-brand text-black font-bold rounded-lg hover:bg-brand/90 transition-all flex items-center gap-2"
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-brand text-black font-bold rounded-lg hover:bg-brand/90 transition-all flex items-center gap-2 text-sm"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
                             </svg>
-                            Responder
+                            <span className="hidden sm:inline">Responder</span>
+                            <span className="sm:hidden text-lg">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                                </svg>
+                            </span>
                         </button>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-400">
-                    <span className="bg-white/10 px-2 py-0.5 rounded text-white">
+                <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 overflow-hidden">
+                    <span className="bg-white/10 px-2 py-0.5 rounded text-white flex-shrink-0">
                         {conversation.emails.length} mensajes
                     </span>
                     <span>•</span>
-                    <span>Participantes: {Array.from(conversation.participants).join(', ')}</span>
+                    <span className="truncate">Participantes: {Array.from(conversation.participants).join(', ')}</span>
                 </div>
             </div>
 

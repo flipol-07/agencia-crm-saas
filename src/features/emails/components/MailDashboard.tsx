@@ -183,19 +183,22 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
                 onCompose={handleCompose}
             />
 
-            <MailThreadList
-                threads={threads}
-                selectedThreadId={selectedThreadId}
-                onThreadSelect={setSelectedThreadId}
-                folder={selectedFolder}
-                onToggleRead={handleToggleRead}
-            />
+            <div className={`flex-1 border-r border-white/10 ${selectedThreadId ? 'hidden md:block' : 'block'}`}>
+                <MailThreadList
+                    threads={threads}
+                    selectedThreadId={selectedThreadId}
+                    onThreadSelect={setSelectedThreadId}
+                    folder={selectedFolder}
+                    onToggleRead={handleToggleRead}
+                />
+            </div>
 
-            <main className="flex-[2] h-full overflow-hidden bg-black/40">
+            <main className={`flex-[2] h-full overflow-hidden bg-black/40 ${selectedThreadId ? 'block' : 'hidden md:block'}`}>
                 {activeConversation ? (
                     <MailView
                         conversation={activeConversation}
                         onReply={handleReply}
+                        onBack={() => setSelectedThreadId(null)}
                     />
                 ) : (
                     <div className="flex h-full items-center justify-center text-gray-500">

@@ -117,37 +117,42 @@ export function CalendarView() {
     return (
         <div className="h-full flex flex-col bg-background">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-white/5 bg-white/[0.02]">
-                <div className="flex items-center gap-6">
-                    <h1 className="text-3xl font-bold bg-gradient-to-r from-brand to-white bg-clip-text text-transparent tracking-tight">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 border-b border-white/5 bg-white/[0.02] gap-4 sm:gap-0">
+                <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start gap-4 sm:gap-6">
+                    <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-brand to-white bg-clip-text text-transparent tracking-tight">
                         {format(currentDate, view === 'day' ? 'MMMM d, yyyy' : 'MMMM yyyy')}
                     </h1>
                     <div className="flex items-center rounded-xl border border-white/10 bg-white/5 p-1.5 gap-1.5 shadow-inner">
                         <Button variant="ghost" size="sm" onClick={prev} className="hover:bg-white/10 h-8 w-8 p-0"><ChevronLeft className="h-5 w-5" /></Button>
-                        <Button variant="ghost" size="sm" onClick={today} className="px-4 hover:bg-white/10 text-xs font-bold uppercase tracking-wider">Today</Button>
+                        <Button variant="ghost" size="sm" onClick={today} className="px-2 sm:px-4 hover:bg-white/10 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                            <span className="sm:hidden">Hoy</span>
+                            <span className="hidden sm:inline">Today</span>
+                        </Button>
                         <Button variant="ghost" size="sm" onClick={next} className="hover:bg-white/10 h-8 w-8 p-0"><ChevronRight className="h-5 w-5" /></Button>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
                     {/* View Switcher (Simple) */}
-                    <div className="flex rounded-xl border border-white/10 bg-white/5 p-1 mr-4">
+                    <div className="flex rounded-xl border border-white/10 bg-white/5 p-1 sm:mr-4">
                         <Button
                             variant={view === 'month' ? 'secondary' : 'ghost'}
                             size="sm"
                             onClick={() => setView('month')}
-                            className={cn("px-4 rounded-lg text-xs font-bold uppercase tracking-wider", view === 'month' && "bg-brand text-black shadow-lg shadow-brand/20")}
+                            className={cn("px-3 sm:px-4 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider", view === 'month' && "bg-brand text-black shadow-lg shadow-brand/20")}
                         >
                             Month
                         </Button>
                     </div>
 
-                    <Button onClick={() => setIsEventModalOpen(true)} size="sm" className="gap-2 px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-xs font-bold uppercase tracking-wider">
-                        <Plus className="h-4 w-4" /> Add Event
-                    </Button>
-                    <Button onClick={() => setIsMeetingModalOpen(true)} size="sm" className="gap-2 px-4 rounded-xl bg-brand hover:brightness-110 text-black text-xs font-bold uppercase tracking-wider shadow-lg shadow-brand/10">
-                        <Video className="h-4 w-4" /> Schedule Meeting
-                    </Button>
+                    <div className="flex items-center gap-2">
+                        <Button onClick={() => setIsEventModalOpen(true)} size="sm" className="gap-2 px-3 sm:px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
+                            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Add Event</span>
+                        </Button>
+                        <Button onClick={() => setIsMeetingModalOpen(true)} size="sm" className="gap-2 px-3 sm:px-4 rounded-xl bg-brand hover:brightness-110 text-black text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg shadow-brand/10">
+                            <Video className="h-4 w-4" /> <span className="hidden sm:inline">Schedule</span>
+                        </Button>
+                    </div>
                 </div>
             </div>
 
@@ -183,7 +188,7 @@ export function CalendarView() {
                                 key={day.toString()}
                                 onClick={() => handleDateClick(day)}
                                 className={cn(
-                                    "border-b border-r border-white/5 p-2 flex flex-col transition-all duration-300 hover:bg-white/[0.02] relative group/day overflow-hidden",
+                                    "border-b border-r border-white/5 p-1 sm:p-2 flex flex-col transition-all duration-300 hover:bg-white/[0.02] relative group/day overflow-hidden",
                                     !isSameMonth(day, currentDate) && "bg-white/[0.005] opacity-20",
                                     isToday(day) && "bg-brand/[0.03] border-t-2 border-t-brand/50",
                                     (i + 1) % 7 === 0 && "border-r-0"
@@ -191,7 +196,7 @@ export function CalendarView() {
                             >
                                 <div className="flex justify-between items-start mb-1 h-6 shrink-0">
                                     <span className={cn(
-                                        "text-[10px] font-bold h-6 w-6 flex items-center justify-center rounded-full transition-all duration-300",
+                                        "text-[9px] sm:text-[10px] font-bold h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center rounded-full transition-all duration-300",
                                         isToday(day) && "bg-brand text-black shadow-[0_0_15px_rgba(139,92,246,0.3)]",
                                         selectedDate && isSameDay(day, selectedDate) && !isToday(day) && "bg-white/10 text-white border border-white/20",
                                     )}>

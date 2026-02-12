@@ -44,21 +44,21 @@ export function TaskCard({
 
     return (
         <div
-            className={`glass rounded-lg p-4 border-l-4 ${priorityBorder[task.priority]} hover:bg-white/5 transition-all cursor-pointer group relative ${isStatusOpen ? 'z-50' : 'hover:z-50'} ${className}`}
+            className={`glass rounded-lg p-3 sm:p-4 border-l-4 ${priorityBorder[task.priority]} hover:bg-white/5 transition-all cursor-pointer group relative ${isStatusOpen ? 'z-50' : 'hover:z-50'} ${className}`}
             onClick={onOpen}
             style={style}
         >
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2 sm:gap-3">
                 <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                        <h3 className="font-medium text-white truncate group-hover:text-[#8b5cf6] transition-colors">{task.title}</h3>
+                    <div className="flex items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
+                        <h3 className="text-sm sm:text-base font-medium text-white truncate group-hover:text-[#8b5cf6] transition-colors">{task.title}</h3>
                         {commentCount > 0 && (
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation()
                                     onOpen()
                                 }}
-                                className="flex items-center gap-1.5 bg-white/5 hover:bg-[#8b5cf6]/20 text-gray-500 hover:text-[#8b5cf6] px-2 py-0.5 rounded-full text-[10px] transition-all border border-white/5"
+                                className="flex items-center gap-1 bg-white/5 hover:bg-[#8b5cf6]/20 text-gray-500 hover:text-[#8b5cf6] px-1.5 py-0.5 rounded-full text-[9px] sm:text-[10px] transition-all border border-white/5"
                                 title="Ver comentarios"
                             >
                                 💬 {commentCount}
@@ -66,18 +66,18 @@ export function TaskCard({
                         )}
                     </div>
 
-                    <div className="flex items-center gap-3 text-sm mb-3">
+                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm mb-3">
                         {task.projects && (
                             <>
                                 <Link
                                     href={`/contacts/${task.projects.contact_id}`}
-                                    className="text-gray-400 hover:text-[#8b5cf6] transition-colors"
+                                    className="text-gray-400 hover:text-[#8b5cf6] transition-colors truncate max-w-[120px] sm:max-w-none"
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     🏢 {task.projects.contacts?.company_name}
                                 </Link>
                                 <span className="text-gray-600">→</span>
-                                <span className="text-gray-400">📋 {task.projects.name}</span>
+                                <span className="text-gray-400 truncate max-w-[120px] sm:max-w-none">📋 {task.projects.name}</span>
                             </>
                         )}
                     </div>

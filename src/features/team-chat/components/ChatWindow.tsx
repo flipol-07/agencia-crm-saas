@@ -146,6 +146,21 @@ export function ChatWindow({ chatId }: Props) {
         }
     }
 
+    const handleDeleteChat = async () => {
+        if (!window.confirm('¿Estás seguro de que quieres eliminar este grupo? Esta acción no se puede deshacer.')) {
+            return
+        }
+
+        try {
+            await teamChatService.deleteChat(chatId)
+            router.push('/team-chat')
+            router.refresh()
+        } catch (error) {
+            console.error(error)
+            alert('Error eliminando grupo')
+        }
+    }
+
     const handleSend = async (e?: React.FormEvent) => {
         e?.preventDefault()
         if (!newMessage.trim() || sending) return
@@ -360,6 +375,18 @@ export function ChatWindow({ chatId }: Props) {
                             >
                                 Guardar cambios
                             </button>
+
+                            <div className="pt-4 border-t border-white/5">
+                                <button
+                                    onClick={handleDeleteChat}
+                                    className="w-full bg-red-500/10 text-red-500 font-bold py-3 rounded-xl hover:bg-red-500 hover:text-white transition-all border border-red-500/20"
+                                >
+                                    Eliminar Grupo
+                                </button>
+                                <p className="text-[10px] text-gray-500 text-center mt-2">
+                                    Esta acción eliminará todos los mensajes y participantes permanentemente.
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>

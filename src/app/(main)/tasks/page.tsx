@@ -213,29 +213,29 @@ export default function TasksPage() {
                 userProfile={profile}
                 onOpenTask={setSelectedTask}
             />
-            <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-tight text-white">Gestión de Tareas</h1>
-                    <p className="text-gray-400 mt-1">
+                    <h1 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white">Gestión de Tareas</h1>
+                    <p className="text-xs sm:text-sm text-gray-400 mt-1">
                         {loading ? 'Cargando...' : `${filteredTasks.length} tareas pendientes`}
                         {hasFilters && tasks.length !== filteredTasks.length && ` (de ${tasks.length})`}
                     </p>
                 </div>
 
-                <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-2 sm:gap-3 flex-wrap">
                     {/* Create Task Button */}
                     <button
                         onClick={() => setShowCreateModal(true)}
-                        className="px-4 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold rounded-lg transition-all flex items-center gap-2"
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-[#8b5cf6] hover:bg-[#7c3aed] text-white text-xs sm:text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2"
                     >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                         </svg>
-                        Nueva Tarea
+                        <span>Nueva Tarea</span>
                     </button>
                     {/* View Mode Toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-white/10">
+                    <div className="flex rounded-lg overflow-hidden border border-white/10 shrink-0">
                         <button
                             onClick={() => setViewMode('list')}
                             className={`px-3 py-2 text-sm transition-all ${viewMode === 'list'
@@ -263,10 +263,10 @@ export default function TasksPage() {
                     </div>
 
                     {/* My Tasks Toggle */}
-                    <div className="flex rounded-lg overflow-hidden border border-white/10">
+                    <div className="flex rounded-lg overflow-hidden border border-white/10 shrink-0">
                         <button
                             onClick={() => setFilterMode('all')}
-                            className={`px-4 py-2 text-sm transition-all ${filterMode === 'all'
+                            className={`px-3 sm:px-4 py-2 text-[10px] sm:text-sm transition-all ${filterMode === 'all'
                                 ? 'bg-[#8b5cf6] text-white'
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
@@ -275,7 +275,7 @@ export default function TasksPage() {
                         </button>
                         <button
                             onClick={() => setFilterMode('mine')}
-                            className={`px-4 py-2 text-sm transition-all ${filterMode === 'mine'
+                            className={`px-3 sm:px-4 py-2 text-[10px] sm:text-sm transition-all ${filterMode === 'mine'
                                 ? 'bg-[#8b5cf6] text-white'
                                 : 'bg-white/5 text-gray-400 hover:bg-white/10'
                                 }`}
@@ -287,9 +287,9 @@ export default function TasksPage() {
             </div>
 
             {/* Filters Row */}
-            <div className="flex items-center gap-3 flex-wrap">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 {/* Search */}
-                <div className="relative flex-1 min-w-[200px] max-w-md">
+                <div className="relative flex-1">
                     <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
@@ -310,44 +310,46 @@ export default function TasksPage() {
                     )}
                 </div>
 
-                {/* Filter by priority */}
-                <select
-                    value={filterPriority}
-                    onChange={(e) => setFilterPriority(e.target.value as TaskPriority | '')}
-                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#8b5cf6]"
-                >
-                    <option value="" className="bg-gray-900">Todas las prioridades</option>
-                    {TASK_PRIORITIES.map(p => (
-                        <option key={p.id} value={p.id} className="bg-gray-900">
-                            {p.label}
-                        </option>
-                    ))}
-                </select>
+                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                    {/* Filter by priority */}
+                    <select
+                        value={filterPriority}
+                        onChange={(e) => setFilterPriority(e.target.value as TaskPriority | '')}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#8b5cf6]"
+                    >
+                        <option value="" className="bg-gray-900">Prioridad</option>
+                        {TASK_PRIORITIES.map(p => (
+                            <option key={p.id} value={p.id} className="bg-gray-900">
+                                {p.label}
+                            </option>
+                        ))}
+                    </select>
 
-                {/* Filter by assignee */}
-                <select
-                    value={filterAssignee}
-                    onChange={(e) => setFilterAssignee(e.target.value)}
-                    className="px-4 py-2 text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#8b5cf6]"
-                >
-                    <option value="" className="bg-gray-900">Todos los miembros</option>
-                    {members.map(m => (
-                        <option key={m.id} value={m.id} className="bg-gray-900">
-                            {m.full_name || m.email}
-                        </option>
-                    ))}
-                </select>
+                    {/* Filter by assignee */}
+                    <select
+                        value={filterAssignee}
+                        onChange={(e) => setFilterAssignee(e.target.value)}
+                        className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[11px] sm:text-sm bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-[#8b5cf6]"
+                    >
+                        <option value="" className="bg-gray-900">Miembro</option>
+                        {members.map(m => (
+                            <option key={m.id} value={m.id} className="bg-gray-900">
+                                {m.full_name || m.email}
+                            </option>
+                        ))}
+                    </select>
 
-                {/* Show Completed Toggle */}
-                <button
-                    onClick={() => setShowCompleted(!showCompleted)}
-                    className={`px-4 py-2 text-sm rounded-lg border transition-all ${showCompleted
-                        ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] border-[#8b5cf6]/30'
-                        : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/20'
-                        }`}
-                >
-                    {showCompleted ? 'Ocultar completadas' : 'Mostrar completadas'}
-                </button>
+                    {/* Show Completed Toggle */}
+                    <button
+                        onClick={() => setShowCompleted(!showCompleted)}
+                        className={`px-3 sm:px-4 py-2 text-[11px] sm:text-sm rounded-lg border transition-all ${showCompleted
+                            ? 'bg-[#8b5cf6]/20 text-[#8b5cf6] border-[#8b5cf6]/30'
+                            : 'bg-white/5 text-gray-400 border-white/10 hover:border-white/20'
+                            }`}
+                    >
+                        {showCompleted ? 'Ocultar' : 'Completadas'}
+                    </button>
+                </div>
 
                 {/* Clear filters */}
                 {hasFilters && (
@@ -358,9 +360,9 @@ export default function TasksPage() {
                             setFilterPriority('')
                             setFilterMode('all')
                         }}
-                        className="px-3 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                        className="px-3 py-2 text-xs sm:text-sm text-gray-400 hover:text-white transition-colors text-center"
                     >
-                        Limpiar filtros
+                        Limpiar
                     </button>
                 )}
             </div>

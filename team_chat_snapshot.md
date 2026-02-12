@@ -1,0 +1,155 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "Aurie AURIE." [ref=e238] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aurie" [ref=e10]
+          - heading "AURIE." [level=1] [ref=e11]
+        - generic [ref=e205]:
+          - generic [ref=e240]: plorenzopizarro@gmail.com
+          - button "Cerrar sesión" [ref=e207] [cursor=pointer]:
+            - img [ref=e208]
+    - generic [ref=e12]:
+      - complementary [ref=e13]:
+        - navigation [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e19]: Dashboard
+          - link "Calendario" [ref=e20] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e22]
+            - generic [ref=e24]: Calendario
+          - link "Pipeline" [ref=e25] [cursor=pointer]:
+            - /url: /pipeline
+            - img [ref=e27]
+            - generic [ref=e29]: Pipeline
+          - link "Contactos" [ref=e30] [cursor=pointer]:
+            - /url: /contacts
+            - img [ref=e32]
+            - generic [ref=e34]: Contactos
+          - link "Tareas" [ref=e35] [cursor=pointer]:
+            - /url: /tasks
+            - img [ref=e37]
+            - generic [ref=e39]: Tareas
+          - link "Facturas" [ref=e40] [cursor=pointer]:
+            - /url: /invoices
+            - img [ref=e42]
+            - generic [ref=e44]: Facturas
+          - link "Chat de Equipo" [ref=e45] [cursor=pointer]:
+            - /url: /team-chat
+            - img [ref=e48]
+            - generic [ref=e50]: Chat de Equipo
+          - link "Reuniones" [ref=e51] [cursor=pointer]:
+            - /url: /meetings
+            - img [ref=e53]
+            - generic [ref=e55]: Reuniones
+          - link "Correo" [ref=e56] [cursor=pointer]:
+            - /url: /mail
+            - img [ref=e58]
+            - generic [ref=e60]: Correo
+          - link "Economía" [ref=e61] [cursor=pointer]:
+            - /url: /expenses
+            - img [ref=e63]
+            - generic [ref=e65]: Economía
+          - link "Lead Scraper" [ref=e66] [cursor=pointer]:
+            - /url: /lead-scraper
+            - img [ref=e68]
+            - generic [ref=e70]: Lead Scraper
+        - link "Configuración" [ref=e72] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e74]
+          - generic [ref=e77]: Configuración
+      - main [ref=e78]:
+        - generic [ref=e79]:
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - heading "Chats" [level=1] [ref=e83]
+              - generic [ref=e84]:
+                - button "Nuevo Grupo" [ref=e85] [cursor=pointer]:
+                  - img [ref=e86]
+                - button "Nuevo Chat Individual" [ref=e88] [cursor=pointer]:
+                  - img [ref=e89]
+            - generic [ref=e92]:
+              - link "Try alrededor de 15 horas Hola" [ref=e241] [cursor=pointer]:
+                - /url: /team-chat/8e0832fb-cd62-4fa9-901e-141f9594f51d
+                - generic [ref=e245]:
+                  - generic [ref=e246]:
+                    - heading "Try" [level=3] [ref=e247]
+                    - generic [ref=e248]: alrededor de 15 horas
+                  - paragraph [ref=e250]: Hola
+              - link "A Antón Loredo 10 días funciona oleee jajaj" [ref=e251] [cursor=pointer]:
+                - /url: /team-chat/90017d56-ba89-44fd-9a74-96b287adbac7
+                - generic [ref=e252]:
+                  - generic [ref=e254]: A
+                  - generic [ref=e255]:
+                    - generic [ref=e256]:
+                      - heading "Antón Loredo" [level=3] [ref=e257]
+                      - generic [ref=e258]: 10 días
+                    - paragraph [ref=e260]: funciona oleee jajaj
+          - generic [ref=e109]:
+            - generic [ref=e111]: 💬
+            - heading "Chat de Equipo" [level=2] [ref=e112]
+            - paragraph [ref=e113]: Selecciona una conversación de la izquierda o inicia un nuevo chat para comunicarte con tu equipo.
+            - generic [ref=e114]: 🔒 Mensajes encriptados de extremo a extremo (simulado)
+        - button [ref=e116] [cursor=pointer]:
+          - img [ref=e118]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e126] [cursor=pointer]:
+    - img [ref=e127]
+  - alert [ref=e130]
+  - generic [ref=e132]:
+    - generic [ref=e133]:
+      - link "Aura AURIE" [ref=e134] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aura" [ref=e136]
+        - generic [ref=e137]: AURIE
+      - button [ref=e138] [cursor=pointer]:
+        - img [ref=e139]
+    - navigation [ref=e141]:
+      - link "Dashboard" [ref=e142] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e144]
+        - generic [ref=e146]: Dashboard
+      - link "Pipeline" [ref=e147] [cursor=pointer]:
+        - /url: /pipeline
+        - img [ref=e149]
+        - generic [ref=e151]: Pipeline
+      - link "Contactos" [ref=e152] [cursor=pointer]:
+        - /url: /contacts
+        - img [ref=e154]
+        - generic [ref=e156]: Contactos
+      - link "Tareas" [ref=e157] [cursor=pointer]:
+        - /url: /tasks
+        - img [ref=e159]
+        - generic [ref=e161]: Tareas
+      - link "Facturas" [ref=e162] [cursor=pointer]:
+        - /url: /invoices
+        - img [ref=e164]
+        - generic [ref=e166]: Facturas
+      - link "Chat de Equipo" [ref=e167] [cursor=pointer]:
+        - /url: /team-chat
+        - img [ref=e169]
+        - generic [ref=e171]: Chat de Equipo
+      - link "Reuniones" [ref=e172] [cursor=pointer]:
+        - /url: /meetings
+        - img [ref=e174]
+        - generic [ref=e176]: Reuniones
+      - link "Correo" [ref=e177] [cursor=pointer]:
+        - /url: /mail
+        - img [ref=e179]
+        - generic [ref=e181]: Correo
+      - link "Economía" [ref=e182] [cursor=pointer]:
+        - /url: /expenses
+        - img [ref=e184]
+        - generic [ref=e186]: Economía
+      - link "Lead Scraper" [ref=e187] [cursor=pointer]:
+        - /url: /lead-scraper
+        - img [ref=e189]
+        - generic [ref=e191]: Lead Scraper
+    - link "Ajustes" [ref=e193] [cursor=pointer]:
+      - /url: /settings
+      - img [ref=e195]
+      - generic [ref=e198]: Ajustes

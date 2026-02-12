@@ -38,7 +38,7 @@ export function StatCard({
     const colorClass = getColorClasses(color)
 
     const cardContent = (
-        <div className={`group relative p-6 rounded-2xl border transition-all duration-300 glass-card hover:-translate-y-1 ${colorClass.split(' ').filter(c => c.includes('hover')).join(' ')} border-white/5`}>
+        <div className={`group relative p-4 sm:p-6 rounded-2xl border transition-all duration-300 glass-card hover:-translate-y-1 ${colorClass.split(' ').filter(c => c.includes('hover')).join(' ')} border-white/5`}>
             {/* Glow effect on hover */}
             <div className={`absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none bg-gradient-to-br from-white/5 to-transparent`} />
 
@@ -72,7 +72,7 @@ export function StatCard({
                     </div>
 
                     <div className="flex items-baseline gap-2">
-                        <p className="text-3xl font-bold text-white font-display tracking-tight">{value}</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-white font-display tracking-tight">{value}</p>
                     </div>
 
                     {subtitle && (

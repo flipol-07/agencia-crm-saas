@@ -80,7 +80,7 @@ export function GlassHeader() {
                             <div className="absolute inset-0 bg-brand/20 blur-xl rounded-full animate-pulse" />
                             <Image src="/brand/logo.png" alt="Aurie" fill className="object-contain relative z-10" sizes="(max-width: 768px) 32px, 40px" />
                         </div>
-                        <h1 className="text-xl lg:text-2xl font-black tracking-widest text-white uppercase hidden sm:block font-display">
+                        <h1 className="text-lg sm:text-2xl font-black tracking-widest text-white uppercase font-display">
                             AURIE
                             <span className="text-brand-neon-purple text-glow">.</span>
                         </h1>

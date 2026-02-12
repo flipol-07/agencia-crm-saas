@@ -249,5 +249,18 @@ export const teamChatService = {
             .getPublicUrl(fileName)
 
         return publicUrl
+    },
+
+    async deleteChat(chatId: string): Promise<void> {
+        const supabase = createClient()
+        const { error } = await supabase
+            .from('team_chats')
+            .delete()
+            .eq('id', chatId)
+
+        if (error) {
+            console.error('Error deleting chat:', error)
+            throw error
+        }
     }
 }

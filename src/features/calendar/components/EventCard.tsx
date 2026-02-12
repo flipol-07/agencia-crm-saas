@@ -19,7 +19,7 @@ export function EventCard({ event, onClick }: EventCardProps) {
                 onClick(event)
             }}
             className={cn(
-                "px-2.5 py-1 text-[11px] sm:text-xs rounded-xl cursor-pointer truncate mb-1 transition-all border border-white/5 backdrop-blur-md",
+                "px-1 py-0.5 sm:px-2.5 sm:py-1 text-[9px] sm:text-xs rounded-md sm:rounded-xl cursor-pointer truncate mb-1 transition-all border border-white/5 backdrop-blur-md",
                 isMeeting && "bg-brand/10 text-brand border-l-2 border-l-brand hover:bg-brand/20 shadow-[0_0_20px_rgba(139,92,246,0.08)]",
                 isTask && "bg-green-500/10 text-green-400 border-l-2 border-l-green-500 hover:bg-green-500/20",
                 event.type === 'event' && "bg-blue-500/10 text-blue-400 border-l-2 border-l-blue-500 hover:bg-blue-500/20",
@@ -27,8 +27,8 @@ export function EventCard({ event, onClick }: EventCardProps) {
                 event.color === 'orange' && "bg-orange-500/10 text-orange-400 border-l-2 border-l-orange-500"
             )}
         >
-            <div className="flex items-center gap-2.5">
-                <span className="font-black text-[10px] opacity-60 shrink-0">{format(event.start, 'HH:mm')}</span>
+            <div className="flex items-center gap-1 sm:gap-2.5">
+                <span className="hidden sm:inline font-black text-[10px] opacity-60 shrink-0">{format(event.start, 'HH:mm')}</span>
                 <span className="truncate font-semibold tracking-tight">{event.title}</span>
             </div>
         </div>

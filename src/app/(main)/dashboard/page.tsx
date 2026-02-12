@@ -40,7 +40,7 @@ export default async function DashboardPage({ searchParams }: Props) {
       {/* Page Shell (Instant) */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pb-2 border-b border-white/5">
         <div>
-          <h1 className="text-4xl font-display font-black text-white tracking-tight uppercase">Dashboard</h1>
+          <h1 className="text-2xl sm:text-4xl font-display font-black text-white tracking-tight uppercase">Dashboard</h1>
           <p className="text-gray-400 mt-1 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
             Sistema Operativo <span className="text-white/20">|</span> <span className="capitalize text-[#8b5cf6]">{currentMonth}</span>
