@@ -214,31 +214,49 @@ export class EmailService {
             const sorted = uniqueEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
 
             // Proactividad: Intentar generar embeddings para los nuevos si se llama desde un contexto que lo permita
-            // Como AiMemoryService.storeMemory es async, no bloqueamos el retorno
             try {
                 const supabase = await createClient();
-                for (const email of sorted.slice(0, 5)) { // Solo los 5 más recientes para evitar latencia
-                    const content = `Asunto: ${email.subject}\n\nContenido: ${email.text || email.snippet}`;
-                    // Verificar si ya existe para no duplicar
-                    const { data: existing } = await supabase
-                        .from('embeddings' as any)
-                        .select('id')
-                        .eq('entity_id', email.messageId)
-                        .eq('entity_type', 'email')
-                        .maybeSingle();
+                for (const email of sorted.slice(0, 5)) {
+                    try {
+                        const content = `Asunto: ${email.subject}\n\nContenido: ${email.text || email.snippet}`;
 
-                    if (!existing) {
-                        AiMemoryService.storeMemory({
-                            content,
-                            entity_type: 'email',
-                            entity_id: email.messageId,
-                            metadata: { subject: email.subject }
-                        }, supabase).catch(console.error);
+                        // Verificar si ya existe para no duplicar
+                        const { data: existing, error: checkError } = await (supabase
+                            .from('embeddings' as any)
+                            .select('id')
+                            .eq('entity_id', email.messageId)
+                            .eq('entity_type', 'email') as any)
+                            .maybeSingle();
+
+                        if (checkError) {
+                            if ((checkError as any).code === '22P02') {
+                                console.error(`[EmailService] 🚨 ERROR DE ESQUEMA en 'embeddings': entity_id debe ser TEXT, no UUID. Valor: ${email.messageId}`);
+                            } else {
+                                console.error('[EmailService] Error verificando embeddings:', checkError);
+                            }
+                            continue;
+                        }
+
+                        if (!existing) {
+                            AiMemoryService.storeMemory({
+                                content,
+                                entity_type: 'email',
+                                entity_id: email.messageId,
+                                metadata: { subject: email.subject }
+                            }, supabase).catch(err => {
+                                if (err.code === '22P02') {
+                                    console.error(`[EmailService] 🚨 ERROR DE ESQUEMA al insertar en 'embeddings': entity_id debe ser TEXT, no UUID.`);
+                                } else {
+                                    console.error('[EmailService] Error guardando memoria:', err);
+                                }
+                            });
+                        }
+                    } catch (loopError) {
+                        console.error('[EmailService] Error en bucle de embeddings:', loopError);
                     }
                 }
             } catch (err) {
-                // Silently fail as this is a background optimization
-                console.warn('Background embedding generation skipped:', err);
+                console.warn('Background embedding generation skipped or failed:', err);
             }
 
             return sorted

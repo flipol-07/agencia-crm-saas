@@ -347,11 +347,15 @@ test('should calculate total with tax', () => {
 - **Fix**: Validar `error` y `data` antes de acceder a property. `if (error || !data?.user)`.
 - **Aplicar en**: Todas las llamadas a `supabase.auth.getUser()` en Server Components.
 
-### 2026-02-14: UUID Type Error en message_id
-- **Error**: `invalid input syntax for type uuid` al guardar emails.
-- **Causa**: La columna `message_id` estaba configurada como `UUID`, cuando los IDs de email son strings arbitrarios.
-- **Fix**: Cambiar tipo de columna a `TEXT` mediante `ALTER TABLE contact_emails ALTER COLUMN message_id TYPE text;`.
-- **Aplicar en**: Cualquier tabla que guarde identificadores externos no garantizados como UUID.
+### 2026-02-14: UUID Type Error en message_id y embeddings
+- **Error**: `invalid input syntax for type uuid` al guardar emails o generar embeddings.
+- **Causa**: Las columnas `contact_emails.message_id` y `embeddings.entity_id` estaban configuradas como `UUID`, pero los IDs de email son strings arbitrarios.
+- **Fix**: Cambiar tipo de columnas a `TEXT`:
+    ```sql
+    ALTER TABLE contact_emails ALTER COLUMN message_id TYPE text;
+    ALTER TABLE embeddings ALTER COLUMN entity_id TYPE text;
+    ```
+- **Aplicar en**: Tablas que guarden IDs de sistemas externos (Email, WhatsApp, etc).
 
 ---
 
