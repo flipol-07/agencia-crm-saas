@@ -32,6 +32,17 @@ export function ChatWindow({ chatId }: Props) {
     const [uploading, setUploading] = useState(false)
     const fileInputRef = useRef<HTMLInputElement>(null)
 
+    const getMessageTicks = (msg: TeamMessage) => {
+        const isOptimistic = typeof msg.id === 'string' && msg.id.startsWith('temp-')
+        if (isOptimistic) {
+            return { icon: '✓', className: 'text-white/60', label: 'Enviando' }
+        }
+        if (msg.read_at) {
+            return { icon: '✓✓', className: 'text-[#53bdeb]', label: 'Leido' }
+        }
+        return { icon: '✓✓', className: 'text-white/60', label: 'Entregado' }
+    }
+
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
     }
@@ -62,6 +73,15 @@ export function ChatWindow({ chatId }: Props) {
                     return [...prev, newMsg]
                 })
                 setTimeout(scrollToBottom, 100)
+            })
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'team_messages',
+                filter: `chat_id=eq.${chatId}`
+            }, (payload: { new: TeamMessage }) => {
+                const updatedMsg = payload.new
+                setMessages(prev => prev.map(m => m.id === updatedMsg.id ? updatedMsg : m))
             })
             // Subscribe to chat updates (name/avatar changes)
             .on('postgres_changes', {
@@ -184,11 +204,13 @@ export function ChatWindow({ chatId }: Props) {
         scrollToBottom()
 
         try {
-            await teamChatService.sendMessage(chatId, content)
-            // Remove optimistic will happen when real message arrives or we replace it logic.
-            // For now, let's just leave it, assuming lists key won't conflict heavily until refresh.
-            // Better: Filter out tempId if we confirm send?
-            setMessages(prev => prev.filter(m => m.id !== tempId))
+            const sentMessage = await teamChatService.sendMessage(chatId, content)
+            if (!sentMessage) {
+                throw new Error('No se pudo persistir el mensaje')
+            }
+
+            // Reemplaza el optimista inmediatamente para no depender de realtime.
+            setMessages(prev => prev.map(m => m.id === tempId ? sentMessage : m))
         } catch (error) {
             console.error(error)
             alert('Error enviando mensaje')
@@ -249,6 +271,7 @@ export function ChatWindow({ chatId }: Props) {
                 {messages.map((msg, index) => {
                     const isMe = msg.sender_id === user?.id
                     const showAvatar = !isMe && (index === 0 || messages[index - 1].sender_id !== msg.sender_id)
+                    const ticks = isMe ? getMessageTicks(msg) : null
 
                     return (
                         <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start mb-2'}`}>
@@ -259,9 +282,13 @@ export function ChatWindow({ chatId }: Props) {
                                 <p className="whitespace-pre-wrap text-sm md:text-base">{msg.content}</p>
                                 <div className={`text-[10px] mt-1 text-right ${isMe ? 'text-white/60' : 'text-gray-400'}`}>
                                     {msg.created_at ? format(new Date(msg.created_at), 'HH:mm', { locale: es }) : ''}
-                                    {isMe && (
-                                        <span className="ml-1">
-                                            {msg.read_at ? '✓✓' : '✓'}
+                                    {isMe && ticks && (
+                                        <span
+                                            className={`ml-1 ${ticks.className}`}
+                                            aria-label={ticks.label}
+                                            title={ticks.label}
+                                        >
+                                            {ticks.icon}
                                         </span>
                                     )}
                                 </div>

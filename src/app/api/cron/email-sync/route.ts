@@ -31,6 +31,8 @@ export async function GET(req: Request) {
             whatsapp_email_sent: 0,
             whatsapp_chat_attempted: 0,
             whatsapp_chat_sent: 0,
+            whatsapp_last_error: '' as string,
+            whatsapp_last_status: 0 as number,
             push_targets: 0,
             push_subscriptions: 0,
             push_sent: 0,
@@ -157,8 +159,13 @@ export async function GET(req: Request) {
                     diagnostics.push_targets += Array.from(new Set(pushTargets)).length
 
                     diagnostics.whatsapp_email_attempted++
-                    const whatsappResult = await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
-                    if (whatsappResult) diagnostics.whatsapp_email_sent++
+                    const whatsappResult = await WhatsAppService.notifyNewEmailDetailed(email.from, email.subject, contactId)
+                    if (whatsappResult.success) {
+                        diagnostics.whatsapp_email_sent++
+                    } else {
+                        diagnostics.whatsapp_last_status = Number(whatsappResult.status || 0)
+                        diagnostics.whatsapp_last_error = String(whatsappResult.error || '').slice(0, 500)
+                    }
 
                     await sendPushToUsers(pushTargets, {
                         title: 'Nuevo Email',
@@ -212,12 +219,17 @@ export async function GET(req: Request) {
                 const chatName = msg.chat?.name || (msg.chat?.is_group ? 'Grupo' : 'Chat privado')
 
                     diagnostics.whatsapp_chat_attempted++
-                    const whatsappChatResult = await WhatsAppService.notifyNewTeamMessage(
+                    const whatsappChatResult = await WhatsAppService.notifyNewTeamMessageDetailed(
                         senderName,
                         msg.content.substring(0, 100),
                         msg.chat_id
                     )
-                    if (whatsappChatResult) diagnostics.whatsapp_chat_sent++
+                    if (whatsappChatResult.success) {
+                        diagnostics.whatsapp_chat_sent++
+                    } else {
+                        diagnostics.whatsapp_last_status = Number(whatsappChatResult.status || 0)
+                        diagnostics.whatsapp_last_error = String(whatsappChatResult.error || '').slice(0, 500)
+                    }
 
                     // Push a participantes del chat, excepto remitente.
                     const { data: participants } = await (supabase
