@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { EmailService } from '@/lib/email/service'
 import { createAdminClient } from '@/lib/supabase/server'
 import { WhatsAppService } from '@/shared/lib/whatsapp'
+import { WebPushService } from '@/shared/lib/web-push'
 
+const TEAM_MESSAGE_EVENT_TITLE = 'cron_team_message_notified'
 
 export async function GET(req: Request) {
     // Security check (only in production)
@@ -25,6 +27,40 @@ export async function GET(req: Request) {
         let syncedEmails = 0
         let notifiedChatMessages = 0
 
+        // Mapa de subscriptions por user para evitar múltiples queries.
+        const subscriptionsByUser = new Map<string, any[]>()
+
+        const sendPushToUsers = async (
+            userIds: string[],
+            payload: { title: string, body: string, data?: Record<string, any> }
+        ) => {
+            const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)))
+            if (uniqueUserIds.length === 0) return
+
+            for (const userId of uniqueUserIds) {
+                let subs = subscriptionsByUser.get(userId)
+                if (!subs) {
+                    const { data } = await (supabase
+                        .from('push_subscriptions') as any)
+                        .select('id, subscription')
+                        .eq('user_id', userId)
+                    const loadedSubs = data || []
+                    subscriptionsByUser.set(userId, loadedSubs)
+                    subs = loadedSubs
+                }
+
+                for (const sub of subs || []) {
+                    const result = await WebPushService.sendNotification(sub.subscription, payload)
+                    if (result.error === 'GONE') {
+                        await (supabase
+                            .from('push_subscriptions') as any)
+                            .delete()
+                            .eq('id', sub.id)
+                    }
+                }
+            }
+        }
+
         // ============================================
         // 1. SINCRONIZACIÓN DE EMAILS (IMAP)
         // ============================================
@@ -35,7 +71,7 @@ export async function GET(req: Request) {
                 // Buscar contacto por email
                 const { data: contact, error: contactError } = await (supabase
                     .from('contacts') as any)
-                    .select('id')
+                    .select('id, assigned_to, created_by')
                     .eq('email', email.from)
                     .maybeSingle()
 
@@ -86,9 +122,28 @@ export async function GET(req: Request) {
                     continue
                 }
 
-                if (!existing) {
+                // Solo notificamos nuevos inbound (evita alertas de correos salientes).
+                if (!existing && email.direction === 'inbound') {
                     syncedEmails++
                     await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
+
+                    const pushTargets: string[] = []
+                    if (contact?.assigned_to) pushTargets.push(contact.assigned_to)
+                    if (contact?.created_by) pushTargets.push(contact.created_by)
+
+                    // Fallback: si no hay owner claro, empujamos a todos los perfiles.
+                    if (pushTargets.length === 0) {
+                        const { data: profiles } = await (supabase
+                            .from('profiles') as any)
+                            .select('id')
+                        ;(profiles || []).forEach((p: any) => p?.id && pushTargets.push(p.id))
+                    }
+
+                    await sendPushToUsers(pushTargets, {
+                        title: 'Nuevo Email',
+                        body: `${email.from}: ${email.subject || '(Sin asunto)'}`,
+                        data: { url: contactId ? `/contacts/${contactId}` : '/mail' }
+                    })
 
                     if (contactId) {
                         await (supabase.from('contacts') as any)
@@ -121,6 +176,16 @@ export async function GET(req: Request) {
         if (!chatError && recentMessages) {
             // Notificamos mensajes de equipo unread
             for (const msg of (recentMessages as any[])) {
+                // Deduplicación persistente por mensaje para no reenviar cada 5 min.
+                const { data: alreadyNotified } = await (supabase
+                    .from('notifications') as any)
+                    .select('id')
+                    .eq('title', TEAM_MESSAGE_EVENT_TITLE)
+                    .eq('message', msg.id)
+                    .maybeSingle()
+
+                if (alreadyNotified) continue
+
                 // Evitamos auto-notificarnos si somos el remitente (aunque el admin suele ser quien recibe)
                 const senderName = msg.sender?.full_name || 'Alguien del equipo'
                 const chatName = msg.chat?.name || (msg.chat?.is_group ? 'Grupo' : 'Chat privado')
@@ -130,6 +195,33 @@ export async function GET(req: Request) {
                     msg.content.substring(0, 100),
                     msg.chat_id
                 )
+
+                // Push a participantes del chat, excepto remitente.
+                const { data: participants } = await (supabase
+                    .from('team_chat_participants') as any)
+                    .select('user_id')
+                    .eq('chat_id', msg.chat_id)
+                    .neq('user_id', msg.sender_id)
+
+                const pushTargets = (participants || []).map((p: any) => p.user_id).filter(Boolean)
+                await sendPushToUsers(pushTargets, {
+                    title: `Mensaje en ${chatName}`,
+                    body: `${senderName}: ${msg.content.substring(0, 120)}`,
+                    data: { url: `/team-chat/${msg.chat_id}` }
+                })
+
+                await (supabase
+                    .from('notifications') as any)
+                    .insert({
+                        title: TEAM_MESSAGE_EVENT_TITLE,
+                        message: msg.id,
+                        user_id: null,
+                        metadata: {
+                            chat_id: msg.chat_id,
+                            sender_id: msg.sender_id
+                        }
+                    })
+
                 notifiedChatMessages++
             }
         }
