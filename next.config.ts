@@ -43,7 +43,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Content-Security-Policy',
-            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' *.youtube.com *.google.com *.googleapis.com *.googletagmanager.com; style-src 'self' 'unsafe-inline' *.googleapis.com; img-src 'self' blob: data: *.googleusercontent.com *.supabase.co; font-src 'self' data: *.gstatic.com r2cdn.perplexity.ai; connect-src 'self' *.supabase.co wss://*.supabase.co *.google-analytics.com; frame-src 'self' *.youtube.com; object-src 'none'; base-uri 'self';",
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' *.youtube.com *.google.com *.googleapis.com *.googletagmanager.com; style-src 'self' 'unsafe-inline' *.googleapis.com; img-src 'self' blob: data: *.googleusercontent.com *.supabase.co; font-src 'self' data: *.gstatic.com r2cdn.perplexity.ai; connect-src 'self' *.supabase.co wss://*.supabase.co *.google-analytics.com fonts.googleapis.com; frame-src 'self' *.youtube.com; object-src 'none'; base-uri 'self';",
           },
         ],
       },
