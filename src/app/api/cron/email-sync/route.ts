@@ -26,6 +26,16 @@ export async function GET(req: Request) {
         console.log('[Cron] Iniciando sincronización de Emails y Chat...')
         let syncedEmails = 0
         let notifiedChatMessages = 0
+        const diagnostics = {
+            whatsapp_email_attempted: 0,
+            whatsapp_email_sent: 0,
+            whatsapp_chat_attempted: 0,
+            whatsapp_chat_sent: 0,
+            push_targets: 0,
+            push_subscriptions: 0,
+            push_sent: 0,
+            push_failed: 0
+        }
 
         // Mapa de subscriptions por user para evitar múltiples queries.
         const subscriptionsByUser = new Map<string, any[]>()
@@ -50,7 +60,14 @@ export async function GET(req: Request) {
                 }
 
                 for (const sub of subs || []) {
+                    diagnostics.push_subscriptions++
                     const result = await WebPushService.sendNotification(sub.subscription, payload)
+                    if (result.success) {
+                        diagnostics.push_sent++
+                    } else {
+                        diagnostics.push_failed++
+                    }
+
                     if (result.error === 'GONE') {
                         await (supabase
                             .from('push_subscriptions') as any)
@@ -109,7 +126,7 @@ export async function GET(req: Request) {
                     to_email: email.to,
                     body_text: email.text,
                     body_html: email.html,
-                    direction: 'inbound',
+                    direction: email.direction,
                     received_at: email.date.toISOString(),
                     is_read: false,
                     snippet: email.snippet
@@ -125,7 +142,6 @@ export async function GET(req: Request) {
                 // Solo notificamos nuevos inbound (evita alertas de correos salientes).
                 if (!existing && email.direction === 'inbound') {
                     syncedEmails++
-                    await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
 
                     const pushTargets: string[] = []
                     if (contact?.assigned_to) pushTargets.push(contact.assigned_to)
@@ -138,6 +154,11 @@ export async function GET(req: Request) {
                             .select('id')
                         ;(profiles || []).forEach((p: any) => p?.id && pushTargets.push(p.id))
                     }
+                    diagnostics.push_targets += Array.from(new Set(pushTargets)).length
+
+                    diagnostics.whatsapp_email_attempted++
+                    const whatsappResult = await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
+                    if (whatsappResult) diagnostics.whatsapp_email_sent++
 
                     await sendPushToUsers(pushTargets, {
                         title: 'Nuevo Email',
@@ -190,25 +211,28 @@ export async function GET(req: Request) {
                 const senderName = msg.sender?.full_name || 'Alguien del equipo'
                 const chatName = msg.chat?.name || (msg.chat?.is_group ? 'Grupo' : 'Chat privado')
 
-                await WhatsAppService.notifyNewTeamMessage(
-                    senderName,
-                    msg.content.substring(0, 100),
-                    msg.chat_id
-                )
+                    diagnostics.whatsapp_chat_attempted++
+                    const whatsappChatResult = await WhatsAppService.notifyNewTeamMessage(
+                        senderName,
+                        msg.content.substring(0, 100),
+                        msg.chat_id
+                    )
+                    if (whatsappChatResult) diagnostics.whatsapp_chat_sent++
 
-                // Push a participantes del chat, excepto remitente.
-                const { data: participants } = await (supabase
-                    .from('team_chat_participants') as any)
-                    .select('user_id')
-                    .eq('chat_id', msg.chat_id)
-                    .neq('user_id', msg.sender_id)
+                    // Push a participantes del chat, excepto remitente.
+                    const { data: participants } = await (supabase
+                        .from('team_chat_participants') as any)
+                        .select('user_id')
+                        .eq('chat_id', msg.chat_id)
+                        .neq('user_id', msg.sender_id)
 
-                const pushTargets = (participants || []).map((p: any) => p.user_id).filter(Boolean)
-                await sendPushToUsers(pushTargets, {
-                    title: `Mensaje en ${chatName}`,
-                    body: `${senderName}: ${msg.content.substring(0, 120)}`,
-                    data: { url: `/team-chat/${msg.chat_id}` }
-                })
+                    const pushTargets = (participants || []).map((p: any) => p.user_id).filter(Boolean)
+                    diagnostics.push_targets += Array.from(new Set(pushTargets)).length
+                    await sendPushToUsers(pushTargets, {
+                        title: `Mensaje en ${chatName}`,
+                        body: `${senderName}: ${msg.content.substring(0, 120)}`,
+                        data: { url: `/team-chat/${msg.chat_id}` }
+                    })
 
                 await (supabase
                     .from('notifications') as any)
@@ -232,6 +256,7 @@ export async function GET(req: Request) {
             success: true,
             emails_synced: syncedEmails,
             chat_messages_notified: notifiedChatMessages,
+            diagnostics,
             timestamp: new Date().toISOString()
         })
 

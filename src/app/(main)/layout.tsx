@@ -1,5 +1,6 @@
 import { Suspense } from 'react'
 import { RealtimeNotifications } from '@/shared/components/providers/RealtimeNotifications'
+import { PushSubscriptionManager } from '@/shared/components/providers/PushSubscriptionManager'
 import { Toaster } from 'sonner'
 import { ProfileCompletionCheck } from '@/shared/components/features/ProfileCompletionCheck'
 import { GlassSidebar } from '@/shared/components/layout/GlassSidebar'
@@ -15,6 +16,9 @@ export default function MainLayout({
     <div className="min-h-screen bg-background text-text-primary selection:bg-[#8b5cf6]/30 selection:text-white font-sans">
       <Suspense fallback={null}>
         <RealtimeNotifications />
+      </Suspense>
+      <Suspense fallback={null}>
+        <PushSubscriptionManager />
       </Suspense>
       <Toaster position="top-right" theme="dark" richColors />
 
