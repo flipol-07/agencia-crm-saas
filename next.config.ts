@@ -16,6 +16,25 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  async redirects() {
+    return [
+      {
+        source: '/leads',
+        destination: '/contacts',
+        permanent: false,
+      },
+      {
+        source: '/estrategias',
+        destination: '/lead-scraper',
+        permanent: false,
+      },
+      {
+        source: '/proyectos',
+        destination: '/tasks',
+        permanent: false,
+      },
+    ];
+  },
   async headers() {
     return [
       {

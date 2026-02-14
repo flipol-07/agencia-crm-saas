@@ -32,7 +32,7 @@ export function MailThreadList({ threads, selectedThreadId, onThreadSelect, fold
     }
 
     return (
-        <div className="flex-1 border-r border-white/10 bg-black/10 overflow-y-auto">
+        <div className="h-full min-h-0 border-r border-white/10 bg-black/10 overflow-y-auto overscroll-contain">
             {threads.map(thread => {
                 const isSelected = selectedThreadId === thread.id
                 // Assuming the last email dictates the read status for the thread in the list view logic

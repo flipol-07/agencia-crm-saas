@@ -183,7 +183,7 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
                 onCompose={handleCompose}
             />
 
-            <div className={`flex-1 border-r border-white/10 ${selectedThreadId ? 'hidden md:block' : 'block'}`}>
+            <div className={`flex-1 h-full min-h-0 border-r border-white/10 ${selectedThreadId ? 'hidden md:block' : 'block'}`}>
                 <MailThreadList
                     threads={threads}
                     selectedThreadId={selectedThreadId}
