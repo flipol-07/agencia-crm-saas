@@ -52,7 +52,8 @@ export async function middleware(request: NextRequest) {
         '/signup',
         '/auth/callback',
         '/reset-password',
-        '/update-password'
+        '/update-password',
+        '/api/cron'
     ];
 
     // Check if the current path is public

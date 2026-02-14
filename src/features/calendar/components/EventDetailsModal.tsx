@@ -1,6 +1,6 @@
-
 import { useState } from 'react'
 import { format } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { CalendarEvent } from '../types'
 import { Button } from '@/shared/components/ui/Button'
 import { X, Calendar, Clock, MapPin, AlignLeft, Users, ExternalLink, Trash2, AlertTriangle } from 'lucide-react'
@@ -30,7 +30,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
             await onDelete(event)
             onClose()
         } catch (error) {
-            console.error('Failed to delete event:', error)
+            console.error('Error al eliminar el evento:', error)
             setIsDeleting(false)
         }
     }
@@ -62,7 +62,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                 <button
                                     onClick={() => setShowConfirmDelete(true)}
                                     className="p-2 rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-500 transition-colors"
-                                    title="Delete"
+                                    title="Eliminar"
                                 >
                                     <Trash2 className="h-5 w-5" />
                                 </button>
@@ -85,10 +85,10 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                             >
                                 <div className="flex items-center gap-3 text-red-500">
                                     <AlertTriangle className="h-5 w-5" />
-                                    <span className="font-semibold">Are you sure?</span>
+                                    <span className="font-semibold">¿Estás seguro?</span>
                                 </div>
                                 <p className="text-sm text-gray-300">
-                                    This action cannot be undone. This will permanently delete this {event.type}.
+                                    Esta acción no se puede deshacer. Esto eliminará permanentemente esta {event.type === 'meeting' ? 'reunión' : 'evento'}.
                                 </p>
                                 <div className="flex gap-3 pt-2">
                                     <Button
@@ -98,7 +98,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                         className="w-full"
                                         disabled={isDeleting}
                                     >
-                                        Cancel
+                                        Cancelar
                                     </Button>
                                     <Button
                                         size="sm"
@@ -106,7 +106,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                         disabled={isDeleting}
                                         className="w-full bg-red-500 hover:bg-red-600 text-white border-none"
                                     >
-                                        {isDeleting ? 'Deleting...' : 'Delete'}
+                                        {isDeleting ? 'Eliminando...' : 'Eliminar'}
                                     </Button>
                                 </div>
                             </motion.div>
@@ -118,12 +118,12 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                         <Clock className="h-5 w-5 text-gray-400" />
                                     </div>
                                     <div>
-                                        <h3 className="text-sm font-semibold text-white">Date & Time</h3>
+                                        <h3 className="text-sm font-semibold text-white">Fecha y Hora</h3>
                                         <p className="text-sm text-gray-400 mt-1">
-                                            {format(event.start, 'EEEE, MMMM d, yyyy')}
+                                            {format(event.start, "EEEE, d 'de' MMMM, yyyy", { locale: es })}
                                         </p>
                                         <p className="text-sm text-gray-400">
-                                            {format(event.start, 'h:mm a')} - {format(event.end, 'h:mm a')}
+                                            {format(event.start, 'HH:mm')} - {format(event.end, 'HH:mm')}
                                         </p>
                                     </div>
                                 </div>
@@ -135,14 +135,14 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                             <MapPin className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <div className="flex-1 overflow-hidden">
-                                            <h3 className="text-sm font-semibold text-white">Location</h3>
+                                            <h3 className="text-sm font-semibold text-white">Ubicación</h3>
                                             <a
                                                 href={location}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="text-sm text-brand hover:underline mt-1 block truncate flex items-center gap-2"
                                             >
-                                                Join Meeting <ExternalLink className="h-3 w-3" />
+                                                Unirse a la Reunión <ExternalLink className="h-3 w-3" />
                                             </a>
                                         </div>
                                     </div>
@@ -155,7 +155,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                             <AlignLeft className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <div>
-                                            <h3 className="text-sm font-semibold text-white">Description</h3>
+                                            <h3 className="text-sm font-semibold text-white">Descripción</h3>
                                             <p className="text-sm text-gray-400 mt-1 whitespace-pre-wrap">
                                                 {event.description}
                                             </p>
@@ -170,7 +170,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                             <Users className="h-5 w-5 text-gray-400" />
                                         </div>
                                         <div>
-                                            <h3 className="text-sm font-semibold text-white">Attendees</h3>
+                                            <h3 className="text-sm font-semibold text-white">Asistentes</h3>
                                             <div className="mt-2 space-y-1">
                                                 {attendees.map((email: string) => (
                                                     <div key={email} className="text-sm text-gray-400">
@@ -189,7 +189,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                                             className="w-full bg-brand text-black font-bold hover:bg-brand/90"
                                             onClick={() => window.open(location, '_blank')}
                                         >
-                                            Join Meeting
+                                            Unirse a la Reunión
                                         </Button>
                                     )}
                                 </div>

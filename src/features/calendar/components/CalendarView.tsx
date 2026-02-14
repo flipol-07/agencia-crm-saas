@@ -19,6 +19,7 @@ import {
     subDays,
     isToday
 } from 'date-fns'
+import { es } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight, Plus, Calendar as CalendarIcon, Video } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
 import { cn } from '@/lib/utils'
@@ -61,7 +62,7 @@ export function CalendarView() {
             setEvents(data)
         } catch (error) {
             console.error('Calendar: Fetch error:', error)
-            toast.error('Failed to load events')
+            toast.error('Error al cargar los eventos')
         } finally {
             setLoading(false)
         }
@@ -71,7 +72,7 @@ export function CalendarView() {
         fetchEvents()
     }, [currentDate, view])
 
-    // ... (navigation logic same as before) ...
+    // Navigation logic
     const next = () => {
         if (view === 'month') setCurrentDate(addMonths(currentDate, 1))
         else if (view === 'week') setCurrentDate(addWeeks(currentDate, 1))
@@ -102,7 +103,7 @@ export function CalendarView() {
     })
 
     // Week days header
-    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+    const weekDays = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
     const handleDeleteEvent = async (event: CalendarEvent) => {
         if (event.type === 'meeting') {
@@ -111,7 +112,7 @@ export function CalendarView() {
             await calendarService.deleteEvent(event.id)
         }
         await fetchEvents()
-        toast.success('Item deleted successfully')
+        toast.success('Eliminado correctamente')
     }
 
     return (
@@ -120,20 +121,19 @@ export function CalendarView() {
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 border-b border-white/5 bg-white/[0.02] gap-4 sm:gap-0">
                 <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start gap-4 sm:gap-6">
                     <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-brand to-white bg-clip-text text-transparent tracking-tight">
-                        {format(currentDate, view === 'day' ? 'MMMM d, yyyy' : 'MMMM yyyy')}
+                        {format(currentDate, view === 'day' ? "d 'de' MMMM, yyyy" : 'MMMM yyyy', { locale: es })}
                     </h1>
                     <div className="flex items-center rounded-xl border border-white/10 bg-white/5 p-1.5 gap-1.5 shadow-inner">
                         <Button variant="ghost" size="sm" onClick={prev} className="hover:bg-white/10 h-8 w-8 p-0"><ChevronLeft className="h-5 w-5" /></Button>
                         <Button variant="ghost" size="sm" onClick={today} className="px-2 sm:px-4 hover:bg-white/10 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                            <span className="sm:hidden">Hoy</span>
-                            <span className="hidden sm:inline">Today</span>
+                            <span>Hoy</span>
                         </Button>
                         <Button variant="ghost" size="sm" onClick={next} className="hover:bg-white/10 h-8 w-8 p-0"><ChevronRight className="h-5 w-5" /></Button>
                     </div>
                 </div>
 
                 <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                    {/* View Switcher (Simple) */}
+                    {/* View Switcher */}
                     <div className="flex rounded-xl border border-white/10 bg-white/5 p-1 sm:mr-4">
                         <Button
                             variant={view === 'month' ? 'secondary' : 'ghost'}
@@ -141,26 +141,37 @@ export function CalendarView() {
                             onClick={() => setView('month')}
                             className={cn("px-3 sm:px-4 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider", view === 'month' && "bg-brand text-black shadow-lg shadow-brand/20")}
                         >
-                            Month
+                            Mes
+                        </Button>
+                        <Button
+                            variant={view === 'week' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setView('week')}
+                            className={cn("px-3 sm:px-4 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider", view === 'week' && "bg-brand text-black shadow-lg shadow-brand/20")}
+                        >
+                            Semana
+                        </Button>
+                        <Button
+                            variant={view === 'day' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setView('day')}
+                            className={cn("px-3 sm:px-4 rounded-lg text-[10px] sm:text-xs font-bold uppercase tracking-wider", view === 'day' && "bg-brand text-black shadow-lg shadow-brand/20")}
+                        >
+                            Día
                         </Button>
                     </div>
 
                     <div className="flex items-center gap-2">
                         <Button onClick={() => setIsEventModalOpen(true)} size="sm" className="gap-2 px-3 sm:px-4 rounded-xl bg-white/10 hover:bg-white/15 border border-white/10 text-[10px] sm:text-xs font-bold uppercase tracking-wider">
-                            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Add Event</span>
+                            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Añadir Evento</span>
                         </Button>
                         <Button onClick={() => setIsMeetingModalOpen(true)} size="sm" className="gap-2 px-3 sm:px-4 rounded-xl bg-brand hover:brightness-110 text-black text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-lg shadow-brand/10">
-                            <Video className="h-4 w-4" /> <span className="hidden sm:inline">Schedule</span>
+                            <Video className="h-4 w-4" /> <span className="hidden sm:inline">Agendar</span>
                         </Button>
                     </div>
                 </div>
             </div>
 
-            {loading && (
-                <div className="absolute top-[88px] left-0 w-full h-0.5 z-50">
-                    <div className="h-full bg-brand animate-pulse shadow-[0_0_15px_#8b5cf6]" />
-                </div>
-            )}
 
             {/* Calendar Grid */}
             <div className="flex-1 flex flex-col min-h-0 relative">

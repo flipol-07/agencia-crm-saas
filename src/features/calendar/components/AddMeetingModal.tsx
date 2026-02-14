@@ -80,13 +80,8 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
 
             if (result.success) {
                 setSuccessData(result.data)
-                toast.success('Meeting scheduled and synced with Google Calendar!')
+                toast.success('¡Reunión agendada y sincronizada con Google Calendar!')
 
-                // Also save to Supabase local (as requested in implementation plan to keep track)
-                // However user said "NO" to adding to the meetings section yet, but they said "Crear una reunión o sea tendrá que ir a Google Calendar"
-                // My plan said: "Call googleCalendarService.createEvent on submit. Display the generated Google Meet link."
-
-                // Optionally we can still record it in Supabase for the internal calendar view
                 const date = new Date(formData.get('date') as string)
 
                 const meetingPayload = {
@@ -97,49 +92,45 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                     user_id: user.id,
                     meeting_url: result.data?.meetLink || null,
                     external_id: result.data?.id || null,
-                    status: 'scheduled' as const // Ensure status is set
+                    status: 'scheduled' as const
                 }
 
-                console.log('💾 Saving meeting to DB:', meetingPayload, 'Attendees:', selectedAttendees)
+                console.log('💾 Guardando reunión en BD:', meetingPayload, 'Asistentes:', selectedAttendees)
 
                 try {
                     await calendarService.createMeeting(meetingPayload, selectedAttendees)
-                    console.log('✅ Meeting saved to DB successfully')
+                    console.log('✅ Reunión guardada en BD correctamente')
                 } catch (dbError: any) {
-                    console.error('❌ Database Sync Error:', JSON.stringify(dbError, null, 2))
+                    console.error('❌ Error de sincronización de base de datos:', JSON.stringify(dbError, null, 2))
 
-                    // Specific handling for Schema Cache errors
                     if (dbError?.code === 'PGRST204') {
-                        console.warn('⚠️ PGRST204 detected. Retrying without meeting_url...')
+                        console.warn('⚠️ PGRST204 detectado. Reintentando sin meeting_url...')
                         try {
-                            // Retry without the problematic column and select only safe fields
                             const { meeting_url, ...fallbackPayload } = meetingPayload
                             await calendarService.createMeeting(fallbackPayload as any, selectedAttendees, { select: 'id, title', skipMeetingUrl: true })
-                            toast.success('Meeting saved (Database Warning: Sync URL skipped)')
+                            toast.success('Reunión guardada (Advertencia: Enlace de sincronización omitido)')
                             onClose()
-                            return // Exit successfully
+                            return
                         } catch (retryError) {
-                            console.error('❌ Retry failed:', retryError)
-                            toast.error('Failed to save meeting even after retry.')
+                            console.error('❌ El reintento falló:', retryError)
+                            toast.error('Error al guardar la reunión incluso después de reintentar.')
                         }
                     } else {
-                        toast.error(`Database Error: ${dbError.message || 'Unknown error'}`)
+                        toast.error(`Error de base de datos: ${dbError.message || 'Error desconocido'}`)
                     }
                 }
 
                 onSuccess()
-                // Don't close immediately if we want to show the meet link
                 setTimeout(() => {
                     onClose()
                     setSuccessData(null)
                 }, 5000)
             } else {
-                toast.error((result as any).error || 'Failed to sync with Google Calendar')
+                toast.error((result as any).error || 'Error al sincronizar con Google Calendar')
             }
         } catch (error: any) {
             console.error('AddMeetingModal Error:', JSON.stringify(error, null, 2))
-            console.error('Raw Error:', error)
-            toast.error(`Failed to schedule meeting: ${error.message || 'Unknown error'}`)
+            toast.error(`Error al agendar la reunión: ${error.message || 'Error desconocido'}`)
         } finally {
             setLoading(false)
         }
@@ -176,8 +167,8 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                     <Calendar className="h-5 w-5 text-brand" />
                                 </div>
                                 <div>
-                                    <h2 className="text-xl font-bold text-white tracking-tight">Schedule Meeting</h2>
-                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Google Calendar Sync Active</p>
+                                    <h2 className="text-xl font-bold text-white tracking-tight">Agendar Reunión / Llamada</h2>
+                                    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Sincronización con Google Calendar Activa</p>
                                 </div>
                             </div>
                             <button onClick={onClose} className="rounded-full p-2 hover:bg-white/5 text-gray-500 hover:text-white transition-all">
@@ -191,8 +182,8 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                     <CheckCircle2 className="h-8 w-8 text-brand" />
                                 </div>
                                 <div className="space-y-2">
-                                    <h3 className="text-2xl font-bold text-white">Meeting Confirmed!</h3>
-                                    <p className="text-gray-400">Invitations have been sent to all participants.</p>
+                                    <h3 className="text-2xl font-bold text-white">¡Reunión Confirmada!</h3>
+                                    <p className="text-gray-400">Se han enviado invitaciones a todos los participantes.</p>
                                 </div>
                                 {successData.meetLink && (
                                     <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-between gap-4">
@@ -205,16 +196,16 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                             size="sm"
                                             onClick={() => {
                                                 navigator.clipboard.writeText(successData.meetLink);
-                                                toast.success('Link copied!');
+                                                toast.success('¡Enlace copiado!');
                                             }}
                                             className="text-[10px] uppercase font-bold tracking-widest hover:bg-brand/10 hover:text-brand"
                                         >
-                                            Copy
+                                            Copiar
                                         </Button>
                                     </div>
                                 )}
                                 <Button onClick={onClose} className="w-full h-12 rounded-2xl bg-white text-black font-bold hover:bg-gray-200">
-                                    Done
+                                    Listo
                                 </Button>
                             </div>
                         ) : (
@@ -222,20 +213,20 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2 col-span-2">
                                         <label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-                                            <CheckCircle2 className="h-3 w-3" /> Meeting Title
+                                            <CheckCircle2 className="h-3 w-3" /> Título de la Reunión
                                         </label>
                                         <input
                                             id="title"
                                             name="title"
                                             required
-                                            placeholder="E.g., Strategy Review"
+                                            placeholder="Ej: Revisión de Estrategia"
                                             className="flex h-12 w-full rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-2 text-sm text-white placeholder:text-gray-600 focus:border-brand/40 focus:bg-white/[0.05] transition-all outline-none"
                                         />
                                     </div>
 
                                     <div className="space-y-2">
                                         <label htmlFor="date" className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-                                            <Calendar className="h-3 w-3" /> Date & Time
+                                            <Calendar className="h-3 w-3" /> Fecha y Hora
                                         </label>
                                         <input
                                             id="date"
@@ -249,13 +240,13 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
 
                                     <div className="space-y-2">
                                         <label htmlFor="contact_id" className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-                                            <Users className="h-3 w-3" /> Related Contact
+                                            <Users className="h-3 w-3" /> Contacto Relacionado
                                         </label>
                                         <select
                                             name="contact_id"
                                             className="flex h-12 w-full rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-2 text-sm text-white focus:border-brand/40 transition-all outline-none appearance-none cursor-pointer"
                                         >
-                                            <option value="" className="bg-[#0A0A0A]">None</option>
+                                            <option value="" className="bg-[#0A0A0A]">Ninguno</option>
                                             {contacts.map(contact => (
                                                 <option key={contact.id} value={contact.id} className="bg-[#0A0A0A]">
                                                     {contact.contact_name || contact.company_name}
@@ -267,7 +258,7 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
 
                                 <div className="space-y-3">
                                     <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-                                        <Users className="h-3 w-3" /> Invite Team Members
+                                        <Users className="h-3 w-3" /> Invitar Miembros del Equipo
                                     </label>
                                     <div className="grid grid-cols-2 gap-2 p-4 rounded-2xl border border-white/5 bg-white/[0.02] max-h-40 overflow-y-auto custom-scrollbar">
                                         {teamMembers.map(member => (
@@ -291,26 +282,26 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
 
                                 <div className="space-y-2">
                                     <label htmlFor="summary" className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
-                                        <FileText className="h-3 w-3" /> Agenda / Summary
+                                        <FileText className="h-3 w-3" /> Agenda / Resumen
                                     </label>
                                     <textarea
                                         id="summary"
                                         name="summary"
-                                        placeholder="Discuss project roadmap and key deliverables..."
+                                        placeholder="Discutir la hoja de ruta del proyecto y entregables clave..."
                                         className="flex min-h-[100px] w-full rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-4 text-sm text-white placeholder:text-gray-600 focus:border-brand/40 focus:bg-white/[0.05] transition-all outline-none resize-none"
                                     />
                                 </div>
 
                                 <div className="flex justify-end gap-3 pt-4">
                                     <Button type="button" variant="ghost" onClick={onClose} className="rounded-2xl h-12 px-8 text-gray-400 hover:text-white">
-                                        Cancel
+                                        Cancelar
                                     </Button>
                                     <Button
                                         type="submit"
                                         isLoading={loading}
                                         className="rounded-2xl h-12 px-10 bg-brand hover:brightness-110 text-black font-black uppercase tracking-wider text-xs shadow-[0_0_30px_rgba(163,230,53,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98]"
                                     >
-                                        Schedule & Sync
+                                        Agendar y Sincronizar
                                     </Button>
                                 </div>
                             </form>

@@ -43,16 +43,12 @@ export default async function DashboardPage({ searchParams }: Props) {
           <h1 className="text-2xl sm:text-4xl font-display font-black text-white tracking-tight uppercase">Dashboard</h1>
           <p className="text-gray-400 mt-1 flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            Sistema Operativo <span className="text-white/20">|</span> <span className="capitalize text-[#8b5cf6]">{currentMonth}</span>
+            <span className="capitalize text-[#8b5cf6]">{currentMonth}</span>
           </p>
         </div>
 
         <div className="flex flex-col sm:items-end gap-3">
           <PeriodSelector periods={periods} />
-          <div className="flex items-center gap-2 text-[10px] text-brand-neon-blue bg-brand-neon-blue/5 px-3 py-1.5 rounded-full border border-brand-neon-blue/20 self-start sm:self-auto font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-brand-neon-blue animate-pulse"></span>
-            Next.js 16 Turbo Engine
-          </div>
         </div>
       </div>
 

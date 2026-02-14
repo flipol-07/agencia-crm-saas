@@ -254,23 +254,23 @@ export function InvoiceForm({
                         <h3 className="text-[#8b5cf6] text-xs font-bold uppercase tracking-wider">De (Emisor)</h3>
                     </div>
 
-                    {/* Issuer Selector */}
-                    <div className="relative">
+                    {/* Issuer Selector - Locked to logged in user or existing issuer */}
+                    <div className="relative group/issuer">
                         <select
                             value={selectedIssuerId}
                             onChange={e => setSelectedIssuerId(e.target.value)}
-                            className="w-full bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-white outline-none focus:border-[#8b5cf6] focus:ring-1 focus:ring-[#8b5cf6]/20 appearance-none disabled:opacity-50 transition-all"
-                            disabled={!!initialData} // Lock issuer on edit? Maybe safer.
+                            className="w-full bg-black/40 backdrop-blur-sm border border-white/10 rounded-xl px-4 py-3 text-white outline-none appearance-none disabled:opacity-60 transition-all cursor-not-allowed"
+                            disabled={true}
                         >
                             <option value="" disabled>Seleccionar Emisor...</option>
                             {profiles.map(p => (
                                 <option key={p.id} value={p.id}>
-                                    {p.full_name || p.email} {p.id === user?.id ? '(Yo)' : ''}
+                                    {p.full_name || p.email} {p.id === user?.id ? '(Tú)' : ''}
                                 </option>
                             ))}
                         </select>
-                        <div className="absolute right-3 top-3.5 pointer-events-none text-gray-400">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                        <div className="absolute right-3 top-3.5 pointer-events-none text-gray-500">
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                         </div>
                     </div>
 

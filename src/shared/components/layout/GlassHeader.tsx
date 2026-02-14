@@ -12,6 +12,7 @@ import { User } from '@supabase/supabase-js'
 
 function UserNav() {
     const [user, setUser] = useState<User | null>(null)
+    const [alias, setAlias] = useState<string | null>(null)
     const router = useRouter()
     const supabase = createClient()
 
@@ -20,12 +21,23 @@ function UserNav() {
             const { data } = await supabase.auth.getUser()
             if (data?.user) {
                 setUser(data.user)
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('full_name')
+                    .eq('id', data.user.id)
+                    .single()
+                if (profile?.full_name) {
+                    setAlias(profile.full_name)
+                }
             }
         }
         getUser()
-    }, [supabase.auth])
+    }, [supabase])
 
     const handleSignOut = async () => {
+        const confirmed = window.confirm('¿Estás seguro de que quieres cerrar sesión?')
+        if (!confirmed) return
+
         await supabase.auth.signOut()
         router.push('/login')
     }
@@ -35,7 +47,7 @@ function UserNav() {
     return (
         <div className="flex items-center gap-6">
             <div className="hidden md:flex flex-col items-end">
-                <span className="text-sm font-medium text-white tracking-wide">{user.email}</span>
+                <span className="text-sm font-medium text-white tracking-wide">{alias || user.email}</span>
             </div>
 
             <div className="h-8 w-[1px] bg-white/10 mx-2" />

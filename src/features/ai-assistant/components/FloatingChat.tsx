@@ -7,6 +7,40 @@ import remarkGfm from 'remark-gfm';
 import { motion } from 'framer-motion';
 import { useAuraStore } from '../store/aura-store';
 
+function CopyButton({ text }: { text: string }) {
+    const [copied, setCopied] = useState(false);
+
+    const handleCopy = async (e: React.MouseEvent) => {
+        e.stopPropagation();
+        await navigator.clipboard.writeText(text);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    };
+
+    return (
+        <button
+            onClick={handleCopy}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all text-[10px] font-medium border border-white/10"
+        >
+            {copied ? (
+                <>
+                    <svg className="h-3.5 w-3.5 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Copiado</span>
+                </>
+            ) : (
+                <>
+                    <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                    </svg>
+                    <span>Copiar respuesta</span>
+                </>
+            )}
+        </button>
+    );
+}
+
 export function FloatingChat() {
     const { isOpen, setIsOpen, messageTrigger, clearTrigger } = useAuraStore();
     const [input, setInput] = useState('');
@@ -52,7 +86,7 @@ export function FloatingChat() {
                         initial={{ opacity: 0, y: 20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         onPointerDown={(e) => e.stopPropagation()}
-                        className="mb-4 flex h-[60dvh] md:h-[500px] w-[90vw] max-w-[380px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a]/90 shadow-2xl backdrop-blur-xl"
+                        className="mb-4 flex h-[60dvh] md:h-[500px] w-[90vw] max-w-[380px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-[#0a0a0a]/90 shadow-2xl backdrop-blur-xl touch-auto select-text"
                     >
                         {/* Header */}
                         <div className="flex items-center justify-between bg-gradient-to-r from-[#8b5cf6]/20 to-transparent p-4 border-b border-white/5">
@@ -85,25 +119,32 @@ export function FloatingChat() {
                                     key={i}
                                     className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-1 duration-300`}
                                 >
-                                    <div className={`max-w-[85%] rounded-2xl p-3 text-sm shadow-sm ${msg.role === 'user'
-                                        ? 'bg-[#8b5cf6] text-white font-medium shadow-[0_0_15px_rgba(139,92,246,0.2)]'
-                                        : 'bg-white/5 text-white/90 border border-white/10'
-                                        }`}>
-                                        {msg.role === 'assistant' ? (
-                                            <div className="markdown-container">
-                                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                                    {msg.content}
-                                                </ReactMarkdown>
+                                    <div className="flex flex-col gap-2 max-w-[85%]">
+                                        <div className={`rounded-2xl p-3 text-sm shadow-sm select-text ${msg.role === 'user'
+                                            ? 'bg-[#8b5cf6] text-white font-medium shadow-[0_0_15px_rgba(139,92,246,0.2)]'
+                                            : 'bg-white/5 text-white/90 border border-white/10'
+                                            }`}>
+                                            {msg.role === 'assistant' ? (
+                                                <div className="markdown-container">
+                                                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                                        {msg.content}
+                                                    </ReactMarkdown>
+                                                </div>
+                                            ) : (
+                                                msg.content
+                                            )}
+                                        </div>
+                                        {msg.role === 'assistant' && (
+                                            <div className="flex justify-start">
+                                                <CopyButton text={msg.content} />
                                             </div>
-                                        ) : (
-                                            msg.content
                                         )}
                                     </div>
                                 </div>
                             ))}
                             {isLoading && messages[messages.length - 1]?.role === 'user' && (
                                 <div className="flex justify-start">
-                                    <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
+                                    <div className="bg-white/5 p-3 rounded-2xl border border-white/10 italic text-xs text-white/40">
                                         <div className="flex gap-1">
                                             <div className="h-1.5 w-1.5 bg-[#8b5cf6] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                                             <div className="h-1.5 w-1.5 bg-[#8b5cf6] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -188,6 +229,10 @@ export function FloatingChat() {
                     padding: 0.1rem 0.3rem;
                     border-radius: 0.2rem;
                     font-family: inherit;
+                }
+                .select-text {
+                    user-select: text !important;
+                    -webkit-user-select: text !important;
                 }
             `}</style>
         </motion.div>

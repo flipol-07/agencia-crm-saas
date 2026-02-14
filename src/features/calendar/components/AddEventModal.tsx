@@ -41,13 +41,13 @@ export function AddEventModal({ isOpen, onClose, onSuccess, selectedDate }: AddE
             }
 
             await calendarService.createEvent(eventData)
-            toast.success('Event created')
+            toast.success('Evento creado')
             onSuccess()
             onClose()
         } catch (error) {
             // eslint-disable-next-line no-console
             console.error(error)
-            toast.error('Failed to create event')
+            toast.error('Error al crear el evento')
         } finally {
             setLoading(false)
         }
@@ -65,7 +65,7 @@ export function AddEventModal({ isOpen, onClose, onSuccess, selectedDate }: AddE
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
             <div className="bg-black/90 rounded-xl border border-white/10 shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
                 <div className="flex items-center justify-between p-4 border-b border-white/10">
-                    <h2 className="text-lg font-semibold text-white">Add New Event</h2>
+                    <h2 className="text-lg font-semibold text-white">Añadir Nuevo Evento</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
                         <X className="h-5 w-5" />
                     </button>
@@ -73,19 +73,19 @@ export function AddEventModal({ isOpen, onClose, onSuccess, selectedDate }: AddE
 
                 <form onSubmit={handleSubmit} className="p-4 space-y-4">
                     <div className="space-y-2">
-                        <label htmlFor="title" className="text-sm font-medium text-gray-200">Title</label>
+                        <label htmlFor="title" className="text-sm font-medium text-gray-200">Título</label>
                         <input
                             id="title"
                             name="title"
                             required
-                            placeholder="Event title"
+                            placeholder="Título del evento"
                             className="flex h-10 w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-50"
                         />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <label htmlFor="start_time" className="text-sm font-medium text-gray-200">Start</label>
+                            <label htmlFor="start_time" className="text-sm font-medium text-gray-200">Inicio</label>
                             <input
                                 id="start_time"
                                 name="start_time"
@@ -96,7 +96,7 @@ export function AddEventModal({ isOpen, onClose, onSuccess, selectedDate }: AddE
                             />
                         </div>
                         <div className="space-y-2">
-                            <label htmlFor="end_time" className="text-sm font-medium text-gray-200">End</label>
+                            <label htmlFor="end_time" className="text-sm font-medium text-gray-200">Fin</label>
                             <input
                                 id="end_time"
                                 name="end_time"
@@ -109,19 +109,19 @@ export function AddEventModal({ isOpen, onClose, onSuccess, selectedDate }: AddE
                     </div>
 
                     <div className="space-y-2">
-                        <label htmlFor="description" className="text-sm font-medium text-gray-200">Description</label>
+                        <label htmlFor="description" className="text-sm font-medium text-gray-200">Descripción</label>
                         <textarea
                             id="description"
                             name="description"
-                            placeholder="Optional details"
+                            placeholder="Detalles opcionales"
                             className="flex min-h-[80px] w-full rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm text-white placeholder:text-gray-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-brand disabled:cursor-not-allowed disabled:opacity-50"
                         />
                     </div>
 
                     <div className="flex justify-end gap-2 pt-2">
-                        <Button type="button" variant="ghost" onClick={onClose}>Cancel</Button>
+                        <Button type="button" variant="ghost" onClick={onClose}>Cancelar</Button>
                         <Button type="submit" isLoading={loading}>
-                            Create Event
+                            Crear Evento
                         </Button>
                     </div>
                 </form>

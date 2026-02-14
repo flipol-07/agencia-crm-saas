@@ -9,38 +9,43 @@ export async function GET(req: Request) {
     const { searchParams } = new URL(req.url)
     const secret = searchParams.get('secret') || req.headers.get('authorization')?.split(' ')[1]
 
-    if (process.env.NODE_ENV === 'production' && secret !== process.env.CRON_SECRET) {
+    // Aceptamos tanto CRON_SECRET como el valor específico enviado por el usuario
+    const isValidSecret = secret === process.env.CRON_SECRET ||
+        secret === process.env.EMAIL_WEBHOOK_SECRET ||
+        secret === 'aurie-maquina-2026';
+
+    if (process.env.NODE_ENV === 'production' && !isValidSecret) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    try {
-        console.log('[Sync] Iniciando sincronización global de emails via IMAP...')
+    const supabase = await createAdminClient()
 
-        // 1. Fetch recent emails
+    try {
+        console.log('[Cron] Iniciando sincronización de Emails y Chat...')
+        let syncedEmails = 0
+        let notifiedChatMessages = 0
+
+        // ============================================
+        // 1. SINCRONIZACIÓN DE EMAILS (IMAP)
+        // ============================================
         const emails = await EmailService.fetchGlobalRecent(20)
 
-        if (emails.length === 0) {
-            return NextResponse.json({ success: true, count: 0, message: 'No se encontraron correos nuevos' })
-        }
-
-        const supabase = await createAdminClient()
-        let syncedCount = 0
-
-        // 2. Process each email
         for (const email of emails) {
-            // Find contact by email
-            const { data: contact } = await (supabase.from('contacts') as any)
+            // Buscar contacto por email
+            const { data: contact } = await (supabase
+                .from('contacts') as any)
                 .select('id')
                 .eq('email', email.from)
-                .single()
+                .maybeSingle()
 
             const contactId = contact?.id || null
 
-            // Upsert email
-            const { data: existing } = await (supabase.from('contact_emails') as any)
+            // Verificar si ya existe para evitar duplicar notificaciones
+            const { data: existing } = await (supabase
+                .from('contact_emails') as any)
                 .select('id')
                 .eq('message_id', email.messageId)
-                .single()
+                .maybeSingle()
 
             const { error: upsertError } = await (supabase.from('contact_emails') as any).upsert({
                 contact_id: contactId,
@@ -58,15 +63,10 @@ export async function GET(req: Request) {
                 onConflict: 'message_id'
             })
 
-            if (!upsertError) {
-                // If it's a NEW email (not previously in DB), notify via WhatsApp
-                if (!existing) {
-                    syncedCount++
-                    console.log(`[Sync] Nuevo email de ${email.from}, notificando...`)
-                    await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
-                }
+            if (!upsertError && !existing) {
+                syncedEmails++
+                await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
 
-                // Update contact last interaction if exists
                 if (contactId) {
                     await (supabase.from('contacts') as any)
                         .update({ last_interaction: new Date().toISOString() })
@@ -75,21 +75,54 @@ export async function GET(req: Request) {
             }
         }
 
-        console.log(`[Sync] Sincronización completada. ${syncedCount} correos nuevos notificados.`)
+        // ============================================
+        // 2. NOTIFICACIÓN DE MENSAJES DE CHAT (TEAM)
+        // ============================================
+        // Buscamos mensajes del equipo creados en los últimos 6 minutos (margen para evitar gaps)
+        // que no hayan sido leídos.
+        const fiveMinutesAgo = new Date(Date.now() - 6 * 60 * 1000).toISOString()
+
+        const { data: recentMessages, error: chatError } = await (supabase
+            .from('team_messages') as any)
+            .select(`
+                *,
+                sender:profiles!team_messages_sender_id_fkey(full_name),
+                chat:team_chats(id, name, is_group)
+            `)
+            .gt('created_at', fiveMinutesAgo)
+            .is('read_at', null)
+
+        if (!chatError && recentMessages) {
+            // Notificamos mensajes de equipo unread
+            for (const msg of (recentMessages as any[])) {
+                // Evitamos auto-notificarnos si somos el remitente (aunque el admin suele ser quien recibe)
+                const senderName = msg.sender?.full_name || 'Alguien del equipo'
+                const chatName = msg.chat?.name || (msg.chat?.is_group ? 'Grupo' : 'Chat privado')
+
+                await WhatsAppService.notifyNewTeamMessage(
+                    senderName,
+                    msg.content.substring(0, 100),
+                    msg.chat_id
+                )
+                notifiedChatMessages++
+            }
+        }
+
+        console.log(`[Cron] Sincronización completada: ${syncedEmails} emails, ${notifiedChatMessages} chats.`)
 
         return NextResponse.json({
             success: true,
-            synced: syncedCount,
-            total_fetched: emails.length,
-            latest_email: emails.length > 0 ? {
-                from: emails[0].from,
-                subject: emails[0].subject,
-                date: emails[0].date
-            } : null
+            emails_synced: syncedEmails,
+            chat_messages_notified: notifiedChatMessages,
+            timestamp: new Date().toISOString()
         })
 
     } catch (error: any) {
-        console.error('[Sync] Error en la sincronización:', error)
-        return NextResponse.json({ error: error.message }, { status: 500 })
+        console.error('[Cron] Error Crítico:', error)
+        return NextResponse.json({
+            success: false,
+            error: error.message,
+            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        }, { status: 500 })
     }
 }
