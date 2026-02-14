@@ -1,12 +1,13 @@
 export class WhatsAppService {
     private static API_URL = process.env.EVOLUTION_API_URL || 'http://13.53.96.3:8080'
-    private static API_KEY = process.env.EVOLUTION_API_KEY || '4D809A972D78-4CB6-8203-DCD2560B83BA'
+    private static API_KEY = process.env.EVOLUTION_API_KEY || process.env.AUTHENTICATION_API_KEY || '4D809A972D78-4CB6-8203-DCD2560B83BA'
     private static INSTANCE = process.env.EVOLUTION_INSTANCE_NAME || 'n8nbot'
-    private static TARGET_PHONE = '34693482385'
+    private static TARGET_PHONE = process.env.WHATSAPP_TARGET_PHONE || '34693482385'
 
     static async sendMessage(text: string) {
         try {
-            const response = await fetch(`${this.API_URL}/message/sendText/${this.INSTANCE}`, {
+            const instancePath = encodeURIComponent(this.INSTANCE)
+            const response = await fetch(`${this.API_URL}/message/sendText/${instancePath}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
