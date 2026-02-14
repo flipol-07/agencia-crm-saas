@@ -11,6 +11,13 @@ export function SettingsForm() {
     const { user } = useAuth()
     const { profile, loading, saving, saveBillingProfile } = useBillingProfile()
     const [uploading, setUploading] = useState(false)
+    const [loadingNotificationPrefs, setLoadingNotificationPrefs] = useState(true)
+    const [testingWhatsApp, setTestingWhatsApp] = useState(false)
+    const [notificationPrefs, setNotificationPrefs] = useState({
+        push_enabled: true,
+        whatsapp_enabled: false,
+        whatsapp_number: '',
+    })
 
     const [formData, setFormData] = useState({
         full_name: '',
@@ -49,6 +56,25 @@ export function SettingsForm() {
             })
         }
     }, [profile])
+
+    useEffect(() => {
+        const loadNotificationPreferences = async () => {
+            try {
+                const response = await fetch('/api/settings/notification-preferences', { cache: 'no-store' })
+                if (!response.ok) return
+                const data = await response.json()
+                if (data?.preferences) {
+                    setNotificationPrefs(data.preferences)
+                }
+            } catch (error) {
+                console.error('Error loading notification preferences:', error)
+            } finally {
+                setLoadingNotificationPrefs(false)
+            }
+        }
+
+        loadNotificationPreferences()
+    }, [])
 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -108,10 +134,67 @@ export function SettingsForm() {
                 professional_description: formData.professional_description,
                 default_irpf_rate: formData.default_irpf_rate
             })
+
+            const prefResponse = await fetch('/api/settings/notification-preferences', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    preferences: {
+                        push_enabled: notificationPrefs.push_enabled,
+                        whatsapp_enabled: notificationPrefs.whatsapp_enabled,
+                        whatsapp_number: notificationPrefs.whatsapp_number.trim(),
+                    }
+                })
+            })
+
+            const prefData = await prefResponse.json()
+            if (!prefResponse.ok) {
+                throw new Error(prefData?.error || 'Error guardando preferencias de notificaciones')
+            }
+
+            if (!notificationPrefs.push_enabled) {
+                await fetch('/api/push/subscribe', { method: 'DELETE' })
+            }
+
+            window.dispatchEvent(new Event('push-preference-updated'))
             alert('Perfil de facturación guardado correctamente 💾')
         } catch (error) {
             console.error(error)
-            alert('Error al guardar ajustes')
+            const message = error instanceof Error ? error.message : 'Error al guardar ajustes'
+            alert(message)
+        }
+    }
+
+    const handleTestWhatsApp = async () => {
+        const phone = notificationPrefs.whatsapp_number.trim()
+        if (!notificationPrefs.whatsapp_enabled) {
+            alert('Activa primero las notificaciones por WhatsApp.')
+            return
+        }
+        if (!/^34\d{8,15}$/.test(phone)) {
+            alert('El numero debe tener formato 34... (solo digitos).')
+            return
+        }
+
+        setTestingWhatsApp(true)
+        try {
+            const response = await fetch('/api/settings/test-whatsapp-notification', {
+                method: 'POST',
+            })
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data?.error || 'No se pudo enviar la prueba por WhatsApp')
+            }
+
+            alert('Mensaje de prueba enviado por WhatsApp ✅')
+        } catch (error) {
+            console.error(error)
+            alert(error instanceof Error ? error.message : 'Error enviando prueba por WhatsApp')
+        } finally {
+            setTestingWhatsApp(false)
         }
     }
 
@@ -371,6 +454,71 @@ export function SettingsForm() {
                         />
                     </div>
                 </div>
+            </div>
+
+            {/* Notificaciones */}
+            <div className="glass-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl space-y-6 sm:space-y-8 border border-white/10 shadow-2xl relative overflow-hidden group hover:border-white/20 transition-all duration-500">
+                <h2 className="text-xl sm:text-2xl font-display font-black text-white border-b border-white/5 pb-6 flex items-center gap-3">
+                    <span className="text-brand text-lg">05.</span>
+                    Notificaciones
+                </h2>
+
+                {loadingNotificationPrefs ? (
+                    <p className="text-sm text-gray-400">Cargando preferencias...</p>
+                ) : (
+                    <div className="space-y-6">
+                        <label className="flex items-center justify-between gap-4 bg-background-secondary/30 border border-white/10 rounded-xl p-4 cursor-pointer">
+                            <div>
+                                <p className="text-sm font-bold text-white">Activar notificaciones push</p>
+                                <p className="text-xs text-gray-400 mt-1">Alertas del navegador para chat, emails y eventos relevantes.</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={notificationPrefs.push_enabled}
+                                onChange={(e) => setNotificationPrefs(prev => ({ ...prev, push_enabled: e.target.checked }))}
+                                className="h-5 w-5 accent-brand"
+                            />
+                        </label>
+
+                        <label className="flex items-center justify-between gap-4 bg-background-secondary/30 border border-white/10 rounded-xl p-4 cursor-pointer">
+                            <div>
+                                <p className="text-sm font-bold text-white">Recibir notificaciones por WhatsApp</p>
+                                <p className="text-xs text-gray-400 mt-1">Cuando está activo, enviaremos avisos al número indicado.</p>
+                            </div>
+                            <input
+                                type="checkbox"
+                                checked={notificationPrefs.whatsapp_enabled}
+                                onChange={(e) => setNotificationPrefs(prev => ({ ...prev, whatsapp_enabled: e.target.checked }))}
+                                className="h-5 w-5 accent-brand"
+                            />
+                        </label>
+
+                        {notificationPrefs.whatsapp_enabled && (
+                            <div className="space-y-3">
+                                <label className="text-[10px] uppercase font-bold text-gray-400 tracking-widest pl-1">Número WhatsApp (formato Evolution)</label>
+                                <input
+                                    type="text"
+                                    value={notificationPrefs.whatsapp_number}
+                                    onChange={(e) => setNotificationPrefs(prev => ({
+                                        ...prev,
+                                        whatsapp_number: e.target.value.replace(/[^\d]/g, ''),
+                                    }))}
+                                    className="w-full bg-background-secondary/40 backdrop-blur-sm border border-white/10 rounded-xl px-5 py-3.5 text-white focus:border-brand outline-none focus:ring-1 focus:ring-brand/20 transition-all font-mono placeholder-gray-700 hover:border-white/20"
+                                    placeholder="346XXXXXXXX"
+                                />
+                                <p className="text-[10px] text-gray-500 pl-1 font-medium">Solo dígitos y empezando por 34. Ejemplo: 34600111222</p>
+                                <button
+                                    type="button"
+                                    onClick={handleTestWhatsApp}
+                                    disabled={testingWhatsApp || !/^34\d{8,15}$/.test(notificationPrefs.whatsapp_number.trim())}
+                                    className="inline-flex items-center justify-center px-4 py-2 rounded-lg border border-brand/40 text-brand text-xs font-bold uppercase tracking-wider hover:bg-brand/10 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    {testingWhatsApp ? 'Enviando prueba...' : 'Probar notificación WhatsApp'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className="flex justify-end pt-8 pb-12 sticky bottom-0 z-50 pointer-events-none">

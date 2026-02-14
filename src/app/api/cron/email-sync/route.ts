@@ -41,6 +41,33 @@ export async function GET(req: Request) {
 
         // Mapa de subscriptions por user para evitar múltiples queries.
         const subscriptionsByUser = new Map<string, any[]>()
+        const notificationPrefsByUser = new Map<string, { push_enabled: boolean, whatsapp_enabled: boolean, whatsapp_number: string }>()
+
+        const loadNotificationPreferencesForUsers = async (userIds: string[]) => {
+            const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)))
+            const idsToLoad = uniqueUserIds.filter(userId => !notificationPrefsByUser.has(userId))
+            if (idsToLoad.length === 0) return
+
+            const keys = idsToLoad.map(userId => `notification_preferences:${userId}`)
+            const { data } = await (supabase
+                .from('app_settings') as any)
+                .select('key, value')
+                .in('key', keys)
+
+            const byKey = new Map<string, any>()
+            for (const row of (data || [])) {
+                byKey.set(row.key, row.value || {})
+            }
+
+            for (const userId of idsToLoad) {
+                const raw = byKey.get(`notification_preferences:${userId}`) || {}
+                notificationPrefsByUser.set(userId, {
+                    push_enabled: raw.push_enabled !== false,
+                    whatsapp_enabled: raw.whatsapp_enabled === true,
+                    whatsapp_number: typeof raw.whatsapp_number === 'string' ? raw.whatsapp_number : '',
+                })
+            }
+        }
 
         const sendPushToUsers = async (
             userIds: string[],
@@ -49,7 +76,10 @@ export async function GET(req: Request) {
             const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)))
             if (uniqueUserIds.length === 0) return
 
-            for (const userId of uniqueUserIds) {
+            await loadNotificationPreferencesForUsers(uniqueUserIds)
+            const enabledUsers = uniqueUserIds.filter(userId => notificationPrefsByUser.get(userId)?.push_enabled !== false)
+
+            for (const userId of enabledUsers) {
                 let subs = subscriptionsByUser.get(userId)
                 if (!subs) {
                     const { data } = await (supabase
@@ -78,6 +108,36 @@ export async function GET(req: Request) {
                     }
                 }
             }
+        }
+
+        const sendWhatsAppToUsers = async (
+            userIds: string[],
+            buildMessage: (userId: string) => string
+        ) => {
+            const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)))
+            if (uniqueUserIds.length === 0) return { attempted: 0, sent: 0 }
+
+            await loadNotificationPreferencesForUsers(uniqueUserIds)
+            let attempted = 0
+            let sent = 0
+
+            for (const userId of uniqueUserIds) {
+                const pref = notificationPrefsByUser.get(userId)
+                const number = pref?.whatsapp_number || ''
+                if (!pref?.whatsapp_enabled || !/^34\d{8,15}$/.test(number)) continue
+
+                attempted++
+                const result = await WhatsAppService.sendMessageToNumberDetailed(number, buildMessage(userId))
+                diagnostics.whatsapp_last_status = Number(result.status || diagnostics.whatsapp_last_status || 0)
+                if (result.success) {
+                    sent++
+                }
+                if (!result.success) {
+                    diagnostics.whatsapp_last_error = String(result.error || '').slice(0, 500)
+                }
+            }
+
+            return { attempted, sent }
         }
 
         // ============================================
@@ -158,14 +218,11 @@ export async function GET(req: Request) {
                     }
                     diagnostics.push_targets += Array.from(new Set(pushTargets)).length
 
-                    diagnostics.whatsapp_email_attempted++
-                    const whatsappResult = await WhatsAppService.notifyNewEmailDetailed(email.from, email.subject, contactId)
-                    if (whatsappResult.success) {
-                        diagnostics.whatsapp_email_sent++
-                    } else {
-                        diagnostics.whatsapp_last_status = Number(whatsappResult.status || 0)
-                        diagnostics.whatsapp_last_error = String(whatsappResult.error || '').slice(0, 500)
-                    }
+                    const emailWhatsApp = await sendWhatsAppToUsers(pushTargets, () =>
+                        `📧 *Nuevo Email en CRM Aurie*\n\n*De:* ${email.from}\n*Asunto:* ${email.subject || '(Sin asunto)'}\n\n👉 Ver en el CRM: https://agencia-crm-saas.vercel.app${contactId ? `/contacts/${contactId}` : '/mail'}`
+                    )
+                    diagnostics.whatsapp_email_attempted += emailWhatsApp.attempted
+                    diagnostics.whatsapp_email_sent += emailWhatsApp.sent
 
                     await sendPushToUsers(pushTargets, {
                         title: 'Nuevo Email',
@@ -218,19 +275,6 @@ export async function GET(req: Request) {
                 const senderName = msg.sender?.full_name || 'Alguien del equipo'
                 const chatName = msg.chat?.name || (msg.chat?.is_group ? 'Grupo' : 'Chat privado')
 
-                    diagnostics.whatsapp_chat_attempted++
-                    const whatsappChatResult = await WhatsAppService.notifyNewTeamMessageDetailed(
-                        senderName,
-                        msg.content.substring(0, 100),
-                        msg.chat_id
-                    )
-                    if (whatsappChatResult.success) {
-                        diagnostics.whatsapp_chat_sent++
-                    } else {
-                        diagnostics.whatsapp_last_status = Number(whatsappChatResult.status || 0)
-                        diagnostics.whatsapp_last_error = String(whatsappChatResult.error || '').slice(0, 500)
-                    }
-
                     // Push a participantes del chat, excepto remitente.
                     const { data: participants } = await (supabase
                         .from('team_chat_participants') as any)
@@ -239,6 +283,12 @@ export async function GET(req: Request) {
                         .neq('user_id', msg.sender_id)
 
                     const pushTargets = (participants || []).map((p: any) => p.user_id).filter(Boolean)
+                    const chatWhatsApp = await sendWhatsAppToUsers(pushTargets, () =>
+                        `💬 *Mensaje de Equipo en CRM Aurie*\n\n*De:* ${senderName}\n*Chat:* ${chatName}\n*Mensaje:* ${msg.content.substring(0, 120)}\n\n👉 Responder: https://agencia-crm-saas.vercel.app/team-chat/${msg.chat_id}`
+                    )
+                    diagnostics.whatsapp_chat_attempted += chatWhatsApp.attempted
+                    diagnostics.whatsapp_chat_sent += chatWhatsApp.sent
+
                     diagnostics.push_targets += Array.from(new Set(pushTargets)).length
                     await sendPushToUsers(pushTargets, {
                         title: `Mensaje en ${chatName}`,

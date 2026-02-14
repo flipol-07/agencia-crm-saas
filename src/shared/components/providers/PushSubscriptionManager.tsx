@@ -23,6 +23,11 @@ export function PushSubscriptionManager() {
             if (!window.isSecureContext) return
 
             try {
+                const prefResponse = await fetch('/api/settings/notification-preferences', { cache: 'no-store' })
+                if (!prefResponse.ok) return
+                const prefData = await prefResponse.json()
+                if (!prefData?.preferences?.push_enabled) return
+
                 let permission = Notification.permission
                 if (permission === 'default') {
                     permission = await Notification.requestPermission()
@@ -59,6 +64,15 @@ export function PushSubscriptionManager() {
         }
 
         setupPush()
+
+        const onPrefsUpdated = () => {
+            setupPush()
+        }
+
+        window.addEventListener('push-preference-updated', onPrefsUpdated)
+        return () => {
+            window.removeEventListener('push-preference-updated', onPrefsUpdated)
+        }
     }, [])
 
     return null

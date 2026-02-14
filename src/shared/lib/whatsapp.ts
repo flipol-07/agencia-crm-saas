@@ -4,7 +4,7 @@ export class WhatsAppService {
     private static INSTANCE = process.env.EVOLUTION_INSTANCE_NAME || 'n8nbot'
     private static TARGET_PHONE = process.env.WHATSAPP_TARGET_PHONE || '34693482385'
 
-    static async sendMessageDetailed(text: string) {
+    static async sendMessageToNumberDetailed(number: string, text: string) {
         try {
             const instancePath = encodeURIComponent(this.INSTANCE)
             const response = await fetch(`${this.API_URL}/message/sendText/${instancePath}`, {
@@ -14,8 +14,8 @@ export class WhatsAppService {
                     'apikey': this.API_KEY
                 },
                 body: JSON.stringify({
-                    number: this.TARGET_PHONE,
-                    text: text
+                    number,
+                    text
                 })
             })
 
@@ -40,6 +40,10 @@ export class WhatsAppService {
                 error: String(error)
             }
         }
+    }
+
+    static async sendMessageDetailed(text: string) {
+        return this.sendMessageToNumberDetailed(this.TARGET_PHONE, text)
     }
 
     static async sendMessage(text: string) {
