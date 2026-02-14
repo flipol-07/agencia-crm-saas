@@ -13,7 +13,7 @@ export default async function MailPage() {
         .limit(200)
 
     return (
-        <div className="h-full">
+        <div className="h-[calc(100vh-73px-2rem)] lg:h-[calc(100vh-73px-3rem)] overflow-hidden">
             <MailDashboard initialEmails={emails || []} />
         </div>
     )

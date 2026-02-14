@@ -173,7 +173,7 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
     }
 
     return (
-        <div className="flex h-[calc(100vh-theme(spacing.24))] overflow-hidden bg-black text-white">
+        <div className="flex h-full overflow-hidden bg-black text-white">
             <MailSidebar
                 selectedFolder={selectedFolder}
                 onFolderSelect={(f) => {
