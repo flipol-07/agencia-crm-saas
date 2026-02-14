@@ -6,7 +6,7 @@ description: Verifica el estado de los servidores MCP y de la base de datos Supa
 Este comando realiza un chequeo rápido de la infraestructura.
 
 ## 1. Servidores MCP
-- ¿Están activos `supabase`, `next-devtools` y `playwright`?
+- ¿Están activos `supabase`, `next-devtools`, `playwright` y `vercel`?
 - Intenta listar recursos de cada uno.
 
 ## 2. Base de Datos

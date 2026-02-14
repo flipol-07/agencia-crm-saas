@@ -31,47 +31,73 @@ export async function GET(req: Request) {
         const emails = await EmailService.fetchGlobalRecent(20)
 
         for (const email of emails) {
-            // Buscar contacto por email
-            const { data: contact } = await (supabase
-                .from('contacts') as any)
-                .select('id')
-                .eq('email', email.from)
-                .maybeSingle()
+            try {
+                // Buscar contacto por email
+                const { data: contact, error: contactError } = await (supabase
+                    .from('contacts') as any)
+                    .select('id')
+                    .eq('email', email.from)
+                    .maybeSingle()
 
-            const contactId = contact?.id || null
-
-            // Verificar si ya existe para evitar duplicar notificaciones
-            const { data: existing } = await (supabase
-                .from('contact_emails') as any)
-                .select('id')
-                .eq('message_id', email.messageId)
-                .maybeSingle()
-
-            const { error: upsertError } = await (supabase.from('contact_emails') as any).upsert({
-                contact_id: contactId,
-                message_id: email.messageId,
-                subject: email.subject,
-                from_email: email.from,
-                to_email: email.to,
-                body_text: email.text,
-                body_html: email.html,
-                direction: 'inbound',
-                received_at: email.date.toISOString(),
-                is_read: false,
-                snippet: email.snippet
-            }, {
-                onConflict: 'message_id'
-            })
-
-            if (!upsertError && !existing) {
-                syncedEmails++
-                await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
-
-                if (contactId) {
-                    await (supabase.from('contacts') as any)
-                        .update({ last_interaction: new Date().toISOString() })
-                        .eq('id', contactId)
+                if (contactError) {
+                    console.error(`[Cron] Error buscando contacto ${email.from}:`, contactError)
+                    continue
                 }
+
+                const contactId = contact?.id || null
+
+                // Verificar si ya existe para evitar duplicar notificaciones
+                const { data: existing, error: checkError } = await (supabase
+                    .from('contact_emails') as any)
+                    .select('id')
+                    .eq('message_id', email.messageId)
+                    .maybeSingle()
+
+                if (checkError) {
+                    // Si el error es de sintaxis UUID (22P02), es que la columna message_id está mal tipada
+                    if ((checkError as any).code === '22P02') {
+                        console.error(`[Cron] 🚨 ERROR DE ESQUEMA: La columna contact_emails.message_id debe ser TEXT, no UUID.`)
+                        console.error(`[Cron] 💡 SOLUCIÓN: Ejecuta este SQL en el panel de Supabase:`)
+                        console.error(`       ALTER TABLE contact_emails ALTER COLUMN message_id TYPE text;`)
+                    } else {
+                        console.error(`[Cron] Error verificando existencia de email:`, checkError)
+                    }
+                    continue
+                }
+
+                const { error: upsertError } = await (supabase.from('contact_emails') as any).upsert({
+                    contact_id: contactId,
+                    message_id: email.messageId,
+                    subject: email.subject,
+                    from_email: email.from,
+                    to_email: email.to,
+                    body_text: email.text,
+                    body_html: email.html,
+                    direction: 'inbound',
+                    received_at: email.date.toISOString(),
+                    is_read: false,
+                    snippet: email.snippet
+                }, {
+                    onConflict: 'message_id'
+                })
+
+                if (upsertError) {
+                    console.error(`[Cron] Error al upsertar email ${email.messageId}:`, upsertError)
+                    continue
+                }
+
+                if (!existing) {
+                    syncedEmails++
+                    await WhatsAppService.notifyNewEmail(email.from, email.subject, contactId)
+
+                    if (contactId) {
+                        await (supabase.from('contacts') as any)
+                            .update({ last_interaction: new Date().toISOString() })
+                            .eq('id', contactId)
+                    }
+                }
+            } catch (loopError) {
+                console.error(`[Cron] Error procesando email individual:`, loopError)
             }
         }
 
