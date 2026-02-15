@@ -368,7 +368,7 @@ export type SettingsUpdate = Partial<Omit<Settings, 'id' | 'created_at'>>
 
 export interface InvoiceElement {
   id: string
-  type: 'text' | 'title' | 'image' | 'table' | 'issuer' | 'recipient' | 'total' | 'invoice_number' | 'date'
+  type: 'text' | 'title' | 'image' | 'table' | 'issuer' | 'recipient' | 'total' | 'invoice_number' | 'date' | 'square' | 'line'
   x: number // positions in mm
   y: number
   width?: number
@@ -381,6 +381,9 @@ export interface InvoiceElement {
   fontFamily?: string
   src?: string // for images
   opacity?: number
+  backgroundColor?: string
+  borderColor?: string
+  borderWidth?: number
   zIndex?: number
 }
 

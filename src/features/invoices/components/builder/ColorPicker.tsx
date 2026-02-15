@@ -8,9 +8,10 @@ interface Props {
     value?: string
     onChange: (color: string) => void
     label?: string
+    allowTransparent?: boolean
 }
 
-export const ColorPicker = memo(function ColorPicker({ value = '#000000', onChange, label = 'Color' }: Props) {
+export const ColorPicker = memo(function ColorPicker({ value = '#000000', onChange, label = 'Color', allowTransparent }: Props) {
     return (
         <div>
             <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">{label}</label>
@@ -38,6 +39,15 @@ export const ColorPicker = memo(function ColorPicker({ value = '#000000', onChan
 
                 {/* Presets */}
                 <div className="flex flex-wrap gap-1.5">
+                    {allowTransparent && (
+                        <button
+                            onClick={() => onChange('transparent')}
+                            className={`w-6 h-6 rounded-full border border-white/20 transition-transform hover:scale-110 flex items-center justify-center bg-zinc-900 overflow-hidden ${value === 'transparent' ? 'ring-2 ring-brand ring-offset-2 ring-offset-black' : ''}`}
+                            title="Transparente"
+                        >
+                            <div className="w-[1px] h-full bg-red-500 rotate-45" />
+                        </button>
+                    )}
                     {PRESET_COLORS.map(color => (
                         <button
                             key={color}

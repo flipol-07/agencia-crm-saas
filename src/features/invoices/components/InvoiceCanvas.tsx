@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useState, useEffect } from 'react'
-import type { InvoiceTemplate, InvoiceWithDetails, Settings } from '@/types/database'
+import type { InvoiceTemplate, InvoiceWithDetails, Settings, InvoiceElement } from '@/types/database'
 import { AlignmentGuides } from './builder/AlignmentGuides'
 import { useElementSnapping } from '../hooks/useElementSnapping'
 
@@ -185,6 +185,25 @@ export function InvoiceCanvas({
         onUpdateTemplate({ config: { ...template.config, elements: newElements } })
     }
 
+    const getElementStyles = (el: InvoiceElement) => ({
+        left: `${el.x}mm`,
+        top: `${el.y}mm`,
+        width: el.width ? `${el.width}mm` : 'auto',
+        height: el.height ? `${el.height}mm` : 'auto',
+        color: el.color || 'black',
+        fontFamily: el.fontFamily || 'Inter',
+        fontSize: el.fontSize ? `${el.fontSize}pt` : '10pt',
+        fontWeight: el.fontWeight || 'normal',
+        textAlign: el.align as any || 'left',
+        opacity: el.opacity !== undefined ? el.opacity : 1,
+        backgroundColor: el.backgroundColor || 'transparent',
+        border: el.borderWidth ? `${el.borderWidth}mm solid ${el.borderColor || el.color || '#000'}` : 'none',
+        boxSizing: 'border-box' as const,
+        borderRadius: el.type === 'total' || el.id.includes('box') || el.type === 'square' ? (el.type === 'square' ? '0px' : '4px') : '0px',
+        display: el.type === 'line' ? 'block' : 'initial',
+        zIndex: el.zIndex || 1
+    })
+
     return (
         <div
             ref={canvasRef}
@@ -211,19 +230,7 @@ export function InvoiceCanvas({
                         key={el.id}
                         onMouseDown={(e) => handleElementMouseDown(e, el.id)}
                         className={`absolute ${editable ? 'cursor-move group' : ''} transition-all duration-200 ease-out ${isSelected ? 'ring-1 ring-brand ring-offset-0 z-50 shadow-[0_0_30px_rgba(139,92,246,0.3)]' : ''}`}
-                        style={{
-                            left: `${el.x}mm`,
-                            top: `${el.y}mm`,
-                            width: el.width ? `${el.width}mm` : 'auto',
-                            height: el.height ? `${el.height}mm` : 'auto',
-                            color: el.color || 'black',
-                            fontFamily: el.fontFamily || 'Inter',
-                            fontSize: el.fontSize ? `${el.fontSize}pt` : '10pt',
-                            fontWeight: el.fontWeight || 'normal',
-                            textAlign: el.align as any || 'left',
-                            opacity: el.opacity !== undefined ? el.opacity : 1,
-                            zIndex: el.zIndex || 1
-                        }}
+                        style={getElementStyles(el)}
                     >
                         {el.type === 'title' && (
                             <h1
@@ -288,6 +295,10 @@ export function InvoiceCanvas({
 
                         {el.type === 'image' && el.src && (
                             <img src={el.src} alt="" className="w-full h-full object-contain pointer-events-none" />
+                        )}
+
+                        {(el.type === 'square' || el.type === 'line') && (
+                            <div className="w-full h-full" style={el.type === 'line' ? { backgroundColor: el.color || '#000' } : {}} />
                         )}
 
                         {el.type === 'table' && (
@@ -377,7 +388,20 @@ export function InvoiceCanvas({
                                             {invoice.tax_amount.toFixed(2)}€
                                         </div>
                                     </div>
-                                    <div className="flex justify-between gap-4 font-black w-full max-w-[200px]" style={{ fontSize: '1.8em', color: 'inherit' }}>
+                                    {invoice.irpf_rate > 0 && (
+                                        <div className="flex justify-between gap-4 opacity-50 w-full max-w-[200px]" style={{ fontSize: '0.8em', color: 'inherit' }}>
+                                            <span>IRPF (-{invoice.irpf_rate}%)</span>
+                                            <div
+                                                contentEditable={editable}
+                                                suppressContentEditableWarning
+                                                onBlur={(e) => onUpdateInvoice?.({ irpf_amount: parseFloat(e.currentTarget.innerText.replace('€', '').replace(',', '.')) || 0 })}
+                                                className="focus:outline-none focus:bg-[#8b5cf6]/5"
+                                            >
+                                                -{invoice.irpf_amount?.toFixed(2) || '0.00'}€
+                                            </div>
+                                        </div>
+                                    )}
+                                    <div className="flex justify-between gap-4 font-black w-full max-w-[200px] mt-2 pt-2 border-t border-current/10" style={{ fontSize: '1.8em', color: 'inherit' }}>
                                         <span>TOTAL</span>
                                         <div
                                             contentEditable={editable}
@@ -385,7 +409,7 @@ export function InvoiceCanvas({
                                             onBlur={(e) => onUpdateInvoice?.({ total: parseFloat(e.currentTarget.innerText.replace('€', '').replace(',', '.')) || 0 })}
                                             className="focus:outline-none focus:bg-[#8b5cf6]/5"
                                         >
-                                            {(invoice.subtotal + invoice.tax_amount).toFixed(2)}€
+                                            {(invoice.subtotal + invoice.tax_amount - (invoice.irpf_amount || 0)).toFixed(2)}€
                                         </div>
                                     </div>
                                 </div>

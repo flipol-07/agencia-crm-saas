@@ -29,8 +29,8 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
             type,
             x: 50,
             y: 50,
-            width: type === 'table' ? 150 : (type === 'image' ? 40 : 100),
-            height: type === 'table' ? 100 : (type === 'image' ? 40 : 10),
+            width: type === 'table' ? 150 : (type === 'image' ? 40 : (type === 'line' ? 100 : 100)),
+            height: type === 'table' ? 100 : (type === 'image' ? 40 : (type === 'line' ? 1 : 10)),
             content: type === 'title' ? 'NUEVO TITULO' : type === 'text' ? 'Nuevo bloque de texto...' : '',
             fontSize: type === 'title' ? 24 : 10,
             fontWeight: type === 'title' ? '700' : '400',
@@ -104,6 +104,8 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                     <button onClick={() => addElement('recipient')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Cliente</button>
                     <button onClick={() => addElement('invoice_number')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Nº Factura</button>
                     <button onClick={() => addElement('total')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Totales</button>
+                    <button onClick={() => addElement('square')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Cuadrado</button>
+                    <button onClick={() => addElement('line')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Línea</button>
                 </div>
             </div>
 
@@ -224,11 +226,36 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                             </div>
                         </div>
 
-                        <ColorPicker
-                            label="Color del Texto / Borde"
-                            value={selectedElement.color}
-                            onChange={(color) => updateSelected({ color })}
-                        />
+                        <div className="grid grid-cols-2 gap-4">
+                            <ColorPicker
+                                label="Borde / Texto"
+                                value={selectedElement.borderColor || selectedElement.color}
+                                onChange={(color) => updateSelected({ borderColor: color, color })}
+                            />
+                            <ColorPicker
+                                label="Fondo"
+                                value={selectedElement.backgroundColor || 'transparent'}
+                                onChange={(color) => updateSelected({ backgroundColor: color })}
+                                allowTransparent
+                            />
+                        </div>
+
+                        <div>
+                            <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Grosor Borde ({selectedElement.borderWidth || 0}mm)</label>
+                            <input
+                                type="range"
+                                min="0"
+                                max="5"
+                                step="0.5"
+                                value={selectedElement.borderWidth || 0}
+                                onChange={(e) => updateSelected({ borderWidth: parseFloat(e.target.value) })}
+                                className="w-full accent-brand h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                            />
+                            <div className="flex justify-between text-[8px] text-gray-600 mt-1 uppercase font-bold">
+                                <span>Sin Marco</span>
+                                <span>Grueso</span>
+                            </div>
+                        </div>
 
                         <div>
                             <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Alineación</label>
@@ -253,8 +280,9 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                     <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">X</label>
                                     <input
                                         type="number"
-                                        value={Math.round(selectedElement.x) || 0}
-                                        onChange={(e) => updateSelected({ x: parseInt(e.target.value) || 0 })}
+                                        step="0.1"
+                                        value={selectedElement.x ?? 0}
+                                        onChange={(e) => updateSelected({ x: parseFloat(e.target.value) || 0 })}
                                         className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
@@ -262,8 +290,9 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                     <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">Y</label>
                                     <input
                                         type="number"
-                                        value={Math.round(selectedElement.y) || 0}
-                                        onChange={(e) => updateSelected({ y: parseInt(e.target.value) || 0 })}
+                                        step="0.1"
+                                        value={selectedElement.y ?? 0}
+                                        onChange={(e) => updateSelected({ y: parseFloat(e.target.value) || 0 })}
                                         className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
@@ -271,8 +300,9 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                     <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">Ancho</label>
                                     <input
                                         type="number"
-                                        value={Math.round(selectedElement.width || 0)}
-                                        onChange={(e) => updateSelected({ width: parseInt(e.target.value) || 0 })}
+                                        step="0.1"
+                                        value={selectedElement.width ?? 0}
+                                        onChange={(e) => updateSelected({ width: parseFloat(e.target.value) || 0 })}
                                         className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
@@ -280,8 +310,9 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                                     <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">Alto</label>
                                     <input
                                         type="number"
-                                        value={Math.round(selectedElement.height || 0)}
-                                        onChange={(e) => updateSelected({ height: parseInt(e.target.value) || 0 })}
+                                        step="0.1"
+                                        value={selectedElement.height ?? 0}
+                                        onChange={(e) => updateSelected({ height: parseFloat(e.target.value) || 0 })}
                                         className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
                                     />
                                 </div>
