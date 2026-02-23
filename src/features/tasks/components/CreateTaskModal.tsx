@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useProjects } from '@/features/projects/hooks'
 import { useContacts } from '@/features/contacts/hooks/useContacts'
+import { TaskAssigneeSelector } from './TaskAssigneeSelector'
 import { TASK_PRIORITIES } from '@/types/database'
 import type { TaskPriority } from '@/types/database'
 
@@ -16,6 +17,7 @@ interface CreateTaskModalProps {
         description?: string
         priority: TaskPriority
         due_date?: string | null
+        assigneeIds?: string[]
     }) => Promise<void>
     initialProjectId?: string | null
     initialContactId?: string | null
@@ -37,6 +39,7 @@ export function CreateTaskModal({
     const [description, setDescription] = useState('')
     const [priority, setPriority] = useState<TaskPriority>('medium')
     const [dueDate, setDueDate] = useState('')
+    const [assigneeIds, setAssigneeIds] = useState<string[]>([])
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
 
@@ -45,6 +48,7 @@ export function CreateTaskModal({
         if (isOpen) {
             setProjectId(initialProjectId || '')
             setContactId(initialContactId || '')
+            setAssigneeIds([])
         }
     }, [isOpen, initialProjectId, initialContactId])
 
@@ -68,6 +72,7 @@ export function CreateTaskModal({
                 description: description.trim() || undefined,
                 priority,
                 due_date: dueDate || null,
+                assigneeIds,
             })
             // Reset form
             setTitle('')
@@ -76,6 +81,7 @@ export function CreateTaskModal({
             setDescription('')
             setPriority('medium')
             setDueDate('')
+            setAssigneeIds([])
             onClose()
         } catch (err) {
             setError('Error al crear la tarea')
@@ -178,8 +184,18 @@ export function CreateTaskModal({
                         </div>
                     </div>
 
-                    {/* Prioridad y Fecha */}
+                    {/* Asignados y Prioridad */}
                     <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
+                                Asignados
+                            </label>
+                            <TaskAssigneeSelector
+                                assignees={assigneeIds.map(id => ({ user_id: id, profiles: { id, full_name: '', email: '', avatar_url: null } }))}
+                                onAssign={(userId) => setAssigneeIds(prev => [...prev, userId])}
+                                onUnassign={(userId) => setAssigneeIds(prev => prev.filter(id => id !== userId))}
+                            />
+                        </div>
                         <div>
                             <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
                                 Prioridad
@@ -199,22 +215,20 @@ export function CreateTaskModal({
                                     </button>
                                 ))}
                             </div>
-                            <p className="text-xs text-gray-500 mt-1">
-                                {TASK_PRIORITIES.find(p => p.id === priority)?.label}
-                            </p>
                         </div>
+                    </div>
 
-                        <div>
-                            <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
-                                Fecha límite
-                            </label>
-                            <input
-                                type="date"
-                                value={dueDate}
-                                onChange={(e) => setDueDate(e.target.value)}
-                                className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8b5cf6] text-sm"
-                            />
-                        </div>
+                    {/* Fecha límite */}
+                    <div>
+                        <label className="block text-xs text-gray-500 uppercase tracking-wide mb-2">
+                            Fecha límite
+                        </label>
+                        <input
+                            type="date"
+                            value={dueDate}
+                            onChange={(e) => setDueDate(e.target.value)}
+                            className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#8b5cf6] text-sm"
+                        />
                     </div>
 
                     {/* Descripción */}

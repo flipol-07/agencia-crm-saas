@@ -51,7 +51,7 @@ export function useProjectTasks(projectId: string) {
         }
     }, [projectId, fetchTasks])
 
-    const createTask = async (task: Partial<TaskInsert>) => {
+    const createTask = async (task: Partial<TaskInsert> & { assigneeIds?: string[] }) => {
         const { data, error } = await (supabase.from('tasks') as any)
             .insert({
                 project_id: projectId,
@@ -67,6 +67,21 @@ export function useProjectTasks(projectId: string) {
 
         if (error) {
             throw new Error(error.message)
+        }
+
+        // Si hay asignados, insertarlos en la tabla task_assignees
+        if (task.assigneeIds && task.assigneeIds.length > 0) {
+            const assigneesData = task.assigneeIds.map(userId => ({
+                task_id: data.id,
+                user_id: userId
+            }))
+
+            const { error: assignError } = await (supabase.from('task_assignees') as any)
+                .insert(assigneesData)
+
+            if (assignError) {
+                console.error('Error assigning users:', assignError)
+            }
         }
 
         setTasks(prev => [data, ...prev])
@@ -155,7 +170,7 @@ export function useContactTasks(contactId: string) {
         }
     }, [contactId, fetchTasks])
 
-    const createTask = async (task: Partial<TaskInsert>) => {
+    const createTask = async (task: Partial<TaskInsert> & { assigneeIds?: string[] }) => {
         const { data, error } = await (supabase.from('tasks') as any)
             .insert({
                 contact_id: contactId,
@@ -172,6 +187,21 @@ export function useContactTasks(contactId: string) {
 
         if (error) {
             throw new Error(error.message)
+        }
+
+        // Si hay asignados, insertarlos en la tabla task_assignees
+        if (task.assigneeIds && task.assigneeIds.length > 0) {
+            const assigneesData = task.assigneeIds.map(userId => ({
+                task_id: data.id,
+                user_id: userId
+            }))
+
+            const { error: assignError } = await (supabase.from('task_assignees') as any)
+                .insert(assigneesData)
+
+            if (assignError) {
+                console.error('Error assigning users:', assignError)
+            }
         }
 
         setTasks(prev => [data, ...prev])
@@ -346,6 +376,7 @@ export function useTasksWithDetails() {
         priority?: TaskPriority
         due_date?: string | null
         contact_id?: string | null
+        assigneeIds?: string[]
     }) => {
         const { data, error } = await (supabase.from('tasks') as any)
             .insert({
@@ -379,6 +410,49 @@ export function useTasksWithDetails() {
 
         if (error) {
             throw new Error(error.message)
+        }
+
+        // Si hay asignados, insertarlos en la tabla task_assignees
+        if (options?.assigneeIds && options.assigneeIds.length > 0) {
+            const assigneesData = options.assigneeIds.map(userId => ({
+                task_id: data.id,
+                user_id: userId
+            }))
+
+            const { error: assignError } = await (supabase.from('task_assignees') as any)
+                .insert(assigneesData)
+
+            if (assignError) {
+                console.error('Error assigning users:', assignError)
+            } else {
+                // Volver a cargar la tarea con los asignados si es necesario, 
+                // o añadirlos manualmente al estado local
+                const { data: updatedTask } = await (supabase.from('tasks') as any)
+                    .select(`
+                        *,
+                        projects (
+                            id, 
+                            name, 
+                            contact_id,
+                            contacts (id, company_name)
+                        ),
+                        contacts (id, company_name),
+                        task_assignees (
+                            id,
+                            user_id,
+                            created_at,
+                            profiles (id, full_name, email, avatar_url)
+                        ),
+                        task_comments (id)
+                    `)
+                    .eq('id', data.id)
+                    .single()
+
+                if (updatedTask) {
+                    setTasks(prev => [updatedTask as TaskWithDetails, ...prev])
+                    return updatedTask as TaskWithDetails
+                }
+            }
         }
 
         setTasks(prev => [data as TaskWithDetails, ...prev])
