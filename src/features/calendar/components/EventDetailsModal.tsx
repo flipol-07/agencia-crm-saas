@@ -3,9 +3,11 @@ import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import { CalendarEvent } from '../types'
 import { Button } from '@/shared/components/ui/Button'
-import { X, Calendar, Clock, MapPin, AlignLeft, Users, ExternalLink, Trash2, AlertTriangle } from 'lucide-react'
+import { X, Calendar, Clock, MapPin, AlignLeft, Users, ExternalLink, Trash2, AlertTriangle, Smartphone } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { DeleteSeriesModal } from './DeleteSeriesModal'
+import { sendManualReminderAction } from '../actions/calendarActions'
+import { toast } from 'sonner'
 
 interface EventDetailsModalProps {
     isOpen: boolean
@@ -19,6 +21,7 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete, onDeleteSe
     const [isDeleting, setIsDeleting] = useState(false)
     const [showConfirmDelete, setShowConfirmDelete] = useState(false)
     const [showDeleteSeries, setShowDeleteSeries] = useState(false)
+    const [isTestingSms, setIsTestingSms] = useState(false)
 
     if (!isOpen || !event) return null
 
@@ -36,6 +39,24 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete, onDeleteSe
         } catch (error) {
             console.error('Error al eliminar el evento:', error)
             setIsDeleting(false)
+        }
+    }
+
+    const handleSendReminder = async () => {
+        setIsTestingSms(true)
+        try {
+            const guestPhones = event.originalData?.guest_phones || []
+            const meetingUrl = event.url || event.originalData?.meeting_url || null
+            const result = await sendManualReminderAction(attendees, event.title, guestPhones, event.start.toISOString(), meetingUrl)
+            if (result.success) {
+                toast.success(result.message)
+            } else {
+                toast.error(result.error)
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'Error al enviar Test SMS')
+        } finally {
+            setIsTestingSms(false)
         }
     }
 
@@ -193,13 +214,24 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete, onDeleteSe
                                 )}
 
                                 {/* Actions */}
-                                <div className="pt-4 flex justify-end gap-3">
+                                <div className="pt-4 flex flex-col gap-3">
                                     {location && (
                                         <Button
                                             className="w-full bg-brand text-black font-bold hover:bg-brand/90"
                                             onClick={() => window.open(location, '_blank')}
                                         >
                                             Unirse a la Reunión
+                                        </Button>
+                                    )}
+                                    {isMeeting && (attendees.length > 0 || (event.originalData?.guest_phones && event.originalData.guest_phones.length > 0)) && (
+                                        <Button
+                                            variant="outline"
+                                            onClick={handleSendReminder}
+                                            disabled={isTestingSms}
+                                            className="w-full border-green-500/30 text-green-400 hover:bg-green-500/10 flex items-center gap-2"
+                                        >
+                                            <Smartphone className="h-4 w-4" />
+                                            {isTestingSms ? 'Enviando...' : 'Enviar recordatorio'}
                                         </Button>
                                     )}
                                 </div>

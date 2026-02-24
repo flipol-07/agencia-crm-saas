@@ -114,6 +114,7 @@ export const calendarService = {
         const payload: any = {
             ...meeting,
             attendees: attendeeEmails,
+            guest_phones: meeting.guest_phones || [],
             status: 'scheduled'
         }
 
@@ -141,6 +142,7 @@ export const calendarService = {
             const payload: any = {
                 ...meeting,
                 attendees: attendeeEmails,
+                guest_phones: meeting.guest_phones || [],
                 status: 'scheduled'
             }
             if (!options?.skipMeetingUrl) {

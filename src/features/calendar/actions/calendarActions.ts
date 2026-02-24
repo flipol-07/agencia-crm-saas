@@ -2,9 +2,11 @@
 'use server'
 
 import { googleCalendarService, CalendarEventPayload } from '@/shared/services/googleCalendarService';
-import { addHours, parseISO } from 'date-fns';
+import { addHours, parseISO, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { createClient } from '@/lib/supabase/client'; // Note: Server Actions can use this but sebaiknya use server client if possible. 
-// Actually for Server Actions in Next.js 15/16 we should use createClient from @/lib/supabase/server
+import { createAdminClient } from '@/lib/supabase/server';
+import { WhatsAppService } from '@/shared/lib/whatsapp';
 
 /**
  * Server Action to schedule a meeting in Google Calendar
@@ -97,5 +99,57 @@ export async function scheduleGoogleMeetingAction(formData: {
                 meetLink: process.env.GOOGLE_MEET_PERMANENT_LINK || '',
             }
         };
+    }
+}
+
+export async function sendManualReminderAction(
+    attendees: string[],
+    meetingTitle: string,
+    guestPhones: string[] = [],
+    meetingDateStr: string,
+    meetingUrl: string | null
+) {
+    if ((!attendees || attendees.length === 0) && (!guestPhones || guestPhones.length === 0)) {
+        return { success: false, error: 'No hay asistentes ni invitados para enviar el recordatorio.' }
+    }
+
+    try {
+        const meetingDate = new Date(meetingDateStr);
+        const dateStr = format(meetingDate, "dd/MM/yyyy", { locale: es });
+        const timeStr = format(meetingDate, "HH:mm", { locale: es });
+        const msg = `🚨 *Recordatorio de Reunión*\n\nRecuerda que tienes la reunión *${meetingTitle}* el *${dateStr}* a las *${timeStr}*.\n\nY este es el enlace: ${meetingUrl || 'No proporcionado'}`;
+
+        const supabase = await createAdminClient();
+        const { data: profiles } = await supabase
+            .from('profiles')
+            .select('email, billing_phone')
+            .in('email', attendees)
+            .not('billing_phone', 'is', null);
+
+        const profilesSafe = profiles || [];
+
+        let sentCount = 0;
+        for (const profile of (profilesSafe as any[])) {
+            if (profile.billing_phone) {
+                const result = await WhatsAppService.sendMessageToNumberDetailed(profile.billing_phone, msg);
+                if (result.success) sentCount++;
+            }
+        }
+
+        // Send to guest phones as well
+        if (guestPhones && guestPhones.length > 0) {
+            for (const phone of guestPhones) {
+                const result = await WhatsAppService.sendMessageToNumberDetailed(phone, msg);
+                if (result.success) sentCount++;
+            }
+        }
+
+        return {
+            success: true,
+            message: `Se enviaron ${sentCount} recordatorios de WhatsApp exitosamente.`
+        }
+    } catch (error: any) {
+        console.error('WhatsApp Reminder Error:', error)
+        return { success: false, error: error.message || 'Error desconocido' }
     }
 }

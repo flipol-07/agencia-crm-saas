@@ -43,6 +43,7 @@ export interface Meeting {
     external_id: string | null
     meeting_url: string | null
     attendees?: string[] | null
+    guest_phones: string[] | null
     user_id: string | null
     status?: string | null
     created_at: string | null

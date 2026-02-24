@@ -8,7 +8,7 @@ import { calendarService } from '../services/calendarService'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { X, Calendar, Users, FileText, Link, CheckCircle2, Repeat } from 'lucide-react'
+import { X, Calendar, Users, FileText, Link, CheckCircle2, Repeat, Smartphone } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { addDays, addWeeks, addMonths } from 'date-fns'
 
@@ -30,6 +30,8 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
     const [isRecurring, setIsRecurring] = useState(false)
     const [recurrenceFreq, setRecurrenceFreq] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>('WEEKLY')
     const [recurrenceCount, setRecurrenceCount] = useState(10)
+    const [guestPhones, setGuestPhones] = useState<string[]>([])
+    const [currentPhoneInput, setCurrentPhoneInput] = useState('')
 
     // Fetch contacts and team members
     useEffect(() => {
@@ -63,6 +65,16 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                 ? prev.filter(e => e !== email)
                 : [...prev, email]
         )
+    }
+
+    const addGuestPhone = () => {
+        if (!currentPhoneInput.trim()) return;
+        setGuestPhones(prev => [...prev, currentPhoneInput.trim()]);
+        setCurrentPhoneInput('');
+    }
+
+    const removeGuestPhone = (index: number) => {
+        setGuestPhones(prev => prev.filter((_, i) => i !== index));
     }
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -114,6 +126,7 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                         meeting_url: result.data?.meetLink || null,
                         external_id: result.data?.id || null, // Google ID (same for series in Google)
                         series_id,
+                        guest_phones: guestPhones,
                         status: 'scheduled' as const
                     })
                 }
@@ -358,6 +371,46 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                             </label>
                                         ))}
                                     </div>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
+                                        <Smartphone className="h-3 w-3" /> Invitados Externos (Teléfonos para WhatsApp)
+                                    </label>
+                                    <div className="flex gap-2">
+                                        <input
+                                            type="text"
+                                            value={currentPhoneInput}
+                                            onChange={(e) => setCurrentPhoneInput(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    addGuestPhone();
+                                                }
+                                            }}
+                                            placeholder="Ej: 34600111222"
+                                            className="flex h-12 flex-1 rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-2 text-sm text-white placeholder:text-gray-600 focus:border-brand/40 transition-all outline-none"
+                                        />
+                                        <Button
+                                            type="button"
+                                            onClick={addGuestPhone}
+                                            className="h-12 w-12 rounded-2xl bg-white/[0.05] hover:bg-white/[0.1] text-white flex items-center justify-center border border-white/10"
+                                        >
+                                            +
+                                        </Button>
+                                    </div>
+                                    {guestPhones.length > 0 && (
+                                        <div className="flex flex-wrap gap-2 pt-2">
+                                            {guestPhones.map((phone, idx) => (
+                                                <div key={idx} className="flex items-center gap-2 bg-brand/10 border border-brand/30 text-white px-3 py-1.5 rounded-full text-xs">
+                                                    <span>{phone}</span>
+                                                    <button type="button" onClick={() => removeGuestPhone(idx)} className="text-red-400 hover:text-red-300">
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
                                 <div className="space-y-2">
