@@ -15,6 +15,7 @@ export interface Meeting {
     attendees?: string[] | null
     meeting_url?: string | null
     external_id: string | null
+    series_id?: string | null
     user_id: string
     created_at: string
     updated_at: string

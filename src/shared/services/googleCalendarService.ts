@@ -9,6 +9,7 @@ export interface CalendarEventPayload {
     startTime: string;
     endTime: string;
     attendees: string[];
+    recurrence?: string[];
 }
 
 export class GoogleCalendarService {
@@ -69,6 +70,7 @@ export class GoogleCalendarService {
             visibility: 'public',
             guestsCanInviteOthers: true,
             guestsCanSeeOtherGuests: true,
+            ...(payload.recurrence ? { recurrence: payload.recurrence } : {}),
         };
 
         try {

@@ -115,6 +115,14 @@ export function CalendarView() {
         toast.success('Eliminado correctamente')
     }
 
+    const handleDeleteSeries = async (event: CalendarEvent) => {
+        if (event.type === 'meeting' && (event.originalData as any).series_id) {
+            await calendarService.deleteMeetingSeries((event.originalData as any).series_id, event.start.toISOString())
+        }
+        await fetchEvents()
+        toast.success('Serie de eventos eliminada correctamente')
+    }
+
     return (
         <div className="h-full flex flex-col bg-background">
             {/* Header */}
@@ -252,6 +260,7 @@ export function CalendarView() {
                 onClose={() => setIsDetailsModalOpen(false)}
                 event={selectedEvent}
                 onDelete={handleDeleteEvent}
+                onDeleteSeries={handleDeleteSeries}
             />
         </div>
     )

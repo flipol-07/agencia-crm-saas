@@ -135,6 +135,29 @@ export const calendarService = {
         return data
     },
 
+    async createMeetings(meetings: MeetingInsert[], attendeeEmails: string[] = [], options?: { select?: string, skipMeetingUrl?: boolean }) {
+        const supabase = createClient()
+        const payloads = meetings.map(meeting => {
+            const payload: any = {
+                ...meeting,
+                attendees: attendeeEmails,
+                status: 'scheduled'
+            }
+            if (!options?.skipMeetingUrl) {
+                payload.meeting_url = meeting.meeting_url || `https://meet.jit.si/Aurie-${Math.random().toString(36).substring(7)}`
+            }
+            return payload;
+        });
+
+        const { data, error } = await supabase
+            .from('meetings')
+            .insert(payloads)
+            .select(options?.select || '*');
+
+        if (error) throw error;
+        return data;
+    },
+
     async deleteEvent(id: string) {
         const supabase = createClient()
         const { error } = await supabase.from('events').delete().eq('id', id)
@@ -144,6 +167,16 @@ export const calendarService = {
     async deleteMeeting(id: string) {
         const supabase = createClient()
         const { error } = await supabase.from('meetings').delete().eq('id', id)
+        if (error) throw error
+    },
+
+    async deleteMeetingSeries(seriesId: string, fromDateIso: string) {
+        const supabase = createClient()
+        const { error } = await supabase
+            .from('meetings')
+            .delete()
+            .eq('series_id', seriesId)
+            .gte('date', fromDateIso)
         if (error) throw error
     }
 }

@@ -8,8 +8,9 @@ import { calendarService } from '../services/calendarService'
 import { useAuth } from '@/hooks/useAuth'
 import { toast } from 'sonner'
 import { createClient } from '@/lib/supabase/client'
-import { X, Calendar, Users, FileText, Link, CheckCircle2 } from 'lucide-react'
+import { X, Calendar, Users, FileText, Link, CheckCircle2, Repeat } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { addDays, addWeeks, addMonths } from 'date-fns'
 
 interface AddMeetingModalProps {
     isOpen: boolean
@@ -25,6 +26,10 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
     const [selectedAttendees, setSelectedAttendees] = useState<string[]>([])
     const [successData, setSuccessData] = useState<any>(null)
     const { user } = useAuth()
+
+    const [isRecurring, setIsRecurring] = useState(false)
+    const [recurrenceFreq, setRecurrenceFreq] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>('WEEKLY')
+    const [recurrenceCount, setRecurrenceCount] = useState(10)
 
     // Fetch contacts and team members
     useEffect(() => {
@@ -71,49 +76,70 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
         const formData = new FormData(e.currentTarget)
 
         try {
+            const dateStr = formData.get('date') as string
+            const recurrenceRules = isRecurring ? [`RRULE:FREQ=${recurrenceFreq};COUNT=${recurrenceCount}`] : undefined
+
             const result = await scheduleGoogleMeetingAction({
                 title: formData.get('title') as string,
-                date: formData.get('date') as string,
+                date: dateStr,
                 summary: formData.get('summary') as string,
-                attendees: selectedAttendees
+                attendees: selectedAttendees,
+                ...(recurrenceRules ? { recurrence: recurrenceRules } : {})
             })
 
             if (result.success) {
                 setSuccessData(result.data)
                 toast.success('¡Reunión agendada y sincronizada con Google Calendar!')
 
-                const date = new Date(formData.get('date') as string)
+                const baseDate = new Date(dateStr)
+                const meetingsToInsert: any[] = []
+                const series_id = isRecurring ? crypto.randomUUID() : null
 
-                const meetingPayload = {
-                    title: formData.get('title') as string,
-                    date: date.toISOString(),
-                    summary: formData.get('summary') as string,
-                    contact_id: (formData.get('contact_id') as string) || null,
-                    user_id: user.id,
-                    meeting_url: result.data?.meetLink || null,
-                    external_id: result.data?.id || null,
-                    status: 'scheduled' as const
+                const occurrences = isRecurring ? recurrenceCount : 1
+
+                for (let i = 0; i < occurrences; i++) {
+                    let instanceDate = new Date(baseDate)
+                    if (i > 0) {
+                        if (recurrenceFreq === 'DAILY') instanceDate = addDays(baseDate, i)
+                        else if (recurrenceFreq === 'WEEKLY') instanceDate = addWeeks(baseDate, i)
+                        else if (recurrenceFreq === 'MONTHLY') instanceDate = addMonths(baseDate, i)
+                    }
+
+                    meetingsToInsert.push({
+                        title: formData.get('title') as string,
+                        date: instanceDate.toISOString(),
+                        summary: formData.get('summary') as string,
+                        contact_id: (formData.get('contact_id') as string) || null,
+                        user_id: user.id,
+                        meeting_url: result.data?.meetLink || null,
+                        external_id: result.data?.id || null, // Google ID (same for series in Google)
+                        series_id,
+                        status: 'scheduled' as const
+                    })
                 }
 
-                console.log('💾 Guardando reunión en BD:', meetingPayload, 'Asistentes:', selectedAttendees)
+                console.log(`💾 Guardando ${meetingsToInsert.length} reunión(es) en BD. Asistentes:`, selectedAttendees)
 
                 try {
-                    await calendarService.createMeeting(meetingPayload, selectedAttendees)
-                    console.log('✅ Reunión guardada en BD correctamente')
+                    await calendarService.createMeetings(meetingsToInsert, selectedAttendees)
+                    console.log('✅ Reuniones guardadas en BD correctamente')
                 } catch (dbError: any) {
                     console.error('❌ Error de sincronización de base de datos:', JSON.stringify(dbError, null, 2))
 
                     if (dbError?.code === 'PGRST204') {
                         console.warn('⚠️ PGRST204 detectado. Reintentando sin meeting_url...')
                         try {
-                            const { meeting_url, ...fallbackPayload } = meetingPayload
-                            await calendarService.createMeeting(fallbackPayload as any, selectedAttendees, { select: 'id, title', skipMeetingUrl: true })
-                            toast.success('Reunión guardada (Advertencia: Enlace de sincronización omitido)')
+                            const fallbackPayloads = meetingsToInsert.map(m => {
+                                const { meeting_url, ...fallbackPayload } = m
+                                return fallbackPayload
+                            })
+                            await calendarService.createMeetings(fallbackPayloads as any, selectedAttendees, { select: 'id, title', skipMeetingUrl: true })
+                            toast.success('Reuniones guardadas (Advertencia: Enlace de sincronización omitido)')
                             onClose()
                             return
                         } catch (retryError) {
                             console.error('❌ El reintento falló:', retryError)
-                            toast.error('Error al guardar la reunión incluso después de reintentar.')
+                            toast.error('Error al guardar las reuniones incluso después de reintentar.')
                         }
                     } else {
                         toast.error(`Error de base de datos: ${dbError.message || 'Error desconocido'}`)
@@ -156,12 +182,12 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                         initial={{ scale: 0.95, opacity: 0, y: 20 }}
                         animate={{ scale: 1, opacity: 1, y: 0 }}
                         exit={{ scale: 0.95, opacity: 0, y: 20 }}
-                        className="relative bg-[#050505] rounded-3xl border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] w-full max-w-xl overflow-hidden"
+                        className="relative bg-[#050505] rounded-3xl border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden"
                     >
                         {/* Header with gradient line */}
                         <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand to-transparent" />
 
-                        <div className="flex items-center justify-between p-8 border-b border-white/5 bg-white/[0.01]">
+                        <div className="flex items-center justify-between p-8 border-b border-white/5 bg-white/[0.01] shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-xl bg-brand/10 border border-brand/20">
                                     <Calendar className="h-5 w-5 text-brand" />
@@ -177,7 +203,7 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                         </div>
 
                         {successData ? (
-                            <div className="p-12 text-center space-y-6 animate-in zoom-in-95 duration-500">
+                            <div className="p-12 text-center space-y-6 animate-in zoom-in-95 duration-500 overflow-y-auto custom-scrollbar">
                                 <div className="mx-auto w-16 h-16 rounded-full bg-brand/20 flex items-center justify-center border border-brand/30">
                                     <CheckCircle2 className="h-8 w-8 text-brand" />
                                 </div>
@@ -209,7 +235,7 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                 </Button>
                             </div>
                         ) : (
-                            <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                            <form onSubmit={handleSubmit} className="p-8 space-y-6 overflow-y-auto custom-scrollbar">
                                 <div className="grid grid-cols-2 gap-6">
                                     <div className="space-y-2 col-span-2">
                                         <label htmlFor="title" className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1 flex items-center gap-2">
@@ -253,6 +279,60 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                                 </option>
                                             ))}
                                         </select>
+                                    </div>
+
+                                    {/* Toggle Recurrencia */}
+                                    <div className="col-span-2 space-y-4 pt-2 border-t border-white/5">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <Repeat className="h-4 w-4 text-brand" />
+                                                <span className="text-sm font-semibold text-white">Reunión Recurrente</span>
+                                            </div>
+                                            <label className="relative inline-flex items-center cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="sr-only peer"
+                                                    checked={isRecurring}
+                                                    onChange={(e) => setIsRecurring(e.target.checked)}
+                                                />
+                                                <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand"></div>
+                                            </label>
+                                        </div>
+
+                                        <AnimatePresence>
+                                            {isRecurring && (
+                                                <motion.div
+                                                    initial={{ height: 0, opacity: 0 }}
+                                                    animate={{ height: 'auto', opacity: 1 }}
+                                                    exit={{ height: 0, opacity: 0 }}
+                                                    className="grid grid-cols-2 gap-4 overflow-hidden"
+                                                >
+                                                    <div className="space-y-2 pt-2">
+                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Frecuencia</label>
+                                                        <select
+                                                            value={recurrenceFreq}
+                                                            onChange={(e) => setRecurrenceFreq(e.target.value as any)}
+                                                            className="flex h-12 w-full rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-2 text-sm text-white focus:border-brand/40 transition-all outline-none appearance-none"
+                                                        >
+                                                            <option value="DAILY" className="bg-[#0A0A0A]">Diaria</option>
+                                                            <option value="WEEKLY" className="bg-[#0A0A0A]">Semanal</option>
+                                                            <option value="MONTHLY" className="bg-[#0A0A0A]">Mensual</option>
+                                                        </select>
+                                                    </div>
+                                                    <div className="space-y-2 pt-2">
+                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Repeticiones (Max 52)</label>
+                                                        <input
+                                                            type="number"
+                                                            min={2}
+                                                            max={52}
+                                                            value={Number.isNaN(recurrenceCount) ? '' : recurrenceCount}
+                                                            onChange={(e) => setRecurrenceCount(parseInt(e.target.value))}
+                                                            className="flex h-12 w-full rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-2 text-sm text-white focus:border-brand/40 transition-all outline-none"
+                                                        />
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
                                 </div>
 

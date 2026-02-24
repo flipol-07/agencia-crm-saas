@@ -5,23 +5,27 @@ import { CalendarEvent } from '../types'
 import { Button } from '@/shared/components/ui/Button'
 import { X, Calendar, Clock, MapPin, AlignLeft, Users, ExternalLink, Trash2, AlertTriangle } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { DeleteSeriesModal } from './DeleteSeriesModal'
 
 interface EventDetailsModalProps {
     isOpen: boolean
     onClose: () => void
     event: CalendarEvent | null
     onDelete?: (event: CalendarEvent) => Promise<void>
+    onDeleteSeries?: (event: CalendarEvent) => Promise<void>
 }
 
-export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDetailsModalProps) {
+export function EventDetailsModal({ isOpen, onClose, event, onDelete, onDeleteSeries }: EventDetailsModalProps) {
     const [isDeleting, setIsDeleting] = useState(false)
     const [showConfirmDelete, setShowConfirmDelete] = useState(false)
+    const [showDeleteSeries, setShowDeleteSeries] = useState(false)
 
     if (!isOpen || !event) return null
 
     const isMeeting = event.type === 'meeting'
     const location = event.url || (event.originalData as any)?.meeting_url || null
     const attendees = (event.originalData as any)?.attendees || []
+    const isRecurring = isMeeting && !!(event.originalData as any)?.series_id
 
     const handleDelete = async () => {
         if (!onDelete) return
@@ -60,7 +64,13 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                         <div className="flex items-center gap-2">
                             {onDelete && (
                                 <button
-                                    onClick={() => setShowConfirmDelete(true)}
+                                    onClick={() => {
+                                        if (isRecurring) {
+                                            setShowDeleteSeries(true)
+                                        } else {
+                                            setShowConfirmDelete(true)
+                                        }
+                                    }}
                                     className="p-2 rounded-full hover:bg-red-500/10 text-gray-500 hover:text-red-500 transition-colors"
                                     title="Eliminar"
                                 >
@@ -197,6 +207,22 @@ export function EventDetailsModal({ isOpen, onClose, event, onDelete }: EventDet
                         )}
                     </div>
                 </motion.div>
+
+                {onDeleteSeries && (
+                    <DeleteSeriesModal
+                        isOpen={showDeleteSeries}
+                        onClose={() => setShowDeleteSeries(false)}
+                        event={event}
+                        onDeleteSingle={async (e) => {
+                            if (onDelete) await onDelete(e);
+                            onClose();
+                        }}
+                        onDeleteSeries={async (e) => {
+                            await onDeleteSeries(e);
+                            onClose();
+                        }}
+                    />
+                )}
             </div>
         </AnimatePresence>
     )

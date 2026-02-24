@@ -14,6 +14,7 @@ export async function scheduleGoogleMeetingAction(formData: {
     date: string;
     summary: string;
     attendees: string[];
+    recurrence?: string[];
 }) {
     try {
         const startTime = parseISO(formData.date);
@@ -30,6 +31,7 @@ export async function scheduleGoogleMeetingAction(formData: {
                 startTime: startTime.toISOString(),
                 endTime: endTime.toISOString(),
                 attendees: formData.attendees,
+                ...(formData.recurrence ? { recurrence: formData.recurrence } : {}),
             };
             googleEventResult = await googleCalendarService.createEvent(payload);
         } catch (calendarError) {
