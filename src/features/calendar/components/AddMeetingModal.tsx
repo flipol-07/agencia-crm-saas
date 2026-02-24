@@ -30,8 +30,19 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
     const [isRecurring, setIsRecurring] = useState(false)
     const [recurrenceFreq, setRecurrenceFreq] = useState<'DAILY' | 'WEEKLY' | 'MONTHLY'>('WEEKLY')
     const [recurrenceCount, setRecurrenceCount] = useState(10)
+    const [selectedDays, setSelectedDays] = useState<string[]>(['MO'])
     const [guestPhones, setGuestPhones] = useState<string[]>([])
     const [currentPhoneInput, setCurrentPhoneInput] = useState('')
+
+    const DAYS_OF_WEEK = [
+        { key: 'MO', label: 'L', index: 1 },
+        { key: 'TU', label: 'M', index: 2 },
+        { key: 'WE', label: 'X', index: 3 },
+        { key: 'TH', label: 'J', index: 4 },
+        { key: 'FR', label: 'V', index: 5 },
+        { key: 'SA', label: 'S', index: 6 },
+        { key: 'SU', label: 'D', index: 0 },
+    ]
 
     // Fetch contacts and team members
     useEffect(() => {
@@ -77,6 +88,14 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
         setGuestPhones(prev => prev.filter((_, i) => i !== index));
     }
 
+    const toggleDay = (dayKey: string) => {
+        setSelectedDays(prev =>
+            prev.includes(dayKey)
+                ? (prev.length > 1 ? prev.filter(d => d !== dayKey) : prev)
+                : [...prev, dayKey]
+        )
+    }
+
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault()
         if (!user) {
@@ -89,7 +108,15 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
 
         try {
             const dateStr = formData.get('date') as string
-            const recurrenceRules = isRecurring ? [`RRULE:FREQ=${recurrenceFreq};COUNT=${recurrenceCount}`] : undefined
+            let recurrenceRules: string[] | undefined = undefined
+
+            if (isRecurring) {
+                let rule = `RRULE:FREQ=${recurrenceFreq};COUNT=${recurrenceCount}`
+                if (recurrenceFreq === 'WEEKLY' && selectedDays.length > 0) {
+                    rule += `;BYDAY=${selectedDays.join(',')}`
+                }
+                recurrenceRules = [rule]
+            }
 
             const result = await scheduleGoogleMeetingAction({
                 title: formData.get('title') as string,
@@ -107,28 +134,74 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                 const meetingsToInsert: any[] = []
                 const series_id = isRecurring ? crypto.randomUUID() : null
 
-                const occurrences = isRecurring ? recurrenceCount : 1
+                const totalInstances = isRecurring ? recurrenceCount : 1
 
-                for (let i = 0; i < occurrences; i++) {
-                    let instanceDate = new Date(baseDate)
-                    if (i > 0) {
-                        if (recurrenceFreq === 'DAILY') instanceDate = addDays(baseDate, i)
-                        else if (recurrenceFreq === 'WEEKLY') instanceDate = addWeeks(baseDate, i)
-                        else if (recurrenceFreq === 'MONTHLY') instanceDate = addMonths(baseDate, i)
-                    }
-
+                if (!isRecurring) {
                     meetingsToInsert.push({
                         title: formData.get('title') as string,
-                        date: instanceDate.toISOString(),
+                        date: baseDate.toISOString(),
                         summary: formData.get('summary') as string,
                         contact_id: (formData.get('contact_id') as string) || null,
                         user_id: user.id,
                         meeting_url: result.data?.meetLink || null,
-                        external_id: result.data?.id || null, // Google ID (same for series in Google)
+                        external_id: result.data?.id || null,
+                        series_id: null,
+                        guest_phones: guestPhones,
+                        status: 'scheduled' as const
+                    })
+                } else {
+                    let currentSearchDate = new Date(baseDate)
+                    let itemsAdded = 0
+
+                    // The first instance is always the start date (DTSTART in iCal terms)
+                    meetingsToInsert.push({
+                        title: formData.get('title') as string,
+                        date: baseDate.toISOString(),
+                        summary: formData.get('summary') as string,
+                        contact_id: (formData.get('contact_id') as string) || null,
+                        user_id: user.id,
+                        meeting_url: result.data?.meetLink || null,
+                        external_id: result.data?.id || null,
                         series_id,
                         guest_phones: guestPhones,
                         status: 'scheduled' as const
                     })
+                    itemsAdded++
+
+                    // Find subsequent dates
+                    while (itemsAdded < totalInstances) {
+                        currentSearchDate = addDays(currentSearchDate, 1)
+                        const dayIdx = currentSearchDate.getDay() // 0-6
+
+                        let shouldAdd = false
+                        if (recurrenceFreq === 'DAILY') shouldAdd = true
+                        else if (recurrenceFreq === 'WEEKLY') {
+                            const dayObj = DAYS_OF_WEEK.find(d => d.index === dayIdx)
+                            if (dayObj && selectedDays.includes(dayObj.key)) shouldAdd = true
+                        } else if (recurrenceFreq === 'MONTHLY') {
+                            // Simplified Monthly: same day of month
+                            if (currentSearchDate.getDate() === baseDate.getDate()) shouldAdd = true
+                        }
+
+                        if (shouldAdd) {
+                            meetingsToInsert.push({
+                                title: formData.get('title') as string,
+                                date: currentSearchDate.toISOString(),
+                                summary: formData.get('summary') as string,
+                                contact_id: (formData.get('contact_id') as string) || null,
+                                user_id: user.id,
+                                meeting_url: result.data?.meetLink || null,
+                                external_id: result.data?.id || null,
+                                series_id,
+                                guest_phones: guestPhones,
+                                status: 'scheduled' as const
+                            })
+                            itemsAdded++
+                        }
+
+                        // Safety break
+                        if (meetingsToInsert.length > 100) break
+                    }
                 }
 
                 console.log(`💾 Guardando ${meetingsToInsert.length} reunión(es) en BD. Asistentes:`, selectedAttendees)
@@ -320,28 +393,61 @@ export function AddMeetingModal({ isOpen, onClose, onSuccess, selectedDate }: Ad
                                                     exit={{ height: 0, opacity: 0 }}
                                                     className="grid grid-cols-2 gap-4 overflow-hidden"
                                                 >
-                                                    <div className="space-y-2 pt-2">
+                                                    <div className="space-y-2 pt-2 col-span-2">
                                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Frecuencia</label>
-                                                        <select
-                                                            value={recurrenceFreq}
-                                                            onChange={(e) => setRecurrenceFreq(e.target.value as any)}
-                                                            className="flex h-12 w-full rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-2 text-sm text-white focus:border-brand/40 transition-all outline-none appearance-none"
-                                                        >
-                                                            <option value="DAILY" className="bg-[#0A0A0A]">Diaria</option>
-                                                            <option value="WEEKLY" className="bg-[#0A0A0A]">Semanal</option>
-                                                            <option value="MONTHLY" className="bg-[#0A0A0A]">Mensual</option>
-                                                        </select>
+                                                        <div className="flex bg-white/[0.03] rounded-2xl p-1 border border-white/5">
+                                                            {['DAILY', 'WEEKLY', 'MONTHLY'].map((freq) => (
+                                                                <button
+                                                                    key={freq}
+                                                                    type="button"
+                                                                    onClick={() => setRecurrenceFreq(freq as any)}
+                                                                    className={`flex-1 py-2 text-[10px] font-bold uppercase tracking-widest rounded-xl transition-all ${recurrenceFreq === freq ? 'bg-brand text-black shadow-[0_0_15px_rgba(163,230,53,0.2)]' : 'text-gray-500 hover:text-gray-300'}`}
+                                                                >
+                                                                    {freq === 'DAILY' ? 'Diaria' : freq === 'WEEKLY' ? 'Semanal' : 'Mensual'}
+                                                                </button>
+                                                            ))}
+                                                        </div>
                                                     </div>
-                                                    <div className="space-y-2 pt-2">
-                                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Repeticiones (Max 52)</label>
-                                                        <input
-                                                            type="number"
-                                                            min={2}
-                                                            max={52}
-                                                            value={Number.isNaN(recurrenceCount) ? '' : recurrenceCount}
-                                                            onChange={(e) => setRecurrenceCount(parseInt(e.target.value))}
-                                                            className="flex h-12 w-full rounded-2xl border border-white/5 bg-white/[0.03] px-5 py-2 text-sm text-white focus:border-brand/40 transition-all outline-none"
-                                                        />
+
+                                                    <AnimatePresence>
+                                                        {recurrenceFreq === 'WEEKLY' && (
+                                                            <motion.div
+                                                                initial={{ opacity: 0, height: 0 }}
+                                                                animate={{ opacity: 1, height: 'auto' }}
+                                                                exit={{ opacity: 0, height: 0 }}
+                                                                className="col-span-2 space-y-2"
+                                                            >
+                                                                <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Repetir estos días</label>
+                                                                <div className="flex justify-between gap-1">
+                                                                    {DAYS_OF_WEEK.map((day) => (
+                                                                        <button
+                                                                            key={day.key}
+                                                                            type="button"
+                                                                            onClick={() => toggleDay(day.key)}
+                                                                            className={`w-10 h-10 rounded-xl border text-[11px] font-bold transition-all ${selectedDays.includes(day.key) ? 'bg-brand/10 border-brand text-brand' : 'border-white/5 bg-white/[0.02] text-gray-500 hover:border-white/20'}`}
+                                                                        >
+                                                                            {day.label}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </motion.div>
+                                                        )}
+                                                    </AnimatePresence>
+
+                                                    <div className="space-y-2 pt-2 col-span-2">
+                                                        <label htmlFor="count" className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">Número total de ocurrencias (Max 52)</label>
+                                                        <div className="flex items-center gap-4">
+                                                            <input
+                                                                id="count"
+                                                                type="range"
+                                                                min={2}
+                                                                max={52}
+                                                                value={recurrenceCount}
+                                                                onChange={(e) => setRecurrenceCount(parseInt(e.target.value))}
+                                                                className="flex-1 accent-brand"
+                                                            />
+                                                            <span className="text-sm font-mono text-brand w-8 text-right font-bold">{recurrenceCount}</span>
+                                                        </div>
                                                     </div>
                                                 </motion.div>
                                             )}
