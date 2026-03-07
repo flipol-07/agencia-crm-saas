@@ -39,30 +39,32 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'No urgent tasks found' });
         }
 
-        const results = [];
-
-        for (const taskData of (tasks as any[])) {
+        const results: any[] = [];
+        const taskPromises = (tasks as any[]).map(async (taskData) => {
             const task = taskData;
             const assignees = Array.isArray(task.profiles) ? task.profiles : [task.profiles];
 
-            for (const profile of assignees) {
-                if (!profile?.id) continue;
+            const assigneePromises = assignees.map(async (profile: any) => {
+                if (!profile?.id) return;
 
-                // 2. Notify via WhatsApp (Global target for now as per whatsapp.ts config)
-                await WhatsAppService.notifyTaskUrgent(
-                    task.title,
-                    new Date(task.due_date).toLocaleString(),
-                    task.id
+                // 2 & 3. Notify via WhatsApp and Push in parallel
+                const notificationPromises: Promise<any>[] = [];
+
+                notificationPromises.push(
+                    WhatsAppService.notifyTaskUrgent(
+                        task.title,
+                        new Date(task.due_date).toLocaleString(),
+                        task.id
+                    )
                 );
 
-                // 3. Notify via Web Push
                 const { data: subscriptions } = await (supabase
                     .from('push_subscriptions') as any)
-                    .select('subscription')
+                    .select('id, subscription')
                     .eq('user_id', profile.id);
 
                 if (subscriptions && (subscriptions as any[]).length > 0) {
-                    for (const sub of (subscriptions as any[])) {
+                    const pushPromises = (subscriptions as any[]).map(async (sub) => {
                         const pushResult = await WebPushService.sendNotification(sub.subscription, {
                             title: 'Tarea Urgente',
                             body: `La tarea "${task.title}" vence pronto (${new Date(task.due_date).toLocaleTimeString()}).`,
@@ -70,19 +72,23 @@ export async function GET(request: NextRequest) {
                         });
 
                         if (pushResult.error === 'GONE') {
-                            // Clean up invalid subscription
                             await (supabase
                                 .from('push_subscriptions') as any)
                                 .delete()
-                                .eq('user_id', profile.id)
-                                .eq('subscription', sub.subscription);
+                                .eq('id', sub.id);
                         }
-                    }
+                    });
+                    notificationPromises.push(...pushPromises);
                 }
 
+                await Promise.allSettled(notificationPromises);
                 results.push({ task: task.title, user: profile.full_name });
-            }
-        }
+            });
+
+            await Promise.all(assigneePromises);
+        });
+
+        await Promise.all(taskPromises);
 
         return NextResponse.json({ success: true, processed: results });
 

@@ -39,10 +39,10 @@ export async function GET(req: Request) {
             push_failed: 0
         }
 
-        // Mapa de subscriptions por user para evitar múltiples queries.
         const subscriptionsByUser = new Map<string, any[]>()
         const notificationPrefsByUser = new Map<string, { push_enabled: boolean, whatsapp_enabled: boolean, whatsapp_number: string }>()
 
+        // 1. Loading preferences in batch
         const loadNotificationPreferencesForUsers = async (userIds: string[]) => {
             const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)))
             const idsToLoad = uniqueUserIds.filter(userId => !notificationPrefsByUser.has(userId))
@@ -69,250 +69,160 @@ export async function GET(req: Request) {
             }
         }
 
-        const sendPushToUsers = async (
+        // Parallelized notification sending
+        const sendNotificationsToUsers = async (
             userIds: string[],
-            payload: { title: string, body: string, data?: Record<string, any> }
+            payload: { title: string, body: string, data?: Record<string, any> },
+            buildWhatsAppMsg: (userId: string) => string
         ) => {
             const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)))
             if (uniqueUserIds.length === 0) return
 
             await loadNotificationPreferencesForUsers(uniqueUserIds)
-            const enabledUsers = uniqueUserIds.filter(userId => notificationPrefsByUser.get(userId)?.push_enabled !== false)
 
-            for (const userId of enabledUsers) {
-                let subs = subscriptionsByUser.get(userId)
-                if (!subs) {
-                    const { data } = await (supabase
-                        .from('push_subscriptions') as any)
-                        .select('id, subscription')
-                        .eq('user_id', userId)
-                    const loadedSubs = data || []
-                    subscriptionsByUser.set(userId, loadedSubs)
-                    subs = loadedSubs
-                }
-
-                for (const sub of subs || []) {
-                    diagnostics.push_subscriptions++
-                    const result = await WebPushService.sendNotification(sub.subscription, payload)
-                    if (result.success) {
-                        diagnostics.push_sent++
-                    } else {
-                        diagnostics.push_failed++
-                    }
-
-                    if (result.error === 'GONE') {
-                        await (supabase
-                            .from('push_subscriptions') as any)
-                            .delete()
-                            .eq('id', sub.id)
-                    }
-                }
-            }
-        }
-
-        const sendWhatsAppToUsers = async (
-            userIds: string[],
-            buildMessage: (userId: string) => string
-        ) => {
-            const uniqueUserIds = Array.from(new Set(userIds.filter(Boolean)))
-            if (uniqueUserIds.length === 0) return { attempted: 0, sent: 0 }
-
-            await loadNotificationPreferencesForUsers(uniqueUserIds)
-            let attempted = 0
-            let sent = 0
-
-            for (const userId of uniqueUserIds) {
+            const notificationPromises = uniqueUserIds.map(async (userId) => {
                 const pref = notificationPrefsByUser.get(userId)
-                const number = pref?.whatsapp_number || ''
-                if (!pref?.whatsapp_enabled || !/^34\d{8,15}$/.test(number)) continue
 
-                attempted++
-                const result = await WhatsAppService.sendMessageToNumberDetailed(number, buildMessage(userId))
-                diagnostics.whatsapp_last_status = Number(result.status || diagnostics.whatsapp_last_status || 0)
-                if (result.success) {
-                    sent++
+                // 1. WhatsApp
+                if (pref?.whatsapp_enabled && /^34\d{8,15}$/.test(pref.whatsapp_number)) {
+                    diagnostics.whatsapp_email_attempted++
+                    const waResult = await WhatsAppService.sendMessageToNumberDetailed(pref.whatsapp_number, buildWhatsAppMsg(userId))
+                    if (waResult.success) diagnostics.whatsapp_email_sent++
+                    else diagnostics.whatsapp_last_error = String(waResult.error || '').slice(0, 100)
                 }
-                if (!result.success) {
-                    diagnostics.whatsapp_last_error = String(result.error || '').slice(0, 500)
-                }
-            }
 
-            return { attempted, sent }
+                // 2. Push
+                if (pref?.push_enabled !== false) {
+                    let subs: any[] = subscriptionsByUser.get(userId) || [];
+                    if (subs.length === 0) {
+                        const { data } = await (supabase.from('push_subscriptions') as any).select('id, subscription').eq('user_id', userId)
+                        subs = (data || []) as any[];
+                        subscriptionsByUser.set(userId, subs)
+                    }
+
+                    await Promise.allSettled(subs.map(async (sub) => {
+                        diagnostics.push_subscriptions++
+                        const result = await WebPushService.sendNotification(sub.subscription, payload)
+                        if (result.success) diagnostics.push_sent++
+                        else {
+                            diagnostics.push_failed++
+                            if (result.error === 'GONE') {
+                                await (supabase.from('push_subscriptions') as any).delete().eq('id', sub.id)
+                            }
+                        }
+                    }))
+                }
+            })
+
+            await Promise.allSettled(notificationPromises)
         }
 
         // ============================================
         // 1. SINCRONIZACIÓN DE EMAILS (IMAP)
         // ============================================
         const emails = await EmailService.fetchGlobalRecent(20)
+        if (emails.length > 0) {
+            // Batch check existence
+            const messageIds = emails.map(e => e.messageId)
+            const { data: existingIdsData } = await (supabase
+                .from('contact_emails') as any)
+                .select('message_id')
+                .in('message_id', messageIds)
 
-        for (const email of emails) {
-            try {
-                // Buscar contacto por email
-                const { data: contact, error: contactError } = await (supabase
-                    .from('contacts') as any)
-                    .select('id, assigned_to, created_by')
-                    .eq('email', email.from)
-                    .maybeSingle()
+            const existingIds = new Set((existingIdsData || []).map((row: any) => row.message_id))
+            const newEmails = emails.filter(e => !existingIds.has(e.messageId))
 
-                if (contactError) {
-                    console.error(`[Cron] Error buscando contacto ${email.from}:`, contactError)
-                    continue
-                }
+            for (const email of newEmails) {
+                try {
+                    // Contact check (could be batched but more complex due to email lookup)
+                    const { data: contact } = await (supabase.from('contacts') as any).select('id, assigned_to, created_by').eq('email', email.from).maybeSingle()
+                    const contactId = contact?.id || null
 
-                const contactId = contact?.id || null
+                    const { error: upsertError } = await (supabase.from('contact_emails') as any).upsert({
+                        contact_id: contactId,
+                        message_id: email.messageId,
+                        subject: email.subject,
+                        from_email: email.from,
+                        to_email: email.to,
+                        body_text: email.text,
+                        body_html: email.html,
+                        direction: email.direction,
+                        received_at: email.date.toISOString(),
+                        is_read: false,
+                        snippet: email.snippet
+                    }, { onConflict: 'message_id' })
 
-                // Verificar si ya existe para evitar duplicar notificaciones
-                const { data: existing, error: checkError } = await (supabase
-                    .from('contact_emails') as any)
-                    .select('id')
-                    .eq('message_id', email.messageId)
-                    .maybeSingle()
+                    if (upsertError) continue
 
-                if (checkError) {
-                    // Si el error es de sintaxis UUID (22P02), es que la columna message_id está mal tipada
-                    if ((checkError as any).code === '22P02') {
-                        console.error(`[Cron] 🚨 ERROR DE ESQUEMA: La columna contact_emails.message_id debe ser TEXT, no UUID.`)
-                        console.error(`[Cron] 💡 SOLUCIÓN: Ejecuta este SQL en el panel de Supabase:`)
-                        console.error(`       ALTER TABLE contact_emails ALTER COLUMN message_id TYPE text;`)
-                    } else {
-                        console.error(`[Cron] Error verificando existencia de email:`, checkError)
+                    if (email.direction === 'inbound') {
+                        syncedEmails++
+                        const pushTargets: string[] = []
+                        if (contact?.assigned_to) pushTargets.push(contact.assigned_to)
+                        if (contact?.created_by) pushTargets.push(contact.created_by)
+
+                        if (pushTargets.length === 0) {
+                            const { data: profiles } = await (supabase.from('profiles') as any).select('id').limit(5)
+                                ; (profiles || []).forEach((p: any) => pushTargets.push(p.id))
+                        }
+
+                        // Send notifications in background (don't strictly await each one sequentially)
+                        await sendNotificationsToUsers(
+                            Array.from(new Set(pushTargets)),
+                            {
+                                title: 'Nuevo Email',
+                                body: `${email.from}: ${email.subject || '(Sin asunto)'}`,
+                                data: { url: contactId ? `/contacts/${contactId}` : '/mail' }
+                            },
+                            () => `📧 *Nuevo Email en CRM Aurie*\n\n*De:* ${email.from}\n*Asunto:* ${email.subject || '(Sin asunto)'}\n\n👉 Ver: https://agencia-crm-saas.vercel.app${contactId ? `/contacts/${contactId}` : '/mail'}`
+                        )
+
+                        if (contactId) {
+                            await (supabase.from('contacts') as any).update({ last_interaction: new Date().toISOString() }).eq('id', contactId)
+                        }
                     }
-                    continue
+                } catch (err) {
+                    console.error('[Cron] Loop Email Error:', err)
                 }
-
-                const { error: upsertError } = await (supabase.from('contact_emails') as any).upsert({
-                    contact_id: contactId,
-                    message_id: email.messageId,
-                    subject: email.subject,
-                    from_email: email.from,
-                    to_email: email.to,
-                    body_text: email.text,
-                    body_html: email.html,
-                    direction: email.direction,
-                    received_at: email.date.toISOString(),
-                    is_read: false,
-                    snippet: email.snippet
-                }, {
-                    onConflict: 'message_id'
-                })
-
-                if (upsertError) {
-                    console.error(`[Cron] Error al upsertar email ${email.messageId}:`, upsertError)
-                    continue
-                }
-
-                // Solo notificamos nuevos inbound (evita alertas de correos salientes).
-                if (!existing && email.direction === 'inbound') {
-                    syncedEmails++
-
-                    const pushTargets: string[] = []
-                    if (contact?.assigned_to) pushTargets.push(contact.assigned_to)
-                    if (contact?.created_by) pushTargets.push(contact.created_by)
-
-                    // Fallback: si no hay owner claro, empujamos a todos los perfiles.
-                    if (pushTargets.length === 0) {
-                        const { data: profiles } = await (supabase
-                            .from('profiles') as any)
-                            .select('id')
-                        ;(profiles || []).forEach((p: any) => p?.id && pushTargets.push(p.id))
-                    }
-                    diagnostics.push_targets += Array.from(new Set(pushTargets)).length
-
-                    const emailWhatsApp = await sendWhatsAppToUsers(pushTargets, () =>
-                        `📧 *Nuevo Email en CRM Aurie*\n\n*De:* ${email.from}\n*Asunto:* ${email.subject || '(Sin asunto)'}\n\n👉 Ver en el CRM: https://agencia-crm-saas.vercel.app${contactId ? `/contacts/${contactId}` : '/mail'}`
-                    )
-                    diagnostics.whatsapp_email_attempted += emailWhatsApp.attempted
-                    diagnostics.whatsapp_email_sent += emailWhatsApp.sent
-
-                    await sendPushToUsers(pushTargets, {
-                        title: 'Nuevo Email',
-                        body: `${email.from}: ${email.subject || '(Sin asunto)'}`,
-                        data: { url: contactId ? `/contacts/${contactId}` : '/mail' }
-                    })
-
-                    if (contactId) {
-                        await (supabase.from('contacts') as any)
-                            .update({ last_interaction: new Date().toISOString() })
-                            .eq('id', contactId)
-                    }
-                }
-            } catch (loopError) {
-                console.error(`[Cron] Error procesando email individual:`, loopError)
             }
         }
 
         // ============================================
         // 2. NOTIFICACIÓN DE MENSAJES DE CHAT (TEAM)
         // ============================================
-        // Buscamos mensajes del equipo creados en los últimos 6 minutos (margen para evitar gaps)
-        // que no hayan sido leídos.
         const fiveMinutesAgo = new Date(Date.now() - 6 * 60 * 1000).toISOString()
-
         const { data: recentMessages, error: chatError } = await (supabase
             .from('team_messages') as any)
-            .select(`
-                *,
-                sender:profiles!team_messages_sender_id_fkey(full_name),
-                chat:team_chats(id, name, is_group)
-            `)
+            .select(`*, sender:profiles!team_messages_sender_id_fkey(full_name), chat:team_chats(id, name, is_group)`)
             .gt('created_at', fiveMinutesAgo)
             .is('read_at', null)
 
-        if (!chatError && recentMessages) {
-            // Notificamos mensajes de equipo unread
+        if (!chatError && recentMessages && recentMessages.length > 0) {
             for (const msg of (recentMessages as any[])) {
-                // Deduplicación persistente por mensaje para no reenviar cada 5 min.
-                const { data: alreadyNotified } = await (supabase
-                    .from('notifications') as any)
-                    .select('id')
-                    .eq('title', TEAM_MESSAGE_EVENT_TITLE)
-                    .eq('message', msg.id)
-                    .maybeSingle()
-
+                const { data: alreadyNotified } = await (supabase.from('notifications') as any).select('id').eq('title', TEAM_MESSAGE_EVENT_TITLE).eq('message', msg.id).maybeSingle()
                 if (alreadyNotified) continue
 
-                // Evitamos auto-notificarnos si somos el remitente (aunque el admin suele ser quien recibe)
-                const senderName = msg.sender?.full_name || 'Alguien del equipo'
-                const chatName = msg.chat?.name || (msg.chat?.is_group ? 'Grupo' : 'Chat privado')
+                const { data: participants } = await (supabase.from('team_chat_participants') as any).select('user_id').eq('chat_id', msg.chat_id).neq('user_id', msg.sender_id)
+                const pushTargets = (participants || []).map((p: any) => p.user_id).filter(Boolean)
 
-                    // Push a participantes del chat, excepto remitente.
-                    const { data: participants } = await (supabase
-                        .from('team_chat_participants') as any)
-                        .select('user_id')
-                        .eq('chat_id', msg.chat_id)
-                        .neq('user_id', msg.sender_id)
+                if (pushTargets.length > 0) {
+                    const senderName = msg.sender?.full_name || 'Alguien del equipo'
+                    const chatName = msg.chat?.name || (msg.chat?.is_group ? 'Grupo' : 'Chat privado')
 
-                    const pushTargets = (participants || []).map((p: any) => p.user_id).filter(Boolean)
-                    const chatWhatsApp = await sendWhatsAppToUsers(pushTargets, () =>
-                        `💬 *Mensaje de Equipo en CRM Aurie*\n\n*De:* ${senderName}\n*Chat:* ${chatName}\n*Mensaje:* ${msg.content.substring(0, 120)}\n\n👉 Responder: https://agencia-crm-saas.vercel.app/team-chat/${msg.chat_id}`
+                    await sendNotificationsToUsers(
+                        pushTargets,
+                        {
+                            title: `Mensaje en ${chatName}`,
+                            body: `${senderName}: ${msg.content.substring(0, 120)}`,
+                            data: { url: `/team-chat/${msg.chat_id}` }
+                        },
+                        () => `💬 *Mensaje de Equipo*\n\n*De:* ${senderName}\n*Mensaje:* ${msg.content.substring(0, 120)}\n\n👉 https://agencia-crm-saas.vercel.app/team-chat/${msg.chat_id}`
                     )
-                    diagnostics.whatsapp_chat_attempted += chatWhatsApp.attempted
-                    diagnostics.whatsapp_chat_sent += chatWhatsApp.sent
+                }
 
-                    diagnostics.push_targets += Array.from(new Set(pushTargets)).length
-                    await sendPushToUsers(pushTargets, {
-                        title: `Mensaje en ${chatName}`,
-                        body: `${senderName}: ${msg.content.substring(0, 120)}`,
-                        data: { url: `/team-chat/${msg.chat_id}` }
-                    })
-
-                await (supabase
-                    .from('notifications') as any)
-                    .insert({
-                        title: TEAM_MESSAGE_EVENT_TITLE,
-                        message: msg.id,
-                        user_id: null,
-                        metadata: {
-                            chat_id: msg.chat_id,
-                            sender_id: msg.sender_id
-                        }
-                    })
-
+                await (supabase.from('notifications') as any).insert({ title: TEAM_MESSAGE_EVENT_TITLE, message: msg.id, user_id: null, metadata: { chat_id: msg.chat_id, sender_id: msg.sender_id } })
                 notifiedChatMessages++
             }
         }
-
-        console.log(`[Cron] Sincronización completada: ${syncedEmails} emails, ${notifiedChatMessages} chats.`)
 
         return NextResponse.json({
             success: true,
@@ -324,10 +234,6 @@ export async function GET(req: Request) {
 
     } catch (error: any) {
         console.error('[Cron] Error Crítico:', error)
-        return NextResponse.json({
-            success: false,
-            error: error.message,
-            stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
-        }, { status: 500 })
+        return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 }

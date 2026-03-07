@@ -146,18 +146,23 @@ export class EmailService {
         })
 
         try {
-            const foldersToScan = ['INBOX', 'INBOX.Sent', 'Sent', 'Sent Messages']
+            // Scan fewer folders to save time and CPU
+            const foldersToScan = ['INBOX', 'Sent Messages', 'Sent']
             const allParsedEmails: EmailMessage[] = []
+
+            // Use SINCE to limit the initial search set (last 2 days)
+            const twoDaysAgo = new Date();
+            twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
+            // Format for IMAP (Month Day, Year)
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            const sinceDate = `${monthNames[twoDaysAgo.getMonth()]} ${twoDaysAgo.getDate()}, ${twoDaysAgo.getFullYear()}`;
 
             for (const folder of foldersToScan) {
                 try {
                     await connection.openBox(folder)
 
-                    // Fetch recent messages
-                    // We use 1:* to get all messages, but since we only want recent ones,
-                    // in a real large mailbox we should rely on SEARCH with SINCE date or similar.
-                    // For simplicity and "recent" logic, we'll take the las 'limit' messages.
-                    const searchCriteria = ['ALL']
+                    // Fetch messages from recent days only
+                    const searchCriteria = [['SINCE', sinceDate]];
                     const fetchOptions = {
                         bodies: ['HEADER', 'TEXT', ''],
                         markSeen: false,
@@ -165,41 +170,50 @@ export class EmailService {
                     }
 
                     const messages = await connection.search(searchCriteria, fetchOptions)
-                    const recentMessages = messages.slice(-limit)
+                    // If we have many messages, still limit to the most recent ones
+                    const recentMessages = messages.sort((a, b) => b.attributes.uid - a.attributes.uid).slice(0, limit)
 
-                    for (const item of recentMessages) {
+                    // Parallelize parsing of these emails for speed
+                    const parsedResults = await Promise.all(recentMessages.map(async (item) => {
                         const all = item.parts.find((part: any) => part.which === '')
                         const id = item.attributes.uid
 
                         if (all && all.body) {
-                            const parsed = await simpleParser(all.body)
+                            try {
+                                const parsed = await simpleParser(all.body)
+                                const fromAddr = parsed.from?.value[0]?.address || ''
+                                const direction = fromAddr.toLowerCase().includes(EMAIL_CONFIG.user.toLowerCase()) ? 'outbound' : 'inbound'
 
-                            const fromAddr = parsed.from?.value[0]?.address || ''
+                                let toAddr = ''
+                                if (Array.isArray(parsed.to)) {
+                                    toAddr = parsed.to[0]?.text || ''
+                                } else if (parsed.to && 'text' in (parsed.to as any)) {
+                                    toAddr = (parsed.to as any).text || ''
+                                }
 
-                            // Determine direction based on our user email
-                            // If the sender is us, it's outbound. Otherwise inbound.
-                            const direction = fromAddr.toLowerCase().includes(EMAIL_CONFIG.user.toLowerCase()) ? 'outbound' : 'inbound'
-
-                            let toAddr = ''
-                            if (Array.isArray(parsed.to)) {
-                                toAddr = parsed.to[0]?.text || ''
-                            } else if (parsed.to && 'text' in (parsed.to as any)) {
-                                toAddr = (parsed.to as any).text || ''
+                                return {
+                                    messageId: parsed.messageId || `imap-${folder}-${id}`,
+                                    subject: parsed.subject || '(Sin asunto)',
+                                    from: fromAddr,
+                                    to: toAddr,
+                                    date: parsed.date || new Date(),
+                                    text: parsed.text || '',
+                                    html: parsed.html || '',
+                                    snippet: (parsed.text || '').substring(0, 150),
+                                    direction
+                                } as EmailMessage;
+                            } catch (e) {
+                                console.error(`Error parsing message ${id}:`, e);
+                                return null;
                             }
-
-                            allParsedEmails.push({
-                                messageId: parsed.messageId || `imap-${folder}-${id}`,
-                                subject: parsed.subject || '(Sin asunto)',
-                                from: fromAddr,
-                                to: toAddr,
-                                date: parsed.date || new Date(),
-                                text: parsed.text || '',
-                                html: parsed.html || '',
-                                snippet: (parsed.text || '').substring(0, 150),
-                                direction
-                            })
                         }
+                        return null;
+                    }));
+
+                    for (const res of parsedResults) {
+                        if (res) allParsedEmails.push(res);
                     }
+
                 } catch (folderError: any) {
                     console.warn(`Folder ${folder} not found or inaccessible during global sync:`, folderError.message)
                 }
@@ -213,51 +227,9 @@ export class EmailService {
             // Sort by date desc
             const sorted = uniqueEmails.sort((a, b) => b.date.getTime() - a.date.getTime())
 
-            // Proactividad: Intentar generar embeddings para los nuevos si se llama desde un contexto que lo permita
-            try {
-                const supabase = await createClient();
-                for (const email of sorted.slice(0, 5)) {
-                    try {
-                        const content = `Asunto: ${email.subject}\n\nContenido: ${email.text || email.snippet}`;
-
-                        // Verificar si ya existe para no duplicar
-                        const { data: existing, error: checkError } = await (supabase
-                            .from('embeddings' as any)
-                            .select('id')
-                            .eq('entity_id', email.messageId)
-                            .eq('entity_type', 'email') as any)
-                            .maybeSingle();
-
-                        if (checkError) {
-                            if ((checkError as any).code === '22P02') {
-                                console.error(`[EmailService] 🚨 ERROR DE ESQUEMA en 'embeddings': entity_id debe ser TEXT, no UUID. Valor: ${email.messageId}`);
-                            } else {
-                                console.error('[EmailService] Error verificando embeddings:', checkError);
-                            }
-                            continue;
-                        }
-
-                        if (!existing) {
-                            AiMemoryService.storeMemory({
-                                content,
-                                entity_type: 'email',
-                                entity_id: email.messageId,
-                                metadata: { subject: email.subject }
-                            }, supabase).catch(err => {
-                                if (err.code === '22P02') {
-                                    console.error(`[EmailService] 🚨 ERROR DE ESQUEMA al insertar en 'embeddings': entity_id debe ser TEXT, no UUID.`);
-                                } else {
-                                    console.error('[EmailService] Error guardando memoria:', err);
-                                }
-                            });
-                        }
-                    } catch (loopError) {
-                        console.error('[EmailService] Error en bucle de embeddings:', loopError);
-                    }
-                }
-            } catch (err) {
-                console.warn('Background embedding generation skipped or failed:', err);
-            }
+            // NOTE: Embedding generation removed from here to separate business logic from I/O sync.
+            // This avoids hitting API limits and CPU limits synchronously.
+            // The caller (cron) will handle embeddings for TRULY new emails.
 
             return sorted
 

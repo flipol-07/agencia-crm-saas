@@ -257,32 +257,56 @@ export async function getMonthlyTrend(userId: string, months: number = 6): Promi
 
     const supabase = createAdminClient()
     const now = new Date()
+    const startDate = format(startOfMonth(subMonths(now, months - 1)), 'yyyy-MM-dd')
+    const endDate = format(endOfMonth(now), 'yyyy-MM-dd')
 
-    const monthPromises = Array.from({ length: months }, (_, i) => {
+    // 1. Fetch all records in range in just 2 queries
+    const [incomeResult, expenseResult] = await Promise.all([
+        (supabase as any).from('expenses')
+            .select('amount, date')
+            .eq('type', 'income')
+            .gte('date', startDate)
+            .lte('date', endDate),
+        (supabase as any).from('expenses')
+            .select('amount, date')
+            .eq('type', 'expense')
+            .eq('is_personal', false)
+            .gte('date', startDate)
+            .lte('date', endDate)
+    ])
+
+    const incomeData = (incomeResult.data || []) as { amount: number, date: string }[]
+    const expenseData = (expenseResult.data || []) as { amount: number, date: string }[]
+
+    // 2. Aggregate in JS
+    const results = Array.from({ length: months }, (_, i) => {
         const targetMonth = subMonths(now, i)
-        const monthStart = format(startOfMonth(targetMonth), 'yyyy-MM-dd')
-        const monthEnd = format(endOfMonth(targetMonth), 'yyyy-MM-dd')
+        const monthStart = startOfMonth(targetMonth)
+        const monthEnd = endOfMonth(targetMonth)
         const monthLabel = format(targetMonth, 'MMM')
 
-        return (async () => {
-            const [incomeResult, expenseResult] = await Promise.all([
-                (supabase as any).from('expenses').select('amount').eq('type', 'income').gte('date', monthStart).lte('date', monthEnd),
-                (supabase as any).from('expenses').select('amount').eq('type', 'expense').eq('is_personal', false).gte('date', monthStart).lte('date', monthEnd)
-            ])
+        const income = incomeData
+            .filter(d => {
+                const date = new Date(d.date)
+                return date >= monthStart && date <= monthEnd
+            })
+            .reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
 
-            const income = (incomeResult.data as { amount: number }[] | null)?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0
-            const expenseTotal = (expenseResult.data as { amount: number }[] | null)?.reduce((sum, item) => sum + (Number(item.amount) || 0), 0) || 0
+        const expenses = expenseData
+            .filter(d => {
+                const date = new Date(d.date)
+                return date >= monthStart && date <= monthEnd
+            })
+            .reduce((sum, item) => sum + (Number(item.amount) || 0), 0)
 
-            return {
-                month: monthLabel,
-                income,
-                expenses: expenseTotal,
-                sortKey: i
-            }
-        })()
+        return {
+            month: monthLabel,
+            income,
+            expenses,
+            sortKey: i
+        }
     })
 
-    const results = await Promise.all(monthPromises)
     return results.sort((a, b) => b.sortKey - a.sortKey).map(({ sortKey, ...rest }) => rest)
 }
 
@@ -376,15 +400,21 @@ export async function getProjectsProgress(userId: string): Promise<ProjectProgre
         return []
     }
 
-    // Parallelize task count queries for all projects
-    const projectPromises = projects.map(async (project) => {
-        const [totalTasks, completedTasks] = await Promise.all([
-            supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('project_id', project.id),
-            supabase.from('tasks').select('*', { count: 'exact', head: true }).eq('project_id', project.id).eq('is_completed', true)
-        ])
+    const projectIds = projects.map(p => p.id)
 
-        const total = totalTasks.count || 0
-        const completed = completedTasks.count || 0
+    // 1. Fetch all tasks for these projects in one query
+    const { data: allTasks } = await (supabase as any)
+        .from('tasks')
+        .select('project_id, is_completed')
+        .in('project_id', projectIds)
+
+    const tasks = (allTasks || []) as { project_id: string, is_completed: boolean }[]
+
+    // 2. Aggregate in JS
+    return projects.map((project) => {
+        const projectTasks = tasks.filter(t => t.project_id === project.id)
+        const total = projectTasks.length
+        const completed = projectTasks.filter(t => t.is_completed).length
         const progressPercent = total > 0 ? Math.round((completed / total) * 100) : 0
 
         return {
@@ -398,8 +428,6 @@ export async function getProjectsProgress(userId: string): Promise<ProjectProgre
             deadline: project.deadline
         }
     })
-
-    return Promise.all(projectPromises)
 }
 
 /**

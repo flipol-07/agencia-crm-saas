@@ -357,6 +357,14 @@ test('should calculate total with tax', () => {
     ```
 - **Aplicar en**: Tablas que guarden IDs de sistemas externos (Email, WhatsApp, etc).
 
+### 2026-03-07: Evolution API Instance Name & Notification Reliability
+- **Error**: Notificaciones fallidas por inconsistencia en el nombre de la instancia (`EVOLUTION_INSTANCE_NAME`) y manejo de headers en scripts de notificación.
+- **Fix**: 
+    1. Asegurar que `EVOLUTION_INSTANCE_NAME` en `.env.local` no tenga comillas dobles innecesarias si el script de shell ya las maneja.
+    2. En el servicio `WhatsAppService` y el script `notify.sh`, usar siempre `encodeURIComponent` para el nombre de la instancia (ej: "AURIE POL" -> "AURIE%20POL").
+    3. Validar el estado de la instancia con `/instance/fetchInstances` antes de asumir que el nombre es correcto.
+- **Aplicar en**: Todos los sistemas que usen Evolution API para notificaciones críticas.
+
 ---
 
 *Este archivo es el cerebro de la fábrica. Cada error documentado la hace más fuerte.*

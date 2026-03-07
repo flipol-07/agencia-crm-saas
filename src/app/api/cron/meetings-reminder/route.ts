@@ -39,50 +39,55 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ message: 'No upcoming meetings to remind' });
         }
 
-        const results = [];
+        const results: any[] = [];
 
-        for (const meeting of (meetings as any[])) {
+        const reminderPromises = (meetings as any[]).map(async (meeting) => {
             const meetingDate = new Date(meeting.date);
             const diffMs = meetingDate.getTime() - now.getTime();
             const diffMinutes = Math.round(diffMs / 60000);
 
             if (diffMinutes === 10 || diffMinutes === 5) {
                 const attendees: string[] = Array.isArray(meeting.attendees) ? meeting.attendees : [];
+                const meetTimeStr = format(meetingDate, "HH:mm", { locale: es });
+                const msg = `🚨 *Recordatorio de Reunión*\n\nRecuerda que tienes esta reunión *${meeting.title}* a las *${meetTimeStr}*.\n\nY este es el enlace: ${meeting.meeting_url || 'No proporcionado'}`;
 
-                if (attendees.length > 0 || (meeting.guest_phones && meeting.guest_phones.length > 0)) {
-                    const meetTimeStr = format(meetingDate, "HH:mm", { locale: es });
-                    const msg = `🚨 *Recordatorio de Reunión*\n\nRecuerda que tienes esta reunión *${meeting.title}* a las *${meetTimeStr}*.\n\nY este es el enlace: ${meeting.meeting_url || 'No proporcionado'}`;
+                const targetPromises: Promise<any>[] = [];
 
-                    if (attendees.length > 0) {
-                        const { data: profiles } = await supabase
-                            .from('profiles')
-                            .select('email, billing_phone')
-                            .in('email', attendees)
-                            .not('billing_phone', 'is', null);
+                if (attendees.length > 0) {
+                    const { data: profiles } = await supabase
+                        .from('profiles')
+                        .select('email, billing_phone')
+                        .in('email', attendees)
+                        .not('billing_phone', 'is', null);
 
-                        if (profiles && (profiles as any[]).length > 0) {
-                            for (const profile of (profiles as any[])) {
-                                if (profile.billing_phone) {
-                                    await WhatsAppService.sendMessageToNumberDetailed(profile.billing_phone, msg);
-                                    results.push({ email: profile.email, targetPhone: profile.billing_phone, meeting: meeting.title, reminder: meetTimeStr });
-                                }
-                            }
-                        } else {
-                            console.warn(`No profiles with phones found for attendees: ${attendees.join(', ')}`);
-                        }
-                    }
-
-                    if (meeting.guest_phones && Array.isArray(meeting.guest_phones)) {
-                        for (const phone of meeting.guest_phones) {
-                            if (phone) {
-                                await WhatsAppService.sendMessageToNumberDetailed(phone, msg);
-                                results.push({ targetPhone: phone, meeting: meeting.title, reminder: meetTimeStr, isGuest: true });
+                    if (profiles && (profiles as any[]).length > 0) {
+                        for (const profile of (profiles as any[])) {
+                            if (profile.billing_phone) {
+                                targetPromises.push(
+                                    WhatsAppService.sendMessageToNumberDetailed(profile.billing_phone, msg)
+                                        .then(() => results.push({ email: profile.email, targetPhone: profile.billing_phone, meeting: meeting.title, reminder: meetTimeStr }))
+                                );
                             }
                         }
                     }
                 }
+
+                if (meeting.guest_phones && Number((meeting.guest_phones as any[]).length) > 0) {
+                    for (const phone of meeting.guest_phones) {
+                        if (phone) {
+                            targetPromises.push(
+                                WhatsAppService.sendMessageToNumberDetailed(phone, msg)
+                                    .then(() => results.push({ targetPhone: phone, meeting: meeting.title, reminder: meetTimeStr, isGuest: true }))
+                            );
+                        }
+                    }
+                }
+
+                await Promise.allSettled(targetPromises);
             }
-        }
+        });
+
+        await Promise.all(reminderPromises);
 
         return NextResponse.json({ success: true, processed: results });
 
