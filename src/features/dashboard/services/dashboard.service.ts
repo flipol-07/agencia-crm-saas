@@ -3,6 +3,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import { cacheLife } from 'next/cache'
+import { isDemoEmail } from '@/shared/lib/demo'
+import { generateRecommendations, Recommendation } from '../lib/recommendation-engine'
+import { aiRecommendationsService } from './ai-recommendations.service'
 
 // ============================================
 // Types
@@ -109,6 +112,16 @@ function getRangeFromPeriod(period: DashboardPeriod) {
     }
 }
 
+async function shouldUseDemoScope(supabase: any, userId: string) {
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .maybeSingle()
+
+    return isDemoEmail(profile?.email)
+}
+
 // ============================================
 // Service Functions
 // ============================================
@@ -122,6 +135,7 @@ export async function getExecutiveKPIs(userId: string, period: DashboardPeriod =
 
     // Use admin client to avoid cookies() inside "use cache"
     const supabase = createAdminClient()
+    const demoScope = await shouldUseDemoScope(supabase, userId)
     const { start, end, prevStart, prevEnd } = getRangeFromPeriod(period)
 
     // Parallelize all KPI queries (Current + Previous Period)
@@ -142,43 +156,63 @@ export async function getExecutiveKPIs(userId: string, period: DashboardPeriod =
         // 1. Current Income
         (async () => {
             let q = (supabase as any).from('expenses').select('amount').eq('type', 'income')
+            if (demoScope) q = q.eq('user_id', userId)
             if (start) q = q.gte('date', start)
             return q.lte('date', end)
         })(),
         // 2. Current Expenses
         (async () => {
             let q = (supabase as any).from('expenses').select('amount').eq('type', 'expense').eq('is_personal', false)
+            if (demoScope) q = q.eq('user_id', userId)
             if (start) q = q.gte('date', start)
             return q.lte('date', end)
         })(),
         // 3. Current Contacts (Pipeline)
-        (supabase as any).from('contacts').select('estimated_value').not('status', 'in', '("won","lost")'),
+        (async () => {
+            let q = (supabase as any).from('contacts').select('estimated_value').not('status', 'in', '("won","lost")')
+            if (demoScope) q = q.or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+            return q
+        })(),
         // 4. Current Projects budget
-        (supabase as any).from('projects').select('budget').eq('status', 'active'),
+        (async () => {
+            let q = (supabase as any).from('projects').select('budget').eq('status', 'active')
+            if (demoScope) q = q.eq('created_by', userId)
+            return q
+        })(),
         // 5. Current Pending invoices
-        (supabase as any).from('invoices').select('total').in('status', ['sent', 'overdue']),
+        (async () => {
+            let q = (supabase as any).from('invoices').select('total').in('status', ['sent', 'overdue'])
+            if (demoScope) q = q.or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
+            return q
+        })(),
         // 6. Current Projects count
-        supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active'),
+        (async () => {
+            let q = supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active')
+            if (demoScope) q = q.eq('created_by', userId)
+            return q
+        })(),
 
         // --- PREVIOUS PERIOD QUERIES ---
 
         // 7. Prev Income
         (async () => {
             if (!prevStart || !prevEnd) return { data: [] }
-            return (supabase as any).from('expenses')
+            let q = (supabase as any).from('expenses')
                 .select('amount')
                 .eq('type', 'income')
-                .gte('date', prevStart)
+            if (demoScope) q = q.eq('user_id', userId)
+            return q.gte('date', prevStart)
                 .lte('date', prevEnd)
         })(),
         // 8. Prev Expenses
         (async () => {
             if (!prevStart || !prevEnd) return { data: [] }
-            return (supabase as any).from('expenses')
+            let q = (supabase as any).from('expenses')
                 .select('amount')
                 .eq('type', 'expense')
                 .eq('is_personal', false)
-                .gte('date', prevStart)
+            if (demoScope) q = q.eq('user_id', userId)
+            return q.gte('date', prevStart)
                 .lte('date', prevEnd)
         })(),
         // 9. Prev Pipeline (Approx: contacts created before prevEnd and updated in that range? Hard to reconstruct pipeline state without snapshots. 
@@ -186,17 +220,19 @@ export async function getExecutiveKPIs(userId: string, period: DashboardPeriod =
         // Let's try: Contacts created in the previous period.
         (async () => {
             if (!prevStart || !prevEnd) return { data: [] }
-            return (supabase as any).from('contacts')
+            let q = (supabase as any).from('contacts')
                 .select('estimated_value')
-                .gte('created_at', prevStart)
+            if (demoScope) q = q.or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+            return q.gte('created_at', prevStart)
                 .lte('created_at', prevEnd)
         })(),
         // 10. Prev Projects (Approx: projects created in range)
         (async () => {
             if (!prevStart || !prevEnd) return { count: 0 }
-            return supabase.from('projects')
+            let q = supabase.from('projects')
                 .select('*', { count: 'exact', head: true })
-                .gte('created_at', prevStart)
+            if (demoScope) q = q.eq('created_by', userId)
+            return q.gte('created_at', prevStart)
                 .lte('created_at', prevEnd)
         })()
     ])
@@ -256,23 +292,32 @@ export async function getMonthlyTrend(userId: string, months: number = 6): Promi
     cacheLife('hours')
 
     const supabase = createAdminClient()
+    const demoScope = await shouldUseDemoScope(supabase, userId)
     const now = new Date()
     const startDate = format(startOfMonth(subMonths(now, months - 1)), 'yyyy-MM-dd')
     const endDate = format(endOfMonth(now), 'yyyy-MM-dd')
 
     // 1. Fetch all records in range in just 2 queries
-    const [incomeResult, expenseResult] = await Promise.all([
-        (supabase as any).from('expenses')
+    let incomeQuery = (supabase as any).from('expenses')
             .select('amount, date')
             .eq('type', 'income')
             .gte('date', startDate)
-            .lte('date', endDate),
-        (supabase as any).from('expenses')
+            .lte('date', endDate)
+    let expenseQuery = (supabase as any).from('expenses')
             .select('amount, date')
             .eq('type', 'expense')
             .eq('is_personal', false)
             .gte('date', startDate)
             .lte('date', endDate)
+
+    if (demoScope) {
+        incomeQuery = incomeQuery.eq('user_id', userId)
+        expenseQuery = expenseQuery.eq('user_id', userId)
+    }
+
+    const [incomeResult, expenseResult] = await Promise.all([
+        incomeQuery,
+        expenseQuery
     ])
 
     const incomeData = (incomeResult.data || []) as { amount: number, date: string }[]
@@ -318,6 +363,7 @@ export async function getExpenseDistribution(userId: string, period: DashboardPe
     cacheLife('hours')
 
     const supabase = createAdminClient()
+    const demoScope = await shouldUseDemoScope(supabase, userId)
     const { start, end } = getRangeFromPeriod(period)
 
     // Get expenses with category info
@@ -332,6 +378,7 @@ export async function getExpenseDistribution(userId: string, period: DashboardPe
 
     if (start) query = query.gte('date', start)
     query = query.lte('date', end)
+    if (demoScope) query = query.eq('user_id', userId)
 
     const { data: expenses } = await query
 
@@ -381,9 +428,10 @@ export async function getProjectsProgress(userId: string): Promise<ProjectProgre
     cacheLife('minutes')
 
     const supabase = createAdminClient()
+    const demoScope = await shouldUseDemoScope(supabase, userId)
 
     // Get active projects with client info
-    const { data: projects } = await (supabase as any)
+    let projectsQuery = (supabase as any)
         .from('projects')
         .select(`
             id,
@@ -394,7 +442,11 @@ export async function getProjectsProgress(userId: string): Promise<ProjectProgre
         `)
         .eq('status', 'active')
         .order('deadline', { ascending: true })
-        .limit(5) as { data: { id: string; name: string; status: string; deadline: string | null; contacts: { company_name: string } | null }[] | null }
+        .limit(5)
+
+    if (demoScope) projectsQuery = projectsQuery.eq('created_by', userId)
+
+    const { data: projects } = await projectsQuery as { data: { id: string; name: string; status: string; deadline: string | null; contacts: { company_name: string } | null }[] | null }
 
     if (!projects || projects.length === 0) {
         return []
@@ -438,11 +490,16 @@ export async function getRecentLeads(userId: string) {
     cacheLife('minutes')
 
     const supabase = createAdminClient()
-    const { data } = await supabase
+    const demoScope = await shouldUseDemoScope(supabase, userId)
+    let query = supabase
         .from('contacts')
         .select('*')
         .order('updated_at', { ascending: false })
         .limit(5)
+
+    if (demoScope) query = (query as any).or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+
+    const { data } = await query
 
     return data || []
 }
@@ -455,9 +512,10 @@ export async function getPriorityTasks(userId: string) {
     cacheLife('minutes')
 
     const supabase = createAdminClient()
+    const demoScope = await shouldUseDemoScope(supabase, userId)
     const today = new Date().toISOString().split('T')[0]
 
-    let { data } = await (supabase.from('tasks') as any)
+    let query = (supabase.from('tasks') as any)
         .select(`
             id, title, priority, due_date, is_completed,
             projects ( name, contacts ( company_name ) )
@@ -465,6 +523,10 @@ export async function getPriorityTasks(userId: string) {
         .eq('is_completed', false)
         .order('due_date', { ascending: true, nullsFirst: false })
         .limit(6)
+
+    if (demoScope) query = query.eq('assigned_to', userId)
+
+    let { data } = await query
 
     if (!data) return []
 
@@ -496,14 +558,12 @@ export async function getPriorityTasks(userId: string) {
 /**
  * Get AI-powered recommendations based on user role and stats
  */
-import { generateRecommendations, Recommendation } from '../lib/recommendation-engine'
-import { aiRecommendationsService } from './ai-recommendations.service'
-
 export async function getDashboardRecommendations(userId: string): Promise<Recommendation[]> {
     'use cache'
     cacheLife('minutes')
 
     const supabase = createAdminClient()
+    const demoScope = await shouldUseDemoScope(supabase, userId)
 
     // 1. Get Role
     const { data: profile } = await supabase
@@ -517,9 +577,17 @@ export async function getDashboardRecommendations(userId: string): Promise<Recom
     const kpis = await getExecutiveKPIs(userId, '30d')
 
     // 3. Get Context Data
+    let recentLeadsQuery = supabase.from('contacts').select('id', { count: 'exact', head: true }).gt('created_at', format(subMonths(new Date(), 1), 'yyyy-MM-dd'))
+    let highPrioTasksQuery = supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('is_completed', false).in('priority', ['high', 'urgent'])
+
+    if (demoScope) {
+        recentLeadsQuery = (recentLeadsQuery as any).or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+        highPrioTasksQuery = highPrioTasksQuery.eq('assigned_to', userId)
+    }
+
     const [recentLeads, highPrioTasks] = await Promise.all([
-        supabase.from('contacts').select('id', { count: 'exact', head: true }).gt('created_at', format(subMonths(new Date(), 1), 'yyyy-MM-dd')),
-        supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('is_completed', false).in('priority', ['high', 'urgent'])
+        recentLeadsQuery,
+        highPrioTasksQuery
     ])
 
     const context = {

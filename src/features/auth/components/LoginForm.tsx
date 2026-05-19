@@ -166,6 +166,13 @@ export function LoginForm() {
                 </div>
 
                 <div className="space-y-4">
+                    <Link
+                        href="/demo"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-brand-purple/30 bg-brand-purple/10 px-4 py-3 text-sm font-semibold text-brand-neon-purple transition-all hover:bg-brand-purple/20 hover:text-white"
+                    >
+                        Entrar con datos de prueba
+                    </Link>
+
                     <button
                         type="button"
                         onClick={handleGoogleLogin}

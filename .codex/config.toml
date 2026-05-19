@@ -1,0 +1,14 @@
+# SaaS Factory defaults for OpenAI Codex.
+#
+# Codex loads project-scoped .codex/config.toml files only after the
+# repository is trusted. These settings keep the factory agent-friendly
+# without forcing a model, provider, API key, or dangerous sandbox mode.
+
+project_doc_max_bytes = 65536
+project_doc_fallback_filenames = ["GEMINI.md"]
+default_permissions = ":workspace"
+
+[features]
+codex_hooks = true
+multi_agent = true
+shell_tool = true

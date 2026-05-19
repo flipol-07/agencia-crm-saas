@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isDemoEmail } from '@/shared/lib/demo'
 
 interface ExpenseStats {
     total_expenses: number
@@ -28,6 +29,7 @@ interface UseExpenseStatsReturn {
 
 interface UseExpenseStatsOptions {
     isPersonal?: boolean | null
+    userId?: string
     initialData?: {
         stats?: ExpenseStats | null
         sectorStats?: SectorStats[]
@@ -37,6 +39,7 @@ interface UseExpenseStatsOptions {
 export function useExpenseStats(options: UseExpenseStatsOptions | boolean | null = null): UseExpenseStatsReturn {
     // Soporte para firma antigua (boolean) y nueva (object)
     const isPersonal = typeof options === 'object' && options !== null ? options.isPersonal : options
+    const userId = typeof options === 'object' && options !== null ? options.userId : undefined
     const initialData = typeof options === 'object' && options !== null ? options.initialData : undefined
 
     const [stats, setStats] = useState<ExpenseStats | null>(initialData?.stats || null)
@@ -49,12 +52,28 @@ export function useExpenseStats(options: UseExpenseStatsOptions | boolean | null
         setError(null)
         try {
             const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
+            const shouldScopeDemo = isDemoEmail(user?.email)
+
+            let statsQuery = (supabase.from('expenses') as any)
+                .select('type, amount, tax_amount, tax_deductible')
+                .eq('is_personal', isPersonal ?? false)
+
+            let sectorQuery = (supabase.from('expenses') as any)
+                .select('type, amount, sector_id, sectors(name, color)')
+                .eq('is_personal', false)
+                .not('sector_id', 'is', null)
+
+            if (shouldScopeDemo) {
+                statsQuery = statsQuery.eq('user_id', userId || user?.id)
+                sectorQuery = sectorQuery.eq('user_id', userId || user?.id)
+            }
 
             // Re-fetch using client SDK
             const [{ data: statsData, error: sError }, { data: sectorData, error: scError }] = await Promise.all([
-                (supabase.from('expenses') as any).select('type, amount, tax_amount, tax_deductible').eq('is_personal', isPersonal ?? false),
+                statsQuery,
                 (isPersonal === false || isPersonal === null)
-                    ? (supabase.from('expenses') as any).select('type, amount, sector_id, sectors(name, color)').eq('is_personal', false).not('sector_id', 'is', null)
+                    ? sectorQuery
                     : Promise.resolve({ data: [], error: null })
             ])
 
@@ -109,7 +128,7 @@ export function useExpenseStats(options: UseExpenseStatsOptions | boolean | null
 
     useEffect(() => {
         fetchStats()
-    }, [isPersonal])
+    }, [isPersonal, userId])
 
     return {
         stats,

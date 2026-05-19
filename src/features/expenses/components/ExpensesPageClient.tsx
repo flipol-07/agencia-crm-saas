@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import {
     ExpenseList,
     ExpenseForm,
+    ExpenseReceiptModal,
     ExpenseSummary,
     SectorBreakdown,
     TaxForecastCard
@@ -24,6 +25,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
     const [activeTab, setActiveTab] = useState<TabMode>('empresa')
     const [showForm, setShowForm] = useState(false)
     const [editingExpense, setEditingExpense] = useState<ExpenseWithRelations | null>(null)
+    const [receiptExpense, setReceiptExpense] = useState<ExpenseWithRelations | null>(null)
 
     const isPersonal = activeTab === 'personal'
 
@@ -46,7 +48,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
         }
     })
 
-    const { stats, sectorStats, isLoading: statsLoading, refresh: refreshStats } = useExpenseStats(isPersonal)
+    const { stats, sectorStats, isLoading: statsLoading, refresh: refreshStats } = useExpenseStats({ isPersonal, userId })
     const { data: taxData, isLoading: taxLoading } = useTaxForecast()
 
     // Cambiar tab actualiza filtro
@@ -188,6 +190,7 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
                         expenses={expenses}
                         isLoading={isLoading}
                         onEdit={handleEdit}
+                        onViewReceipt={setReceiptExpense}
                         onDelete={handleDelete}
                     />
                 </div>
@@ -239,6 +242,13 @@ export function ExpensesPageClient({ userId, initialSectors, initialCategories }
                         setShowForm(false)
                         setEditingExpense(null)
                     }}
+                />
+            )}
+
+            {receiptExpense && (
+                <ExpenseReceiptModal
+                    expense={receiptExpense}
+                    onClose={() => setReceiptExpense(null)}
                 />
             )}
         </div>

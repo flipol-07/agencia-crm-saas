@@ -9,6 +9,7 @@ import { useContacts } from '@/features/contacts/hooks/useContacts'
 // import { useSettings } from '@/features/settings/hooks/useSettings' // Removed, we use profiles now
 import {
     createInvoiceWithItemsAction as createInvoiceWithItems,
+    generateInvoiceItemsAction,
     updateInvoiceWithItemsAction as updateInvoiceWithItems,
     generateInvoiceNumberAction as generateInvoiceNumber
 } from '../actions/invoiceActions'
@@ -39,6 +40,8 @@ export function InvoiceForm({
     const [loading, setLoading] = useState(false)
     const [profiles, setProfiles] = useState<Profile[]>([])
     const [sectors, setSectors] = useState<Sector[]>([])
+    const [itemPrompt, setItemPrompt] = useState('')
+    const [generatingItems, setGeneratingItems] = useState(false)
     const [selectedIssuerId, setSelectedIssuerId] = useState<string>(initialData?.issuer_profile_id || '')
     const [selectedSectorId, setSelectedSectorId] = useState<string>((initialData as any)?.sector_id || '')
 
@@ -153,6 +156,34 @@ export function InvoiceForm({
         ))
     }
 
+    const handleGenerateItems = async () => {
+        if (!itemPrompt.trim()) {
+            toast.error('Describe los productos o servicios primero')
+            return
+        }
+
+        setGeneratingItems(true)
+        try {
+            const generated = await generateInvoiceItemsAction(itemPrompt)
+            if (generated.length === 0) {
+                toast.error('No he podido detectar líneas facturables')
+                return
+            }
+
+            setItems(generated)
+            setSelectedTemplate(prev => {
+                if (prev && generated.length <= prev.max_items) return prev
+                return getOptimalTemplate(templates, generated.length)
+            })
+            toast.success('Líneas de factura generadas')
+        } catch (error) {
+            console.error(error)
+            toast.error('No se pudieron generar las líneas')
+        } finally {
+            setGeneratingItems(false)
+        }
+    }
+
     // Cálculos
     const subtotal = items.reduce((acc, item) => acc + (item.quantity * item.unit_price), 0)
     const taxAmount = (subtotal * taxRate) / 100
@@ -179,7 +210,7 @@ export function InvoiceForm({
                 irpf_rate: irpfRate,
                 irpf_amount: irpfAmount,
                 project_id: null,
-                created_by: null,
+                created_by: user?.id || null,
                 issuer_profile_id: selectedIssuerId, // IMPORTANT
                 notes: null,
                 due_date: null,
@@ -378,6 +409,30 @@ export function InvoiceForm({
 
             {/* Items */}
             <div className="pt-8">
+                <div className="mb-5 rounded-2xl border border-[#8b5cf6]/20 bg-[#8b5cf6]/10 p-4">
+                    <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+                        <div className="flex-1">
+                            <label className="text-xs font-bold uppercase tracking-wider text-[#c4b5fd]">
+                                Crear líneas con IA
+                            </label>
+                            <textarea
+                                value={itemPrompt}
+                                onChange={e => setItemPrompt(e.target.value)}
+                                rows={2}
+                                placeholder="Ej: 2 sesiones de consultoría estratégica a 350€, auditoría web 600€ y mantenimiento mensual 120€"
+                                className="mt-2 w-full resize-none rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-white outline-none transition-colors placeholder:text-gray-600 focus:border-[#8b5cf6]/60"
+                            />
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleGenerateItems}
+                            disabled={generatingItems}
+                            className="rounded-xl bg-[#8b5cf6] px-5 py-3 text-sm font-black uppercase tracking-wider text-white shadow-[0_0_20px_rgba(139,92,246,0.25)] transition-all hover:bg-[#7c3aed] disabled:opacity-50"
+                        >
+                            {generatingItems ? 'Generando...' : 'Generar líneas'}
+                        </button>
+                    </div>
+                </div>
                 <table className="w-full text-left border-separate border-spacing-y-2">
                     <thead>
                         <tr className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">

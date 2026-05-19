@@ -25,7 +25,12 @@ const nextConfig: NextConfig = {
       },
       {
         source: '/estrategias',
-        destination: '/lead-scraper',
+        destination: '/pipeline',
+        permanent: false,
+      },
+      {
+        source: '/lead-scraper',
+        destination: '/pipeline',
         permanent: false,
       },
       {

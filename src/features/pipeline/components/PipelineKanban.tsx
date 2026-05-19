@@ -19,6 +19,9 @@ import { PIPELINE_STAGES } from '@/types/database'
 import type { Contact } from '@/types/database'
 
 function PipelineCard({ contact, isOverlay = false }: { contact: Contact, isOverlay?: boolean }) {
+    const priority = getContactPriority(contact)
+    const lastInteractionLabel = getLastInteractionLabel(contact.last_interaction)
+
     const getSourceIcon = (source: string) => {
         const icons: Record<string, string> = {
             inbound_whatsapp: '📱',
@@ -32,7 +35,7 @@ function PipelineCard({ contact, isOverlay = false }: { contact: Contact, isOver
     }
 
     return (
-        <div className={`bg-white/5 border border-white/10 rounded-lg p-4 hover:border-purple-400/30 hover:shadow-[0_0_15px_rgba(139,92,246,0.1)] transition-all cursor-pointer group select-none overflow-hidden ${isOverlay ? 'shadow-2xl bg-[#1a1a1a] border-purple-500/50' : ''}`}>
+        <div className={`bg-white/5 border rounded-lg p-4 hover:border-purple-400/30 hover:shadow-[0_0_15px_rgba(139,92,246,0.1)] transition-all cursor-pointer group select-none overflow-hidden ${priority.borderClass} ${isOverlay ? 'shadow-2xl bg-[#1a1a1a] border-purple-500/50' : ''}`}>
             <div className="flex items-start justify-between mb-2">
                 <Link href={`/contacts/${contact.id}`} className="flex-1 min-w-0" onClick={e => e.stopPropagation()}>
                     <h4 className="font-medium text-white group-hover:text-[#8b5cf6] transition-colors truncate">
@@ -40,6 +43,22 @@ function PipelineCard({ contact, isOverlay = false }: { contact: Contact, isOver
                     </h4>
                 </Link>
                 <span className="text-xs ml-2">{getSourceIcon(contact.source)}</span>
+            </div>
+
+            <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide ${priority.className}`}>
+                    {priority.label}
+                </span>
+                {typeof contact.probability_close === 'number' && (
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-gray-300">
+                        {contact.probability_close}% cierre
+                    </span>
+                )}
+                {lastInteractionLabel && (
+                    <span className="rounded-full bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-gray-400">
+                        {lastInteractionLabel}
+                    </span>
+                )}
             </div>
 
             {contact.contact_name && (
@@ -162,25 +181,6 @@ export function PipelineKanban() {
     const { contacts, loading, updateContact } = useContacts()
     const [activeContact, setActiveContact] = useState<Contact | null>(null)
 
-    // Optimistic update state
-    const [localContacts, setLocalContacts] = useState<Contact[] | null>(null)
-
-    // Sync local state when contacts are loaded
-    if (!loading && localContacts === null && contacts.length > 0) {
-        // Only set if we haven't initialized yet
-        // Actually, better to derive from props and use local state only for dragging visual feedback?
-        // Or maintain full local state copy? Simpler: derive from 'contacts' props, 
-        // but optimistic update relies on updateContact being fast or manipulating local list.
-        // Let's rely on 'contacts' prop and optimistic update via useContacts hook if it supports it, 
-        // or just accept the slight delay. useContacts does "setContacts" optimistically in Step 290.
-        // So we don't need complex local state here if useContacts updates its state immediately.
-        // Checking Step 290: createContact uses setContacts(prev => [data, ...prev]). updateContact uses setContacts(prev => map...).
-        // BUT updateContact in Step 290 waits for Supabase result (await supabase...). 
-        // It's not fully optimistic. It waits for DB.
-        // I will implement a quick local optimistic update layer here if needed, but draggable usually handles the visual 'drag'.
-        // The 'drop' delay is the issue. I'll modify handleDragEnd to update visually.
-    }
-
     const sensors = useSensors(
         useSensor(PointerSensor, {
             activationConstraint: {
@@ -207,7 +207,9 @@ export function PipelineKanban() {
     }
 
     const contactsByStage = PIPELINE_STAGES.reduce((acc, stage) => {
-        acc[stage.id] = contacts.filter(c => c.pipeline_stage === stage.id)
+        acc[stage.id] = contacts
+            .filter(c => c.pipeline_stage === stage.id)
+            .sort(comparePipelineContacts)
         return acc
     }, {} as Record<string, Contact[]>)
 
@@ -279,4 +281,66 @@ export function PipelineKanban() {
             </DragOverlay>
         </DndContext>
     )
+}
+
+function comparePipelineContacts(a: Contact, b: Contact) {
+    const scoreDiff = getContactPriority(b).score - getContactPriority(a).score
+    if (scoreDiff !== 0) return scoreDiff
+    return (b.estimated_value || 0) - (a.estimated_value || 0)
+}
+
+function getContactPriority(contact: Contact) {
+    const probability = contact.probability_close || 0
+    const days = getDaysSince(contact.last_interaction)
+    const estimatedValue = contact.estimated_value || 0
+    const isWonOrLost = ['won', 'lost', 'archived'].includes(contact.status)
+
+    if (!isWonOrLost && (contact.inactivity_status === 'inactive' || days >= 30)) {
+        return {
+            label: 'Reactivar',
+            score: 90 + Math.min(days, 30),
+            className: 'bg-red-500/15 text-red-300 border border-red-500/20',
+            borderClass: 'border-red-500/25',
+        }
+    }
+
+    if (!isWonOrLost && (probability >= 70 || estimatedValue >= 5000)) {
+        return {
+            label: 'Prioritario',
+            score: 80 + probability,
+            className: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20',
+            borderClass: 'border-emerald-500/25',
+        }
+    }
+
+    if (!isWonOrLost && (contact.inactivity_status === 'warning' || days >= 14)) {
+        return {
+            label: 'Seguimiento',
+            score: 60 + Math.min(days, 20),
+            className: 'bg-amber-500/15 text-amber-300 border border-amber-500/20',
+            borderClass: 'border-amber-500/25',
+        }
+    }
+
+    return {
+        label: 'Normal',
+        score: probability,
+        className: 'bg-white/5 text-gray-300 border border-white/10',
+        borderClass: 'border-white/10',
+    }
+}
+
+function getDaysSince(dateValue: string | null) {
+    if (!dateValue) return 999
+    const date = new Date(dateValue)
+    if (Number.isNaN(date.getTime())) return 999
+    return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function getLastInteractionLabel(dateValue: string | null) {
+    const days = getDaysSince(dateValue)
+    if (days === 999) return 'Sin contacto'
+    if (days <= 0) return 'Hoy'
+    if (days === 1) return 'Ayer'
+    return `${days}d sin contacto`
 }

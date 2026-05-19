@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cacheLife } from 'next/cache'
+import { isDemoEmail } from '@/shared/lib/demo'
 import {
     ExpenseWithRelations,
     Sector,
@@ -203,7 +204,19 @@ export async function getExpensesBySectorCached(): Promise<
     }))
 }
 
-export async function getTaxForecastCached(): Promise<{
+async function shouldUseDemoScope(supabase: any, userId?: string) {
+    if (!userId) return false
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('id', userId)
+        .maybeSingle()
+
+    return isDemoEmail(profile?.email)
+}
+
+export async function getTaxForecastCached(userId?: string): Promise<{
     iva_repercutido: number
     iva_soportado: number
     iva_resultado: number
@@ -211,6 +224,7 @@ export async function getTaxForecastCached(): Promise<{
     year: number
 }> {
     const supabase = createAdminClient()
+    const demoScope = await shouldUseDemoScope(supabase, userId)
     const now = new Date()
     const month = now.getMonth()
     const year = now.getFullYear()
@@ -222,7 +236,7 @@ export async function getTaxForecastCached(): Promise<{
     const endDate = new Date(year, qStartMonth + 3, 0).toISOString().split('T')[0]
 
     // Fetch Invoices Tax (IVA Repercutido)
-    const { data: invoices, error: invError } = await (supabase.from('invoices') as any)
+    let invoiceQuery = (supabase.from('invoices') as any)
         .select('tax_amount')
         .gte('issue_date', startDate)
         .lte('issue_date', endDate)
@@ -230,12 +244,22 @@ export async function getTaxForecastCached(): Promise<{
         .not('status', 'in', '("draft","cancelled")')
 
     // Fetch Expenses Tax (IVA Soportado)
-    const { data: expenses, error: expError } = await (supabase.from('expenses') as any)
+    let expenseQuery = (supabase.from('expenses') as any)
         .select('tax_amount')
         .eq('tax_deductible', true)
         .eq('is_personal', false)
         .gte('date', startDate)
         .lte('date', endDate)
+
+    if (demoScope && userId) {
+        invoiceQuery = invoiceQuery.or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
+        expenseQuery = expenseQuery.eq('user_id', userId)
+    }
+
+    const [{ data: invoices, error: invError }, { data: expenses, error: expError }] = await Promise.all([
+        invoiceQuery,
+        expenseQuery
+    ])
 
     if (invError || expError) {
         console.error('[Tax Forecast] Error:', invError || expError)

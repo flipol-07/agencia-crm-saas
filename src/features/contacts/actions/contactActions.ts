@@ -6,8 +6,15 @@ import { revalidateTag } from 'next/cache'
 
 export async function createContactAction(contact: any): Promise<{ data: Contact | null; error: string | null }> {
     const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    const payload = {
+        ...contact,
+        created_by: contact.created_by || user?.id || null,
+        assigned_to: contact.assigned_to || user?.id || null,
+    }
+
     const { data, error } = await (supabase.from('contacts') as any)
-        .insert(contact)
+        .insert(payload)
         .select()
         .single()
 

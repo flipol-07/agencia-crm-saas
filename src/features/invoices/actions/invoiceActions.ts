@@ -8,6 +8,85 @@ import {
 } from '@/types/database'
 import { revalidateTag } from 'next/cache'
 
+interface GeneratedInvoiceItem {
+    description: string
+    quantity: number
+    unit_price: number
+}
+
+export const generateInvoiceItemsAction = async (prompt: string): Promise<GeneratedInvoiceItem[]> => {
+    const apiKey = process.env.OPENAI_API_KEY
+    if (!apiKey) {
+        throw new Error('OPENAI_API_KEY not configured')
+    }
+
+    const cleanPrompt = prompt.trim()
+    if (!cleanPrompt) {
+        throw new Error('Describe al menos un producto o servicio')
+    }
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            model: 'gpt-4o-mini',
+            messages: [
+                {
+                    role: 'system',
+                    content: `Convierte una descripción informal en líneas de factura.
+Devuelve SOLO JSON válido:
+{
+  "items": [
+    { "description": "string", "quantity": number, "unit_price": number }
+  ]
+}
+Reglas:
+- quantity mínimo 1.
+- unit_price es precio unitario sin IVA.
+- Si el usuario da un total para varias unidades, calcula el precio unitario.
+- Usa descripciones profesionales, breves y en español.
+- No inventes líneas que no estén implícitas en el texto.`
+                },
+                {
+                    role: 'user',
+                    content: cleanPrompt
+                }
+            ],
+            temperature: 0.2,
+            response_format: { type: 'json_object' }
+        }),
+    })
+
+    if (!response.ok) {
+        throw new Error(`AI API error: ${await response.text()}`)
+    }
+
+    const data = await response.json()
+    const content = data.choices[0]?.message?.content
+    if (!content) throw new Error('No content from AI')
+
+    const parsed = JSON.parse(content)
+    const items = Array.isArray(parsed.items) ? parsed.items : []
+
+    return items
+        .map((item: Partial<GeneratedInvoiceItem>) => ({
+            description: String(item.description || '').trim(),
+            quantity: normalizePositiveNumber(item.quantity, 1),
+            unit_price: normalizePositiveNumber(item.unit_price, 0),
+        }))
+        .filter((item: GeneratedInvoiceItem) => item.description && item.quantity > 0)
+        .slice(0, 20)
+}
+
+function normalizePositiveNumber(value: unknown, fallback: number) {
+    const parsed = typeof value === 'number' ? value : Number(String(value ?? '').replace(',', '.'))
+    if (!Number.isFinite(parsed) || parsed < 0) return fallback
+    return Number(parsed.toFixed(2))
+}
+
 export const createInvoiceWithItemsAction = async (
     invoice: InvoiceInsert,
     items: InvoiceItemInsert[]

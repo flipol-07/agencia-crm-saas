@@ -6,10 +6,11 @@ interface ExpenseListProps {
     expenses: ExpenseWithRelations[]
     isLoading: boolean
     onEdit: (expense: ExpenseWithRelations) => void
+    onViewReceipt: (expense: ExpenseWithRelations) => void
     onDelete: (id: string) => void
 }
 
-export function ExpenseList({ expenses, isLoading, onEdit, onDelete }: ExpenseListProps) {
+export function ExpenseList({ expenses, isLoading, onEdit, onViewReceipt, onDelete }: ExpenseListProps) {
     if (isLoading) {
         return (
             <div className="glass rounded-xl p-8">
@@ -113,6 +114,12 @@ export function ExpenseList({ expenses, isLoading, onEdit, onDelete }: ExpenseLi
                                         {expense.tax_deductible && (
                                             <span className="text-[#a78bfa]">Deducible</span>
                                         )}
+                                        {expense.receipt_url && (
+                                            <>
+                                                <span>•</span>
+                                                <span className="text-sky-300">Factura adjunta</span>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
 
@@ -127,6 +134,21 @@ export function ExpenseList({ expenses, isLoading, onEdit, onDelete }: ExpenseLi
                                         </p>
                                     )}
                                 </div>
+
+                                {expense.receipt_url && (
+                                    <button
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            onViewReceipt(expense)
+                                        }}
+                                        className="rounded-lg p-2 text-gray-400 opacity-100 transition-all hover:bg-white/10 hover:text-sky-300 sm:opacity-0 sm:group-hover:opacity-100"
+                                        title="Ver factura"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                                        </svg>
+                                    </button>
+                                )}
 
                                 {/* Delete button */}
                                 <button

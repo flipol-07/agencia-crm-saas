@@ -1,7 +1,10 @@
 'use server'
 
+import { createClient } from '@/lib/supabase/server'
 import { getTaxForecastCached } from '../services/expenseService.server'
 
 export async function getTaxForecastAction() {
-    return await getTaxForecastCached()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    return await getTaxForecastCached(user?.id)
 }

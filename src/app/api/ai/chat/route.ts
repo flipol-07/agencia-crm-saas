@@ -41,16 +41,8 @@ export async function POST(request: NextRequest) {
                 type: 'function',
                 function: {
                     name: 'get_recent_leads',
-                    description: 'Leads capturados por el scraper.',
+                    description: 'Contactos y oportunidades recientes del CRM.',
                     parameters: { type: 'object', properties: { limit: { type: 'number' } } },
-                },
-            },
-            {
-                type: 'function',
-                function: {
-                    name: 'get_scraper_campaigns',
-                    description: 'Campañas de prospección activas.',
-                    parameters: { type: 'object', properties: {} },
                 },
             },
             {
@@ -167,7 +159,7 @@ export async function POST(request: NextRequest) {
         TIENES ACCESO TOTAL (vía herramientas) A:
         1. CRM: Contactos, Proyectos, Tareas, Gastos e Invoices.
         2. Comunicación: Emails con clientes, chat interno y reuniones (transcripciones).
-        3. Prospección: Campañas de scraping y leads capturados.
+        3. Ventas: Pipeline comercial, contactos recientes y oportunidades abiertas.
         4. Equipo: Miembros de la agencia.
         5. Conocimiento: Base experta y memoria compartida.
 
@@ -180,7 +172,7 @@ export async function POST(request: NextRequest) {
 
         PRINCIPIOS DE PRIORIZACIÓN (Copiloto "Qué hacer ahora"):
         1. SUPERVIVENCIA: Facturas overdue (vencidas) son TOP 1. Necesitamos el cash.
-        2. CRECIMIENTO: Leads calientes (nuevos) o ventas por cerrar.
+        2. CRECIMIENTO: Contactos recientes, oportunidades activas o ventas por cerrar.
         3. OPERACIONES: Tareas urgentes o proyectos con deadline inminente.
         4. ESTRATEGIA: Revisión de KPIs o optimización de procesos.
 
@@ -227,7 +219,11 @@ export async function POST(request: NextRequest) {
                 const { data } = await supabase.from('invoices').select('*').order('created_at', { ascending: false }).limit(functionArgs.limit || 5);
                 toolResult = JSON.stringify(data);
             } else if (functionName === 'get_recent_leads') {
-                const { data } = await supabase.from('scraper_leads').select('*').order('created_at', { ascending: false }).limit(functionArgs.limit || 5);
+                const { data } = await supabase
+                    .from('contacts')
+                    .select('id, company_name, contact_name, email, status, estimated_value, last_interaction, created_at, notes')
+                    .order('created_at', { ascending: false })
+                    .limit(functionArgs.limit || 5);
                 toolResult = JSON.stringify(data);
             } else if (functionName === 'search_contacts') {
                 const q = functionArgs.query || '';
@@ -244,9 +240,6 @@ export async function POST(request: NextRequest) {
                 let query = supabase.from('tasks').select('*, projects(name)');
                 if (functionArgs.is_completed !== undefined) query = query.eq('is_completed', functionArgs.is_completed);
                 const { data } = await query.order('due_date', { ascending: true }).limit(20);
-                toolResult = JSON.stringify(data);
-            } else if (functionName === 'get_scraper_campaigns') {
-                const { data } = await supabase.from('scraper_campaigns').select('*').order('created_at', { ascending: false });
                 toolResult = JSON.stringify(data);
             } else if (functionName === 'get_team') {
                 const { data } = await supabase.from('profiles').select('id, full_name, professional_role, email, avatar_url');

@@ -50,6 +50,7 @@ export async function middleware(request: NextRequest) {
     const publicPaths = [
         '/login',
         '/signup',
+        '/demo',
         '/auth/callback',
         '/reset-password',
         '/update-password',
@@ -91,7 +92,7 @@ export async function middleware(request: NextRequest) {
     }
 
     // Si YA hay usuario y trata de ir a login/signup, mandar al dashboard
-    if (user && isPublicPath && !path.startsWith('/auth/callback')) {
+    if (user && isPublicPath && !path.startsWith('/auth/callback') && path !== '/demo') {
         return NextResponse.redirect(new URL('/dashboard', request.url))
     }
 

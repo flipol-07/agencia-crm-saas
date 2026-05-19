@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { isDemoEmail } from '@/shared/lib/demo'
 import type { Contact, ContactInsert, ContactUpdate } from '@/types/database'
 import {
     createContactAction,
@@ -20,9 +21,16 @@ export function useContacts() {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await (supabase.from('contacts') as any)
+        const { data: { user } } = await supabase.auth.getUser()
+        let query = (supabase.from('contacts') as any)
             .select('*')
             .order('created_at', { ascending: false })
+
+        if (isDemoEmail(user?.email)) {
+            query = query.or(`created_by.eq.${user?.id},assigned_to.eq.${user?.id}`)
+        }
+
+        const { data, error } = await query
 
         if (error) {
             setError(error.message)
@@ -105,9 +113,16 @@ export function useContact(id: string) {
 
     const fetchContact = useCallback(async () => {
         setLoading(true)
-        const { data, error } = await (supabase.from('contacts') as any)
+        const { data: { user } } = await supabase.auth.getUser()
+        let query = (supabase.from('contacts') as any)
             .select('*')
             .eq('id', id)
+
+        if (isDemoEmail(user?.email)) {
+            query = query.or(`created_by.eq.${user?.id},assigned_to.eq.${user?.id}`)
+        }
+
+        const { data, error } = await query
             .single()
 
         if (error) {

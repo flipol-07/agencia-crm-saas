@@ -59,9 +59,9 @@ export function generateRecommendations(context: DashboardContext): Recommendati
                 id: 'sales-pipeline-low',
                 type: 'info',
                 title: 'Pipeline Bajo',
-                message: 'Tu pipeline de ventas está bajo. Es momento de prospectar o reactivar leads antiguos.',
-                actionLabel: 'Ver Leads',
-                actionUrl: '/lead-scraper'
+                message: 'Tu pipeline de ventas está bajo. Es momento de reactivar contactos y oportunidades abiertas.',
+                actionLabel: 'Ver Pipeline',
+                actionUrl: '/pipeline'
             })
         }
 

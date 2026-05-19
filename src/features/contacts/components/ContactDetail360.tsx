@@ -7,6 +7,7 @@ import { PIPELINE_STAGES } from '@/types/database'
 import { ProjectTasksPanel } from '@/features/projects/components'
 import { InvoiceList } from '@/features/invoices/components'
 import { analyzeWebsite } from '@/features/contacts/actions/analyze-website'
+import { ContactBrief, generateContactBriefAction } from '@/features/contacts/actions/contactBriefActions'
 import { EmailList } from '@/features/emails/components'
 import { useContactEmails, useContacts } from '@/features/contacts/hooks/useContacts'
 import { ServiceTagSelector, FileSection } from '@/features/contacts/components'
@@ -43,6 +44,24 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
     const [isAnalyzing, setIsAnalyzing] = useState(false)
 
     const [isAnalyzingOpportunity, setIsAnalyzingOpportunity] = useState(false)
+    const [isGeneratingBrief, setIsGeneratingBrief] = useState(false)
+    const [brief, setBrief] = useState<ContactBrief | null>(null)
+    const [briefError, setBriefError] = useState<string | null>(null)
+
+    const handleGenerateBrief = async () => {
+        setIsGeneratingBrief(true)
+        setBriefError(null)
+
+        try {
+            const result = await generateContactBriefAction(contact.id)
+            setBrief(result)
+        } catch (error) {
+            console.error('Error generating contact brief:', error)
+            setBriefError('No se pudo generar el briefing. Revisa la configuración de IA.')
+        } finally {
+            setIsGeneratingBrief(false)
+        }
+    }
 
     const handleAnalyzeOpportunity = async () => {
         setIsAnalyzingOpportunity(true)
@@ -564,6 +583,64 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
 
             {/* ====== COLUMNA DERECHA: Proyectos, Emails, Facturas ====== */}
             <div className="space-y-6">
+                {/* Briefing Ejecutivo */}
+                <div className="glass rounded-xl p-6 border border-[#8b5cf6]/20 bg-[#8b5cf6]/5">
+                    <div className="flex items-start justify-between gap-4 mb-4">
+                        <div>
+                            <h2 className="text-lg font-semibold text-white">Briefing ejecutivo</h2>
+                            <p className="text-xs text-gray-500 mt-1">Síntesis automática del contexto comercial.</p>
+                        </div>
+                        <button
+                            onClick={handleGenerateBrief}
+                            disabled={isGeneratingBrief}
+                            className="shrink-0 rounded-lg bg-[#8b5cf6] px-3 py-2 text-xs font-bold text-white transition-colors hover:bg-[#7c3aed] disabled:opacity-50"
+                        >
+                            {isGeneratingBrief ? 'Generando...' : brief ? 'Actualizar' : 'Generar'}
+                        </button>
+                    </div>
+
+                    {briefError && (
+                        <div className="mb-4 rounded-lg border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-300">
+                            {briefError}
+                        </div>
+                    )}
+
+                    {brief ? (
+                        <div className="space-y-4">
+                            <div className="flex items-start justify-between gap-3">
+                                <div>
+                                    <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${getBriefHealthClass(brief.health)}`}>
+                                        {getBriefHealthLabel(brief.health)}
+                                    </span>
+                                    <h3 className="mt-3 text-base font-semibold text-white">{brief.headline}</h3>
+                                </div>
+                            </div>
+
+                            <p className="text-sm leading-relaxed text-gray-300">{brief.contextSummary}</p>
+
+                            <div className="rounded-lg bg-black/20 p-3">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-[#c4b5fd]">Siguiente mejor acción</p>
+                                <p className="mt-1 text-sm text-white">{brief.nextBestAction}</p>
+                            </div>
+
+                            <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
+                                <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Mensaje sugerido</p>
+                                <p className="mt-2 text-sm leading-relaxed text-gray-200">{brief.suggestedMessage}</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                                <BriefList title="Oportunidades" items={brief.opportunities} tone="positive" />
+                                <BriefList title="Riesgos" items={brief.risks} tone="risk" />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="rounded-lg border border-dashed border-white/10 bg-black/20 p-5 text-center">
+                            <p className="text-sm text-gray-400">
+                                Genera una lectura rápida del cliente antes de una llamada, propuesta o seguimiento.
+                            </p>
+                        </div>
+                    )}
+                </div>
 
                 {/* Emails y Comunicaciones */}
                 <div className="glass rounded-xl p-6">
@@ -637,4 +714,45 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
             </div>
         </div>
     )
+}
+
+function BriefList({ title, items, tone }: { title: string, items: string[], tone: 'positive' | 'risk' }) {
+    const color = tone === 'positive' ? 'text-emerald-300' : 'text-amber-300'
+
+    return (
+        <div>
+            <p className={`mb-2 text-xs font-semibold uppercase tracking-wide ${color}`}>{title}</p>
+            {items.length > 0 ? (
+                <ul className="space-y-1.5">
+                    {items.map((item, index) => (
+                        <li key={index} className="rounded-md bg-white/[0.04] px-2.5 py-2 text-xs leading-relaxed text-gray-300">
+                            {item}
+                        </li>
+                    ))}
+                </ul>
+            ) : (
+                <p className="text-xs text-gray-500">Sin señales claras.</p>
+            )}
+        </div>
+    )
+}
+
+function getBriefHealthLabel(health: ContactBrief['health']) {
+    const labels = {
+        hot: 'Cliente caliente',
+        warm: 'Oportunidad activa',
+        cold: 'Sin movimiento',
+        risk: 'Riesgo comercial',
+    }
+    return labels[health]
+}
+
+function getBriefHealthClass(health: ContactBrief['health']) {
+    const classes = {
+        hot: 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/20',
+        warm: 'bg-blue-500/15 text-blue-300 border border-blue-500/20',
+        cold: 'bg-gray-500/15 text-gray-300 border border-gray-500/20',
+        risk: 'bg-amber-500/15 text-amber-300 border border-amber-500/20',
+    }
+    return classes[health]
 }

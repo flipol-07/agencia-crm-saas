@@ -1,5 +1,7 @@
 import { InvoiceList } from '@/features/invoices/components/InvoiceList'
 import { getInvoicesCached } from '@/features/invoices/services/invoiceService.server'
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
 
 export const metadata = {
@@ -35,7 +37,14 @@ export default function InvoicesPage() {
 }
 
 async function InvoicesListSection() {
-    const invoices = await getInvoicesCached()
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        redirect('/login')
+    }
+
+    const invoices = await getInvoicesCached(user.id)
     return <InvoiceList initialInvoices={invoices} />
 }
 

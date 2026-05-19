@@ -6,8 +6,8 @@ import { subDays, startOfMonth, formatISO } from 'date-fns'
 
 export interface DashboardMetrics {
     // The Engine (Activity)
-    outreachVolume: number        // Scraper leads sent last 30 days
-    responseRate: number          // % (Inbound Emails / Outreach Volume) - Approximate
+    outreachVolume: number        // Outbound emails last 30 days
+    responseRate: number          // % (Inbound Emails / Outbound Emails) - Approximate
 
     // The Pipeline (Health)
     activeLeads: number           // Total active leads (not won/lost)
@@ -47,10 +47,10 @@ export function useDashboardMetrics() {
 
                 // 1. Outreach Volume (Last 30d)
                 const { count: outreachCount } = await supabase
-                    .from('scraper_leads')
+                    .from('contact_emails')
                     .select('*', { count: 'exact', head: true })
+                    .eq('direction', 'outbound')
                     .gte('created_at', thirtyDaysAgo)
-                // .eq('email_status', 'sent') // Uncomment if status tracking is reliable
 
                 const outreachVolume = outreachCount || 0
 

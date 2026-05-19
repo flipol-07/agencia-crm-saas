@@ -11,6 +11,7 @@ import {
     ExpenseCategory
 } from '../types'
 import { createClient } from '@/lib/supabase/client'
+import { isDemoEmail } from '@/shared/lib/demo'
 import {
     createExpenseAction,
     updateExpenseAction,
@@ -53,6 +54,7 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
         setError(null)
         try {
             const supabase = createClient()
+            const { data: { user } } = await supabase.auth.getUser()
 
             // Re-fetch using client SDK for updates
             let query = (supabase.from('expenses') as any)
@@ -68,6 +70,9 @@ export function useExpenses(options: UseExpensesOptions = {}): UseExpensesReturn
             }
             if (filters.is_personal !== undefined) {
                 query = query.eq('is_personal', filters.is_personal)
+            }
+            if (isDemoEmail(user?.email)) {
+                query = query.eq('user_id', user?.id)
             }
 
             const { data: expensesData, error: expError } = await query

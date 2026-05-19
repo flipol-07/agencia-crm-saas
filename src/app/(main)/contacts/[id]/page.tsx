@@ -1,7 +1,8 @@
 import { ContactDetailPageClient } from '@/features/contacts/components/ContactDetailPageClient'
 import { getContactByIdCached } from '@/features/contacts/services/contact.service.server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { Suspense } from 'react'
+import { createClient } from '@/lib/supabase/server'
 
 interface PageProps {
     params: Promise<{ id: string }>
@@ -19,7 +20,14 @@ export default function ContactDetailPage({ params }: PageProps) {
 
 async function ContactDetailContent({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params
-    const contact = await getContactByIdCached(id)
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
+    if (!user) {
+        redirect('/login')
+    }
+
+    const contact = await getContactByIdCached(id, user.id)
 
     if (!contact) {
         notFound()
@@ -46,5 +54,4 @@ function ContactDetailSkeleton() {
         </div>
     )
 }
-
 

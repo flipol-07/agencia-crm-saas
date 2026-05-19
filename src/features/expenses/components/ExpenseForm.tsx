@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { ExpenseInsert, ExpenseWithRelations, Sector, ExpenseCategory } from '../types'
-import { classifyExpenseAction } from '../actions/expenseActions'
+import { analyzeReceiptAction, classifyExpenseAction, uploadReceiptAction } from '../actions/expenseActions'
 
 interface ExpenseFormProps {
     expense?: ExpenseWithRelations | null
@@ -31,12 +31,28 @@ export function ExpenseForm({
         sector_id: '',
         category_id: '',
         tax_deductible: false,
-        tax_rate: 21
+        tax_rate: 21,
+        receipt_url: ''
     })
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isAnalyzing, setIsAnalyzing] = useState(false)
+    const [isUploadingReceipt, setIsUploadingReceipt] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [aiReason, setAiReason] = useState<string | null>(null)
+    const [receiptFile, setReceiptFile] = useState<File | null>(null)
+    const [receiptAnalysis, setReceiptAnalysis] = useState<{
+        supplier_name: string | null
+        supplier_tax_id: string | null
+        invoice_number: string | null
+        date: string | null
+        amount: number | null
+        tax_rate: number | null
+        tax_amount: number | null
+        base_amount: number | null
+        tax_deductible: boolean
+        confidence: number
+        summary: string
+    } | null>(null)
 
     useEffect(() => {
         if (expense) {
@@ -48,7 +64,8 @@ export function ExpenseForm({
                 sector_id: expense.sector_id || '',
                 category_id: expense.category_id || '',
                 tax_deductible: expense.tax_deductible,
-                tax_rate: expense.tax_rate
+                tax_rate: expense.tax_rate,
+                receipt_url: expense.receipt_url || ''
             })
         }
     }, [expense])
@@ -64,6 +81,10 @@ export function ExpenseForm({
 
         setIsSubmitting(true)
         try {
+            const receiptUrl = receiptFile
+                ? await uploadReceipt(receiptFile)
+                : formData.receipt_url || null
+
             await onSubmit({
                 user_id: userId,
                 type: formData.type,
@@ -76,13 +97,25 @@ export function ExpenseForm({
                 is_personal: isPersonalMode,
                 tax_deductible: formData.tax_deductible,
                 tax_rate: formData.tax_rate,
-                receipt_url: null
+                receipt_url: receiptUrl
             })
             onClose()
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Error al guardar')
         } finally {
             setIsSubmitting(false)
+        }
+    }
+
+    const uploadReceipt = async (file: File) => {
+        setIsUploadingReceipt(true)
+
+        try {
+            const uploadFormData = new FormData()
+            uploadFormData.append('receipt', file)
+            return await uploadReceiptAction(uploadFormData)
+        } finally {
+            setIsUploadingReceipt(false)
         }
     }
 
@@ -104,8 +137,6 @@ export function ExpenseForm({
                 type: formData.type
             })
 
-            console.log('[AI Classification]', results)
-
             if (results) {
                 setFormData(prev => ({
                     ...prev,
@@ -119,6 +150,47 @@ export function ExpenseForm({
         } catch (err) {
             console.error('AI Classification failed:', err)
             setError('La IA no pudo clasificar la transacción. Inténtalo manualmente.')
+        } finally {
+            setIsAnalyzing(false)
+        }
+    }
+
+    const handleReceiptAnalysis = async () => {
+        if (!receiptFile) {
+            setError('Sube primero una factura o comprobante')
+            return
+        }
+
+        setIsAnalyzing(true)
+        setError(null)
+        setAiReason(null)
+
+        try {
+            const analysisFormData = new FormData()
+            analysisFormData.append('receipt', receiptFile)
+
+            const result = await analyzeReceiptAction({
+                formData: analysisFormData,
+                sectors,
+                categories,
+                type: formData.type,
+            })
+
+            setReceiptAnalysis(result)
+            setFormData(prev => ({
+                ...prev,
+                amount: result.amount ? String(result.amount) : prev.amount,
+                date: result.date || prev.date,
+                description: buildReceiptDescription(prev.description, result),
+                sector_id: result.sector_id || prev.sector_id,
+                category_id: result.category_id || prev.category_id,
+                tax_rate: result.tax_rate ?? prev.tax_rate,
+                tax_deductible: result.tax_deductible,
+            }))
+            setAiReason(result.summary)
+        } catch (err) {
+            console.error('Receipt analysis failed:', err)
+            setError(err instanceof Error ? err.message : 'No se pudo analizar la factura')
         } finally {
             setIsAnalyzing(false)
         }
@@ -218,7 +290,7 @@ export function ExpenseForm({
                                             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                                             </svg>
-                                            Clasificación Mágica
+                                            Clasificar con IA
                                         </>
                                     )}
                                 </button>
@@ -253,6 +325,80 @@ export function ExpenseForm({
                             className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white focus:outline-none focus:border-lime-400"
                             required
                         />
+                    </div>
+
+                    {/* Receipt Upload */}
+                    <div className="space-y-3 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+                        <div className="flex items-start justify-between gap-3">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-300">
+                                    Factura o comprobante
+                                </label>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    PDF, JPG, PNG o WebP. La IA puede leer importe, fecha, proveedor e IVA.
+                                </p>
+                            </div>
+                            {formData.receipt_url && !receiptFile && (
+                                <a
+                                    href={formData.receipt_url}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="shrink-0 text-xs font-semibold text-[#a78bfa] hover:text-white"
+                                >
+                                    Abrir actual
+                                </a>
+                            )}
+                        </div>
+
+                        <input
+                            type="file"
+                            accept="application/pdf,image/jpeg,image/png,image/webp"
+                            onChange={(e) => {
+                                const file = e.target.files?.[0] || null
+                                setReceiptFile(file)
+                                setReceiptAnalysis(null)
+                            }}
+                            className="block w-full text-sm text-gray-300 file:mr-4 file:rounded-lg file:border-0 file:bg-white/10 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-white/20"
+                        />
+
+                        {receiptFile && (
+                            <div className="flex flex-col gap-3 rounded-lg bg-black/20 p-3 sm:flex-row sm:items-center sm:justify-between">
+                                <div className="min-w-0">
+                                    <p className="truncate text-sm font-medium text-white">{receiptFile.name}</p>
+                                    <p className="text-xs text-gray-500">
+                                        {(receiptFile.size / 1024 / 1024).toFixed(2)} MB
+                                    </p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleReceiptAnalysis}
+                                    disabled={isAnalyzing}
+                                    className="shrink-0 rounded-lg border border-[#8b5cf6]/30 bg-[#8b5cf6]/10 px-3 py-2 text-xs font-bold text-[#c4b5fd] transition-colors hover:bg-[#8b5cf6]/20 disabled:opacity-50"
+                                >
+                                    {isAnalyzing ? 'Analizando...' : 'Analizar factura'}
+                                </button>
+                            </div>
+                        )}
+
+                        {receiptAnalysis && (
+                            <div className="rounded-lg border border-[#8b5cf6]/20 bg-[#8b5cf6]/10 p-3 text-sm text-gray-200">
+                                <div className="flex items-center justify-between gap-3">
+                                    <p className="font-semibold text-white">
+                                        {receiptAnalysis.supplier_name || 'Proveedor detectado'}
+                                    </p>
+                                    <span className="text-xs text-[#c4b5fd]">
+                                        {Math.round(receiptAnalysis.confidence * 100)}% confianza
+                                    </span>
+                                </div>
+                                <p className="mt-1 text-xs text-gray-300">{receiptAnalysis.summary}</p>
+                                <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-gray-400">
+                                    <span>Total: {receiptAnalysis.amount ? `${receiptAnalysis.amount.toFixed(2)}€` : 'No detectado'}</span>
+                                    <span>IVA: {receiptAnalysis.tax_amount ? `${receiptAnalysis.tax_amount.toFixed(2)}€` : 'No detectado'}</span>
+                                    <span>Fecha: {receiptAnalysis.date || 'No detectada'}</span>
+                                    <span>NIF: {receiptAnalysis.supplier_tax_id || 'No detectado'}</span>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Sector (solo para empresa) */}
@@ -359,14 +505,52 @@ export function ExpenseForm({
                         </button>
                         <button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || isUploadingReceipt}
                             className="flex-1 py-3 rounded-lg bg-[#8b5cf6] text-white font-semibold hover:bg-[#7c3aed] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(139,92,246,0.2)]"
                         >
-                            {isSubmitting ? 'Guardando...' : expense ? 'Actualizar' : 'Añadir'}
+                            {isUploadingReceipt ? 'Subiendo factura...' : isSubmitting ? 'Guardando...' : expense ? 'Actualizar' : 'Añadir'}
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     )
+}
+
+function buildReceiptDescription(
+    currentDescription: string,
+    analysis: {
+        supplier_name: string | null
+        supplier_tax_id: string | null
+        invoice_number: string | null
+        date: string | null
+        amount: number | null
+        tax_rate: number | null
+        tax_amount: number | null
+        base_amount: number | null
+        summary: string
+    }
+) {
+    const baseDescription = currentDescription
+        .replace(/\n\nFactura analizada por IA:[\s\S]*$/m, '')
+        .trim()
+    const title = baseDescription || analysis.supplier_name || analysis.summary
+    const lines = [
+        '',
+        'Factura analizada por IA:',
+        `Proveedor: ${analysis.supplier_name || 'No detectado'}`,
+        `NIF/CIF: ${analysis.supplier_tax_id || 'No detectado'}`,
+        `Nº factura: ${analysis.invoice_number || 'No detectado'}`,
+        `Fecha factura: ${analysis.date || 'No detectada'}`,
+        `Base imponible: ${formatOptionalCurrency(analysis.base_amount)}`,
+        `IVA: ${formatOptionalCurrency(analysis.tax_amount)}${analysis.tax_rate !== null ? ` (${analysis.tax_rate}%)` : ''}`,
+        `Total: ${formatOptionalCurrency(analysis.amount)}`,
+        `Resumen: ${analysis.summary}`,
+    ]
+
+    return `${title}${lines.join('\n')}`
+}
+
+function formatOptionalCurrency(value: number | null) {
+    return value === null ? 'No detectado' : `${value.toFixed(2)} EUR`
 }
