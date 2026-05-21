@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { useInvoices } from '../hooks/useInvoices'
 import type { InvoiceStatus, InvoiceWithDetails } from '@/types/database'
 import { InvoiceForm } from './InvoiceForm'
+import { InvoiceStats } from './InvoiceStats'
 import { Badge } from '@/shared/components/ui/Badge'
 import { motion, AnimatePresence } from 'framer-motion'
 import { format } from 'date-fns'
@@ -62,6 +63,10 @@ export function InvoiceList({ contactId, initialInvoices }: InvoiceListProps) {
 
     return (
         <div className="space-y-6">
+            {!contactId && invoices.length > 0 && (
+                <InvoiceStats invoices={invoices} />
+            )}
+
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
                     <span className="w-1.5 h-6 bg-[#8b5cf6] rounded-full"></span>

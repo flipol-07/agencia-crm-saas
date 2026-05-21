@@ -1,0 +1,11 @@
+[    1171ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1273ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1836ms] [LOG] Realtime Auth State Change: INITIAL_SESSION @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1996ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2559ms] [WARNING] PushSubscriptionManager: NEXT_PUBLIC_VAPID_PUBLIC_KEY ausente @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2631ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3208ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779341464123]: SUBSCRIBED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3344ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779341464123]: CLOSED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3385ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779341464317]: SUBSCRIBED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7107ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7136ms] [LOG] [Fast Refresh] done in 129ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297

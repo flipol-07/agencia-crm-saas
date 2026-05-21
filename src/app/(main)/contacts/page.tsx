@@ -20,8 +20,8 @@ export default async function ContactsPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-wider">Contactos</h1>
-                    <p className="text-gray-400 mt-1">Gestión de base de datos de clientes</p>
+                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-ink-700">Contactos</h1>
+                    <p className="text-sm text-ink-400 mt-1">Gestión de base de datos de clientes</p>
                 </div>
                 <ContactFormWrapper />
             </div>

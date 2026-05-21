@@ -1,0 +1,30 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e8]:
+    - generic [ref=e9]:
+      - img "Aurie" [ref=e12]
+      - heading "Bienvenido a Aurie" [level=1] [ref=e13]
+      - paragraph [ref=e14]: Tu sistema operativo de agencia inteligente
+    - generic [ref=e15]:
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]: Email Corporativo
+          - textbox "Email Corporativo" [ref=e21]:
+            - /placeholder: tu@empresa.com
+            - text: plorenzopizarro@gmail.com
+        - generic [ref=e22]:
+          - generic [ref=e23]: Contraseña
+          - textbox "Contraseña" [ref=e25]:
+            - /placeholder: ••••••••
+            - text: auriePol2026
+        - button "Iniciar Sesión" [ref=e26] [cursor=pointer]:
+          - generic [ref=e27]: Iniciar Sesión
+      - generic [ref=e32]: O continúa con
+      - generic [ref=e33]:
+        - link "Entrar con datos de prueba" [ref=e34] [cursor=pointer]:
+          - /url: /demo
+        - link "¿Olvidaste tu contraseña?" [ref=e36] [cursor=pointer]:
+          - /url: /forgot-password
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]:
+    - img [ref=e43]
+  - alert [ref=e46]

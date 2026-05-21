@@ -2,7 +2,6 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { cacheLife } from 'next/cache'
-import { isDemoEmail } from '@/shared/lib/demo'
 import {
     ExpenseWithRelations,
     Sector,
@@ -39,6 +38,7 @@ export async function getExpenseCategoriesCached(): Promise<ExpenseCategory[]> {
 }
 
 export async function getExpensesCached(
+    userId: string,
     filters?: Partial<ExpenseFilters>
 ): Promise<ExpenseWithRelations[]> {
     cacheLife('minutes')
@@ -49,6 +49,7 @@ export async function getExpensesCached(
             sectors (id, name, color, icon),
             expense_categories (id, name, type, icon)
         `)
+        .eq('user_id', userId)
         .order('date', { ascending: false })
 
     if (filters?.type && filters.type !== 'all') {
@@ -80,6 +81,7 @@ export async function getExpensesCached(
 }
 
 export async function getExpenseStatsCached(
+    userId: string,
     is_personal: boolean | null = null
 ): Promise<{
     total_expenses: number
@@ -89,7 +91,9 @@ export async function getExpenseStatsCached(
 }> {
     cacheLife('minutes')
     const supabase = createAdminClient()
-    let query = (supabase.from('expenses') as any).select('type, amount, tax_amount, tax_deductible')
+    let query = (supabase.from('expenses') as any)
+        .select('type, amount, tax_amount, tax_deductible')
+        .eq('user_id', userId)
 
     if (is_personal !== null) {
         query = query.eq('is_personal', is_personal)
@@ -124,12 +128,12 @@ export async function getExpenseStatsCached(
     }
 }
 
-export async function getExpensesBySectorCached(): Promise<
+export async function getExpensesBySectorCached(userId: string): Promise<
     { sector_id: string; sector_name: string; sector_color: string; expenses: number; income: number }[]
 > {
     const supabase = createAdminClient()
 
-    // Fetch individual expenses/income from expenses table
+    // Fetch individual expenses/income from expenses table, scoped to user
     const { data: expensesData, error: expensesError } = await (supabase.from('expenses') as any)
         .select(`
             type,
@@ -137,6 +141,7 @@ export async function getExpensesBySectorCached(): Promise<
             sector_id,
             sectors (name, color)
         `)
+        .eq('user_id', userId)
         .eq('is_personal', false)
         .not('sector_id', 'is', null)
 
@@ -145,13 +150,14 @@ export async function getExpensesBySectorCached(): Promise<
         return []
     }
 
-    // Fetch invoices with sector_id
+    // Fetch invoices with sector_id, scoped to user
     const { data: invoicesData, error: invoicesError } = await (supabase.from('invoices') as any)
         .select(`
             total,
             sector_id,
             sectors (name, color)
         `)
+        .or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
         .not('sector_id', 'is', null)
 
     if (invoicesError) {
@@ -160,7 +166,6 @@ export async function getExpensesBySectorCached(): Promise<
 
     const bySector: Record<string, any> = {}
 
-    // Process expenses table entries
     for (const exp of (expensesData || [])) {
         const sectorId = exp.sector_id
         const sector = exp.sectors
@@ -181,7 +186,6 @@ export async function getExpensesBySectorCached(): Promise<
         }
     }
 
-    // Process invoices table entries (all are income)
     for (const inv of (invoicesData || [])) {
         const sectorId = inv.sector_id
         const sector = inv.sectors
@@ -204,19 +208,7 @@ export async function getExpensesBySectorCached(): Promise<
     }))
 }
 
-async function shouldUseDemoScope(supabase: any, userId?: string) {
-    if (!userId) return false
-
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', userId)
-        .maybeSingle()
-
-    return isDemoEmail(profile?.email)
-}
-
-export async function getTaxForecastCached(userId?: string): Promise<{
+export async function getTaxForecastCached(userId: string): Promise<{
     iva_repercutido: number
     iva_soportado: number
     iva_resultado: number
@@ -224,37 +216,32 @@ export async function getTaxForecastCached(userId?: string): Promise<{
     year: number
 }> {
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
     const now = new Date()
     const month = now.getMonth()
     const year = now.getFullYear()
     const quarter = Math.floor(month / 3) + 1
 
-    // Quarter dates
     const qStartMonth = (quarter - 1) * 3
     const startDate = new Date(year, qStartMonth, 1).toISOString().split('T')[0]
     const endDate = new Date(year, qStartMonth + 3, 0).toISOString().split('T')[0]
 
-    // Fetch Invoices Tax (IVA Repercutido)
-    let invoiceQuery = (supabase.from('invoices') as any)
+    // IVA Repercutido (invoices), scoped to user
+    const invoiceQuery = (supabase.from('invoices') as any)
         .select('tax_amount')
+        .or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
         .gte('issue_date', startDate)
         .lte('issue_date', endDate)
-        .eq('status', 'paid') // Only paid? Or all issued? Usually all issued for IVA. Let's include all except draft/cancelled.
+        .eq('status', 'paid')
         .not('status', 'in', '("draft","cancelled")')
 
-    // Fetch Expenses Tax (IVA Soportado)
-    let expenseQuery = (supabase.from('expenses') as any)
+    // IVA Soportado (expenses), scoped to user
+    const expenseQuery = (supabase.from('expenses') as any)
         .select('tax_amount')
+        .eq('user_id', userId)
         .eq('tax_deductible', true)
         .eq('is_personal', false)
         .gte('date', startDate)
         .lte('date', endDate)
-
-    if (demoScope && userId) {
-        invoiceQuery = invoiceQuery.or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
-        expenseQuery = expenseQuery.eq('user_id', userId)
-    }
 
     const [{ data: invoices, error: invError }, { data: expenses, error: expError }] = await Promise.all([
         invoiceQuery,

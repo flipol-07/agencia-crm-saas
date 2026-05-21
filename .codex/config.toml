@@ -12,3 +12,22 @@ default_permissions = ":workspace"
 codex_hooks = true
 multi_agent = true
 shell_tool = true
+
+# >>> SaaS Factory managed MCPs >>>
+
+[mcp_servers.next-devtools]
+command = "npx"
+args = ["-y", "next-devtools-mcp@latest"]
+enabled = true
+
+[mcp_servers.playwright]
+command = "npx"
+args = ["@playwright/mcp@latest"]
+enabled = true
+
+[mcp_servers.supabase]
+command = "node"
+args = ["scripts/mcp/supabase.mjs"]
+enabled = true
+
+# <<< SaaS Factory managed MCPs <<<

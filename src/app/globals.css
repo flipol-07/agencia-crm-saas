@@ -1,10 +1,3 @@
-/* Google Fonts - Outfit (Modern, Legible, Premium) */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -25,85 +18,80 @@
   }
 }
 
-/* * Aurie Design System 
- ... resto de tu código
-*/
 /*
- * Aurie Design System
- * Colores: Negro profundo, acentos lime/verde neón, púrpura atmosférico
- * Tipografía: Outfit (display), Inter (body)
+ * ----------------------------------------------------------------
+ * Legacy bridge — preserves API of `--bg-primary`, `--accent-lime`,
+ * etc. but routes them to the theme-aware Aurie tokens defined in
+ * aurie-design.css. This way legacy components keep working while
+ * the theme switch (dark/light) updates everything globally.
+ * ----------------------------------------------------------------
  */
 
 :root {
-  /* Background colors */
-  --bg-primary: #080112;
-  --bg-secondary: #11041d;
-  --bg-tertiary: #1a0b2e;
+  /* Background colors (now theme-aware) */
+  --bg-primary: var(--bg);
+  --bg-secondary: var(--bg-2);
+  --bg-tertiary: var(--bg-3);
 
   /* Text colors */
-  --text-primary: #ffffff;
-  --text-secondary: #a1a1aa;
-  --text-muted: #52525b;
+  --text-primary: var(--ink-700);
+  --text-secondary: var(--ink-500);
+  --text-muted: var(--ink-300);
 
-  /* Accent colors */
-  --accent-lime: #8b5cf6;
-  /* Replaced with Purple */
-  --accent-purple: #a855f7;
-  --accent-cyan: #06b6d4;
-  --accent-violet: #8b5cf6;
-  --accent-pink: #ec4899;
+  /* Accent colors — all funnel into the brand accent */
+  --accent-lime: var(--accent);
+  --accent-purple: var(--ochre);
+  --accent-cyan: var(--accent);
+  --accent-violet: var(--ochre);
+  --accent-pink: var(--accent);
 
   /* Border */
-  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-subtle: var(--divider-2);
 
-  /* Fonts */
-  --font-inter: 'Inter', sans-serif;
-  --font-outfit: 'Outfit', sans-serif;
+  /* Legacy fonts (kept for any direct reference) */
+  --font-inter: var(--font-body);
+  --font-outfit: var(--font-display);
 }
 
 @layer utilities {
   .glass-panel {
-    background: rgba(13, 4, 30, 0.6);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+    background: var(--bg-2);
+    border: 1px solid var(--divider);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.12);
   }
 
   .glass-card {
-    background: linear-gradient(145deg, rgba(26, 11, 46, 0.4), rgba(13, 4, 30, 0.6));
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    background: var(--bg-2);
+    border: 1px solid var(--divider);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.18);
   }
 
   .glass-input {
-    background: rgba(13, 4, 30, 0.5);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: var(--text-primary);
-    backdrop-filter: blur(8px);
-    transition: all 0.3s ease;
+    background: var(--bg-2);
+    border: 1px solid var(--divider);
+    color: var(--ink-700);
+    transition: all 0.18s ease;
   }
 
   .glass-input:focus {
-    background: rgba(13, 4, 30, 0.8);
-    border-color: var(--accent-purple);
-    box-shadow: 0 0 15px rgba(168, 85, 247, 0.2);
+    background: var(--bg-3);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent-line);
     outline: none;
   }
 
   .neon-border {
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    box-shadow: 0 0 15px rgba(139, 92, 246, 0.2);
+    border: 1px solid var(--accent-line);
+    box-shadow: 0 0 14px var(--accent-tint);
   }
 
   .text-glow {
-    text-shadow: 0 0 20px rgba(139, 92, 246, 0.5);
+    text-shadow: 0 0 20px var(--accent-tint);
   }
 
   .bg-gradient-premium {
-    background: radial-gradient(circle at top left, rgba(88, 28, 135, 0.15), transparent 40%),
-      radial-gradient(circle at bottom right, rgba(6, 182, 212, 0.1), transparent 40%);
+    background: radial-gradient(circle at top left, var(--accent-tint), transparent 40%),
+                radial-gradient(circle at bottom right, var(--accent-soft), transparent 40%);
   }
 }
 
@@ -114,12 +102,11 @@ html {
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  background-color: var(--bg-primary);
-  color: var(--text-primary);
+  font-family: var(--font-body, 'DM Sans'), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background-color: var(--bg);
+  color: var(--ink-700);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color-scheme: dark;
   overscroll-behavior-y: none;
   /* PWA native feel */
   min-height: 100dvh;
@@ -127,7 +114,11 @@ body {
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+  transition: background-color 240ms ease, color 240ms ease;
 }
+
+body[data-mode="dark"] { color-scheme: dark; }
+body[data-mode="light"] { color-scheme: light; }
 
 body.scrollbar-hide,
 body {
@@ -156,47 +147,51 @@ body::-webkit-scrollbar {
   padding-right: env(safe-area-inset-right);
 }
 
-/* Outfit for display text */
+/* Display font helper (legacy class used in many components) */
 .font-display {
-  font-family: 'Outfit', sans-serif;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  letter-spacing: 0.005em;
 }
 
 h1,
 h2,
 h3 {
-  font-family: 'Outfit', sans-serif;
-  letter-spacing: -0.01em;
-  font-weight: 600;
+  font-family: var(--font-display);
+  letter-spacing: 0.005em;
+  font-weight: 400;
 }
 
-/* Glow effects */
+/* Glow effects (now theme accent driven) */
 .glow-lime {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 20px var(--accent-tint);
 }
 
 .glow-purple {
-  box-shadow: 0 0 40px rgba(147, 51, 234, 0.2);
+  box-shadow: 0 0 40px var(--accent-tint);
 }
 
-/* Glass effect */
+/* Glass effect (kept for compatibility but neutralised on light) */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-2);
+  border: 1px solid var(--divider);
+  transform: translateZ(0);
+}
+
+body[data-mode="dark"] .glass {
+  background: rgba(255, 255, 255, 0.03);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  transform: translateZ(0);
-  /* Hardware acceleration */
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 /* Selection */
 ::selection {
-  background-color: var(--accent-lime);
-  color: var(--bg-primary);
+  background-color: var(--accent);
+  color: var(--paper);
 }
 
 /* Focus visible */
 :focus-visible {
-  outline: 2px solid var(--accent-lime);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }

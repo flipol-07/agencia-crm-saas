@@ -20,10 +20,10 @@ export default function InvoicesPage() {
 
             <div className="flex items-center justify-between pb-6 border-b border-white/5">
                 <div>
-                    <h1 className="text-4xl font-display font-black text-white tracking-tight uppercase">
+                    <h1 className="text-xl sm:text-2xl font-semibold text-ink-700 tracking-tight">
                         Facturas
                     </h1>
-                    <p className="text-gray-400 mt-1 flex items-center gap-2">
+                    <p className="text-sm text-ink-400 mt-1">
                         Gestiona tus ingresos y cobros
                     </p>
                 </div>

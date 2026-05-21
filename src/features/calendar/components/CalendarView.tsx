@@ -128,7 +128,7 @@ export function CalendarView() {
             {/* Header */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 sm:p-6 border-b border-white/5 bg-white/[0.02] gap-4 sm:gap-0">
                 <div className="flex items-center justify-between w-full sm:w-auto sm:justify-start gap-4 sm:gap-6">
-                    <h1 className="text-xl sm:text-3xl font-bold bg-gradient-to-r from-brand to-white bg-clip-text text-transparent tracking-tight">
+                    <h1 className="text-xl sm:text-2xl font-semibold text-ink-700 tracking-tight">
                         {format(currentDate, view === 'day' ? "d 'de' MMMM, yyyy" : 'MMMM yyyy', { locale: es })}
                     </h1>
                     <div className="flex items-center rounded-xl border border-white/10 bg-white/5 p-1.5 gap-1.5 shadow-inner">

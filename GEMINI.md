@@ -369,3 +369,12 @@ test('should calculate total with tax', () => {
 
 *Este archivo es el cerebro de la fábrica. Cada error documentado la hace más fuerte.*
 
+<!-- SAAS-FACTORY-AGENT-CONFIG:START -->
+## Agent MCP Auto-Config
+
+- Claude Code reads this project's `.mcp.json`.
+- Codex reads this project's `.codex/config.toml`.
+- Antigravity IDE/CLI uses global MCP entries prefixed with `sf-crm-aurie-6d436f38-` and `cwd` fixed to this folder.
+- Supabase MCP is launched through `scripts/mcp/supabase.mjs`, which reads `--project-ref=...` and `SUPABASE_ACCESS_TOKEN` from `.mcp.json` first.
+- Supabase project ref detected: `lqgdjvecnahcdmmkncjs`.
+<!-- SAAS-FACTORY-AGENT-CONFIG:END -->

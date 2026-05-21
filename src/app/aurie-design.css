@@ -1,0 +1,776 @@
+/* =============================================================
+   AURIE CRM — DESIGN SYSTEM
+   Based on Claude Design handoff (brand: aurie)
+   With palette refinements for daily-use legibility
+   ============================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Anton&family=Bebas+Neue&family=DM+Sans:wght@300..700&family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=Geist:wght@300..700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+/* =============================================================
+   AURIE — DARK (default)
+   Slightly softened from raw handoff:
+   - lime desaturated ~6% for less eye-strain
+   - removed orphan lime radial gradient (was random at bottom-left)
+   - reduced CTA glow intensity by ~40%
+   - added warmer ink-450 step for better data hierarchy
+   ============================================================= */
+body[data-brand="aurie"][data-mode="dark"],
+body[data-brand="aurie"]:not([data-mode="light"]) {
+  --bg:            #08060E;
+  --bg-2:          #110C1C;
+  --bg-3:          #1A1428;
+  --bg-4:          #241C36;
+  --paper:         #F3EFFF;
+
+  --ink-700:       #F3EFFF;
+  --ink-600:       #DAD3F1;
+  --ink-500:       #B0A6D4;
+  --ink-450:       #9890BC;
+  --ink-400:       #847AB0;
+  --ink-300:       #6A608F;
+  --ink-200:       #443B66;
+  --ink-100:       #2A2440;
+
+  --accent:        #B8F03A;        /* neon lime, refined */
+  --accent-hi:     #CFFF54;
+  --accent-soft:   #1F2A0A;
+  --accent-tint:   rgba(184,240,58,0.10);
+  --accent-line:   rgba(184,240,58,0.36);
+
+  --ochre:         #7C5BFF;        /* secondary = violet */
+  --ochre-soft:    #1B1238;
+
+  --success:       #6BE3A8;
+  --success-soft:  #0F2A1E;
+  --danger:        #FF6E6E;
+  --danger-soft:   #2A1014;
+  --warning:       #FFC857;
+  --warning-soft:  #2A2010;
+
+  --divider:       #221A38;
+  --divider-2:     #1A1428;
+  --divider-strong:#372A55;
+
+  --grain-opacity: 0.025;
+
+  --font-display:  'Anton', 'Bebas Neue', 'Archivo Black', 'Impact', sans-serif;
+  --font-body:     'DM Sans', 'Geist', -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
+
+  --tracking-display: 0.005em;
+  --tracking-tight:   0;
+  --tracking-label:   0.16em;
+  --tracking-small-cap: 0.18em;
+}
+
+body[data-brand="aurie"][data-mode="dark"],
+body[data-brand="aurie"]:not([data-mode="light"]) {
+  color: var(--ink-700);
+  background:
+    radial-gradient(900px 700px at 100% 0%, rgba(124, 91, 255, 0.16), transparent 60%),
+    radial-gradient(700px 500px at 50% 50%, rgba(124, 91, 255, 0.04), transparent 70%),
+    linear-gradient(180deg, #06040D 0%, #110C1C 100%);
+  background-attachment: fixed;
+}
+
+/* =============================================================
+   AURIE — LIGHT
+   ============================================================= */
+body[data-brand="aurie"][data-mode="light"] {
+  --bg:            #F4F1FB;
+  --bg-2:          #FFFFFF;
+  --bg-3:          #EDE8F8;
+  --bg-4:          #DDD3F0;
+  --paper:         #0A0612;
+
+  --ink-700:       #0A0612;
+  --ink-600:       #1E163A;
+  --ink-500:       #4A3F70;
+  --ink-450:       #5C5286;
+  --ink-400:       #6B5F95;
+  --ink-300:       #8C82B3;
+  --ink-200:       #B0A8CC;
+  --ink-100:       #D4CFE5;
+
+  --accent:        #7C5BFF;        /* on light, switch primary to violet (more legible than lime) */
+  --accent-hi:     #6B45F0;
+  --accent-soft:   #E8DEFF;
+  --accent-tint:   rgba(124,91,255,0.10);
+  --accent-line:   rgba(124,91,255,0.30);
+
+  --ochre:         #97C123;        /* lime as secondary highlight (darkened for contrast on light) */
+  --ochre-soft:    #EFF6D0;
+
+  --success:       #2D9D5F;
+  --success-soft:  #DDF2E5;
+  --danger:        #D14545;
+  --danger-soft:   #FBDFDF;
+  --warning:       #C28518;
+  --warning-soft:  #FBEAC9;
+
+  --divider:       #E0D9F0;
+  --divider-2:     #EBE6F5;
+  --divider-strong:#BFB3DD;
+
+  --grain-opacity: 0;
+}
+
+body[data-brand="aurie"][data-mode="light"] {
+  color: var(--ink-700);
+  background:
+    radial-gradient(1100px 700px at 100% 0%, rgba(124,91,255,0.10), transparent 60%),
+    radial-gradient(900px 800px at 0% 100%, rgba(151,193,35,0.08), transparent 60%),
+    linear-gradient(180deg, #F4F1FB 0%, #EDE8F8 100%);
+  background-attachment: fixed;
+}
+
+/* =============================================================
+   BASE
+   ============================================================= */
+html, body, #root {
+  margin: 0;
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.5;
+  font-feature-settings: "ss01", "cv11";
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+body {
+  min-height: 100vh;
+  position: relative;
+}
+
+/* film grain (only on dark) */
+body[data-mode="dark"]::before,
+body:not([data-mode="light"])::before {
+  content: "";
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: var(--grain-opacity, 0.025);
+  background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)' opacity='1'/></svg>");
+  mix-blend-mode: overlay;
+}
+
+::selection { background: var(--accent); color: var(--paper); }
+
+a { color: inherit; text-decoration: none; }
+
+/* =============================================================
+   TYPOGRAPHY UTILITIES
+   ============================================================= */
+.font-display { font-family: var(--font-display); }
+.font-body { font-family: var(--font-body); }
+.font-mono { font-family: var(--font-mono); }
+
+/* CRM-tuned typography: utility sans, no SHOUTING caps, sane sizes.
+   The Anton condensed-display look is reserved for the explicit
+   `.aurie-wordmark` class (brand-only). */
+.display-xl,
+.display-l,
+.display-m,
+.headline-l,
+.headline-m,
+.headline-s {
+  font-family: var(--font-body);
+  text-transform: none;
+  font-style: normal;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
+  color: var(--ink-700);
+}
+.display-xl { font-size: clamp(28px, 3vw, 36px); font-weight: 700; letter-spacing: -0.015em; }
+.display-l  { font-size: clamp(24px, 2.4vw, 30px); font-weight: 700; letter-spacing: -0.015em; }
+.display-m  { font-size: clamp(20px, 2vw, 24px); font-weight: 600; }
+.headline-l { font-size: 18px; font-weight: 600; line-height: 1.3; }
+.headline-m { font-size: 15px; font-weight: 600; line-height: 1.35; }
+.headline-s { font-size: 13px; font-weight: 600; line-height: 1.4; }
+
+.aurie-wordmark {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 0.94;
+}
+
+.italic-serif {
+  font-style: italic;
+  color: var(--accent);
+  font-family: var(--font-body);
+  font-weight: 500;
+  letter-spacing: -0.005em;
+}
+
+.body-l { font-family: var(--font-body); font-size: 16px; line-height: 1.55; }
+.body-m { font-family: var(--font-body); font-size: 14px; line-height: 1.5; }
+.body-s { font-family: var(--font-body); font-size: 13px; line-height: 1.45; color: var(--ink-300); }
+.mono   { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.01em; }
+
+.label  {
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: var(--tracking-label, 0.16em);
+  text-transform: uppercase;
+  color: var(--ink-300);
+}
+.kicker {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: var(--tracking-small-cap, 0.18em);
+  text-transform: uppercase;
+  color: var(--ink-400);
+}
+
+.tnum { font-variant-numeric: tabular-nums; }
+
+/* =============================================================
+   COMPONENTS — PRIMITIVES
+   ============================================================= */
+
+/* --- Button --- */
+.aurie-btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--divider-strong);
+  background: transparent;
+  color: var(--ink-700);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  white-space: nowrap;
+}
+.aurie-btn:hover { background: var(--bg-3); border-color: var(--ink-300); }
+.aurie-btn:active { transform: translateY(1px); }
+.aurie-btn-primary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  font-size: 12px;
+  box-shadow:
+    0 0 0 1px rgba(184,240,58,0.08),
+    0 0 14px rgba(184,240,58,0.18),
+    inset 0 0 8px rgba(184,240,58,0.04);
+}
+.aurie-btn-primary:hover {
+  background: var(--accent);
+  color: #08060E;
+  box-shadow:
+    0 0 0 1px rgba(184,240,58,0.5),
+    0 0 22px rgba(184,240,58,0.4);
+}
+body[data-mode="light"] .aurie-btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  border-color: var(--accent);
+  box-shadow: 0 6px 20px rgba(124,91,255,0.25);
+}
+body[data-mode="light"] .aurie-btn-primary:hover {
+  background: var(--accent-hi);
+  border-color: var(--accent-hi);
+  box-shadow: 0 8px 28px rgba(124,91,255,0.4);
+}
+.aurie-btn-ghost { border-color: transparent; color: var(--ink-500); }
+.aurie-btn-ghost:hover { background: var(--bg-3); color: var(--ink-700); }
+.aurie-btn-sm { height: 30px; padding: 0 12px; font-size: 10px; }
+.aurie-btn-lg { height: 46px; padding: 0 22px; font-size: 13px; }
+.aurie-btn-icon { width: 38px; padding: 0; }
+
+/* --- Card --- */
+.aurie-card {
+  background: var(--bg-2);
+  border: 1px solid var(--divider);
+  border-radius: 6px;
+  position: relative;
+  transition: border-color 200ms ease, background 200ms ease;
+}
+.aurie-card:hover { border-color: var(--divider-strong); }
+.aurie-card-flat { background: var(--bg-2); border: 1px solid var(--divider); border-radius: 6px; }
+.aurie-card-pad { padding: 24px; }
+
+body[data-mode="light"] .aurie-card {
+  background: #FFFFFF;
+  border-color: var(--divider);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6), 0 4px 18px rgba(60,40,120,0.04);
+}
+
+/* --- Badge --- */
+.aurie-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  border-radius: 2px;
+  border: 1px solid var(--divider-strong);
+  color: var(--ink-500);
+  background: transparent;
+}
+.aurie-badge-accent { color: var(--accent); border-color: var(--accent-line); background: var(--accent-tint); }
+.aurie-badge-success { color: var(--success); border-color: rgba(107,227,168,0.3); background: rgba(107,227,168,0.08); }
+.aurie-badge-danger  { color: var(--danger);  border-color: rgba(255,110,110,0.3);  background: rgba(255,110,110,0.08); }
+.aurie-badge-warning { color: var(--warning); border-color: rgba(255,200,87,0.3); background: rgba(255,200,87,0.08); }
+
+/* --- Input --- */
+.aurie-input {
+  width: 100%;
+  height: 42px;
+  padding: 0 14px;
+  background: var(--bg-2);
+  border: 1px solid var(--divider);
+  border-radius: 4px;
+  color: var(--ink-700);
+  font-family: var(--font-body);
+  font-size: 14px;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+.aurie-input::placeholder { color: var(--ink-200); }
+.aurie-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: var(--bg-3);
+}
+body[data-mode="light"] .aurie-input {
+  background: var(--bg-2);
+  border-color: var(--divider);
+  color: var(--ink-700);
+}
+body[data-mode="light"] .aurie-input:focus { background: #FFFFFF; }
+
+/* --- Tabs --- */
+.aurie-tabs {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--divider);
+}
+.aurie-tab {
+  position: relative;
+  padding: 10px 0;
+  margin-right: 28px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ink-300);
+  cursor: pointer;
+  background: none; border: 0;
+  transition: color 160ms ease;
+}
+.aurie-tab:hover { color: var(--ink-600); }
+.aurie-tab.is-active { color: var(--ink-700); }
+.aurie-tab.is-active::after {
+  content: ""; position: absolute; left: 0; right: 0; bottom: -1px;
+  height: 1px; background: var(--accent);
+}
+
+/* --- Sidenav --- */
+.sidenav-link.is-active .sidenav-bar { background: var(--accent); }
+.kicker-line { display: inline-flex; align-items: center; gap: 10px; }
+.kicker-line::before { content: ""; width: 24px; height: 1px; background: var(--accent); }
+.page-eyebrow { color: var(--ink-300); font-size: 11px; font-weight: 500; letter-spacing: var(--tracking-label, 0.16em); text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+.page-eyebrow::before { content: ""; width: 20px; height: 1px; background: var(--accent); }
+
+/* --- Reveal animation --- */
+.aurie-reveal {
+  opacity: 0;
+  transform: translateY(8px);
+  animation: aurie-reveal-up 600ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes aurie-reveal-up { to { opacity: 1; transform: translateY(0); } }
+
+/* hover-lift */
+.aurie-hov-lift { transition: transform 200ms ease, border-color 200ms ease, background 200ms ease; }
+.aurie-hov-lift:hover { transform: translateY(-2px); border-color: var(--divider-strong); }
+
+/* =============================================================
+   LIGHT MODE — invert Tailwind hardcoded greyscale classes
+   So legacy components stay legible without per-component rewrites.
+   Only inverts pale (1xx-5xx) text — dark Tailwind tones (6xx-9xx)
+   are intentionally dark and stay as-is.
+   ============================================================= */
+body[data-mode="light"] .text-white { color: var(--ink-700) !important; }
+body[data-mode="light"] .text-gray-100,
+body[data-mode="light"] .text-zinc-100,
+body[data-mode="light"] .text-slate-100,
+body[data-mode="light"] .text-neutral-100,
+body[data-mode="light"] .text-stone-100 { color: var(--ink-700) !important; }
+body[data-mode="light"] .text-gray-200,
+body[data-mode="light"] .text-gray-300,
+body[data-mode="light"] .text-zinc-200,
+body[data-mode="light"] .text-zinc-300,
+body[data-mode="light"] .text-slate-200,
+body[data-mode="light"] .text-slate-300,
+body[data-mode="light"] .text-neutral-200,
+body[data-mode="light"] .text-neutral-300,
+body[data-mode="light"] .text-stone-200,
+body[data-mode="light"] .text-stone-300 { color: var(--ink-600) !important; }
+body[data-mode="light"] .text-gray-400,
+body[data-mode="light"] .text-zinc-400,
+body[data-mode="light"] .text-slate-400,
+body[data-mode="light"] .text-neutral-400,
+body[data-mode="light"] .text-stone-400 { color: var(--ink-450) !important; }
+body[data-mode="light"] .text-gray-500,
+body[data-mode="light"] .text-zinc-500,
+body[data-mode="light"] .text-slate-500,
+body[data-mode="light"] .text-neutral-500,
+body[data-mode="light"] .text-stone-500 { color: var(--ink-400) !important; }
+
+/* Bridge tokens used across the codebase */
+body[data-mode="light"] .text-text-primary,
+body[data-mode="light"] .text-text { color: var(--ink-700) !important; }
+body[data-mode="light"] .text-text-secondary,
+body[data-mode="light"] .text-text-muted,
+body[data-mode="light"] .text-muted-foreground { color: var(--ink-400) !important; }
+body[data-mode="light"] .text-foreground { color: var(--ink-700) !important; }
+
+body[data-mode="light"] .bg-black { background-color: rgba(0,0,0,0.04) !important; }
+body[data-mode="light"] .bg-black\/20,
+body[data-mode="light"] .bg-black\/30,
+body[data-mode="light"] .bg-black\/40,
+body[data-mode="light"] .bg-black\/50,
+body[data-mode="light"] .bg-black\/60,
+body[data-mode="light"] .bg-black\/70 { background-color: rgba(255,255,255,0.7) !important; }
+body[data-mode="light"] .bg-white\/5,
+body[data-mode="light"] .bg-white\/10 { background-color: rgba(10,6,18,0.04) !important; }
+body[data-mode="light"] .bg-white\/20 { background-color: rgba(10,6,18,0.06) !important; }
+body[data-mode="light"] .bg-white\/30 { background-color: rgba(10,6,18,0.08) !important; }
+
+body[data-mode="light"] .border-white\/5,
+body[data-mode="light"] .border-white\/10,
+body[data-mode="light"] .border-white\/20 { border-color: var(--divider) !important; }
+
+/* Glow shadows are too dark for light mode */
+body[data-mode="light"] .shadow-2xl,
+body[data-mode="light"] [class*="shadow-["] { box-shadow: 0 4px 18px rgba(60,40,120,0.06) !important; }
+
+/* Background utilities */
+body[data-mode="light"] .bg-background,
+body[data-mode="light"] .bg-background\/60,
+body[data-mode="light"] .bg-background\/80,
+body[data-mode="light"] .bg-background\/30 { background-color: var(--bg-2) !important; }
+
+/* Surface/card bridges (shadcn-style) */
+body[data-mode="light"] .bg-card,
+body[data-mode="light"] .bg-surface,
+body[data-mode="light"] .bg-popover { background-color: var(--bg-2) !important; }
+
+/* Ensure pills/badges using --accent (violet) keep white text in light mode.
+   Common patterns: `text-bg`, `text-paper`, `text-white` over accent bg. */
+body[data-mode="light"] .bg-accent .text-bg,
+body[data-mode="light"] .bg-accent\/15,
+body[data-mode="light"] .bg-accent\/20 { color: inherit; }
+body[data-mode="light"] [class*="bg-accent"].text-bg,
+body[data-mode="light"] [class*="bg-accent"].text-paper { color: #FFFFFF !important; }
+
+/* Glass-panel containers need an opaque enough background in light mode
+   or text-on-blur becomes washed out. */
+body[data-mode="light"] .glass-panel,
+body[data-mode="light"] .glass-card,
+body[data-mode="light"] .glass-surface {
+  background-color: #FFFFFF !important;
+  border-color: var(--divider) !important;
+  color: var(--ink-700);
+  box-shadow: 0 1px 0 rgba(255,255,255,0.6), 0 2px 12px rgba(60,40,120,0.05);
+}
+
+/* =============================================================
+   LIGHT MODE — rescue pastel-tone Tailwind utilities
+   The codebase uses text-{color}-200/300/400 + bg-{color}-X/10
+   patterns designed for dark mode. In light they wash out.
+   Map them to readable equivalents.
+   ============================================================= */
+
+/* TEXT — pale shades become 700 (readable on white) */
+body[data-mode="light"] .text-purple-200,
+body[data-mode="light"] .text-purple-300,
+body[data-mode="light"] .text-purple-400,
+body[data-mode="light"] .text-violet-200,
+body[data-mode="light"] .text-violet-300,
+body[data-mode="light"] .text-violet-400,
+body[data-mode="light"] .text-fuchsia-200,
+body[data-mode="light"] .text-fuchsia-300,
+body[data-mode="light"] .text-fuchsia-400 { color: #6D28D9 !important; }
+
+body[data-mode="light"] .text-emerald-200,
+body[data-mode="light"] .text-emerald-300,
+body[data-mode="light"] .text-emerald-400,
+body[data-mode="light"] .text-green-200,
+body[data-mode="light"] .text-green-300,
+body[data-mode="light"] .text-green-400,
+body[data-mode="light"] .text-green-500 { color: #047857 !important; }
+
+body[data-mode="light"] .text-red-200,
+body[data-mode="light"] .text-red-300,
+body[data-mode="light"] .text-red-400,
+body[data-mode="light"] .text-rose-200,
+body[data-mode="light"] .text-rose-300,
+body[data-mode="light"] .text-rose-400 { color: #B91C1C !important; }
+
+body[data-mode="light"] .text-amber-200,
+body[data-mode="light"] .text-amber-300,
+body[data-mode="light"] .text-amber-400,
+body[data-mode="light"] .text-amber-100,
+body[data-mode="light"] .text-yellow-200,
+body[data-mode="light"] .text-yellow-300,
+body[data-mode="light"] .text-yellow-400,
+body[data-mode="light"] .text-orange-200,
+body[data-mode="light"] .text-orange-300,
+body[data-mode="light"] .text-orange-400 { color: #B45309 !important; }
+
+body[data-mode="light"] .text-blue-200,
+body[data-mode="light"] .text-blue-300,
+body[data-mode="light"] .text-blue-400,
+body[data-mode="light"] .text-sky-200,
+body[data-mode="light"] .text-sky-300,
+body[data-mode="light"] .text-sky-400,
+body[data-mode="light"] .text-cyan-200,
+body[data-mode="light"] .text-cyan-300,
+body[data-mode="light"] .text-cyan-400 { color: #1D4ED8 !important; }
+
+body[data-mode="light"] .text-pink-200,
+body[data-mode="light"] .text-pink-300,
+body[data-mode="light"] .text-pink-400 { color: #BE185D !important; }
+
+body[data-mode="light"] .text-teal-200,
+body[data-mode="light"] .text-teal-300,
+body[data-mode="light"] .text-teal-400 { color: #0F766E !important; }
+
+body[data-mode="light"] .text-indigo-200,
+body[data-mode="light"] .text-indigo-300,
+body[data-mode="light"] .text-indigo-400 { color: #4338CA !important; }
+
+body[data-mode="light"] .text-brand,
+body[data-mode="light"] .text-brand-neon-purple,
+body[data-mode="light"] .text-brand-neon-blue,
+body[data-mode="light"] .text-brand-neon-cyan,
+body[data-mode="light"] .text-brand-neon-lime,
+body[data-mode="light"] .text-brand-purple { color: var(--accent) !important; }
+
+/* BACKGROUNDS — soft pastel chips become slightly stronger tint */
+body[data-mode="light"] .bg-purple-500\/5,
+body[data-mode="light"] .bg-purple-500\/10,
+body[data-mode="light"] .bg-purple-400\/10,
+body[data-mode="light"] .bg-violet-500\/5,
+body[data-mode="light"] .bg-violet-500\/10,
+body[data-mode="light"] .bg-fuchsia-500\/10 { background-color: rgba(124,58,237,0.10) !important; }
+
+body[data-mode="light"] .bg-emerald-500\/5,
+body[data-mode="light"] .bg-emerald-500\/10,
+body[data-mode="light"] .bg-emerald-400\/10,
+body[data-mode="light"] .bg-green-500\/5,
+body[data-mode="light"] .bg-green-500\/10,
+body[data-mode="light"] .bg-green-500\/20 { background-color: rgba(5,150,105,0.10) !important; }
+
+body[data-mode="light"] .bg-red-500\/5,
+body[data-mode="light"] .bg-red-500\/10,
+body[data-mode="light"] .bg-red-400\/10,
+body[data-mode="light"] .bg-rose-500\/10 { background-color: rgba(220,38,38,0.10) !important; }
+
+body[data-mode="light"] .bg-amber-500\/5,
+body[data-mode="light"] .bg-amber-500\/10,
+body[data-mode="light"] .bg-amber-500\/20,
+body[data-mode="light"] .bg-amber-400\/10,
+body[data-mode="light"] .bg-yellow-400\/10,
+body[data-mode="light"] .bg-yellow-500\/10,
+body[data-mode="light"] .bg-orange-500\/10 { background-color: rgba(217,119,6,0.12) !important; }
+
+body[data-mode="light"] .bg-blue-500\/5,
+body[data-mode="light"] .bg-blue-500\/10,
+body[data-mode="light"] .bg-blue-400\/10,
+body[data-mode="light"] .bg-sky-500\/10,
+body[data-mode="light"] .bg-cyan-500\/10 { background-color: rgba(37,99,235,0.10) !important; }
+
+body[data-mode="light"] .bg-pink-500\/10 { background-color: rgba(219,39,119,0.10) !important; }
+body[data-mode="light"] .bg-teal-500\/10 { background-color: rgba(13,148,136,0.10) !important; }
+body[data-mode="light"] .bg-indigo-500\/10 { background-color: rgba(79,70,229,0.10) !important; }
+
+/* BORDERS — colored borders need to be more visible on white */
+body[data-mode="light"] .border-purple-500\/20,
+body[data-mode="light"] .border-purple-500\/30,
+body[data-mode="light"] .border-purple-400\/20,
+body[data-mode="light"] .border-violet-500\/20,
+body[data-mode="light"] .border-violet-500\/30 { border-color: rgba(124,58,237,0.30) !important; }
+
+body[data-mode="light"] .border-emerald-500\/20,
+body[data-mode="light"] .border-emerald-500\/30,
+body[data-mode="light"] .border-emerald-400\/20,
+body[data-mode="light"] .border-green-500\/20,
+body[data-mode="light"] .border-green-500\/30 { border-color: rgba(5,150,105,0.30) !important; }
+
+body[data-mode="light"] .border-red-500\/20,
+body[data-mode="light"] .border-red-500\/30,
+body[data-mode="light"] .border-red-400\/20,
+body[data-mode="light"] .border-rose-500\/30 { border-color: rgba(220,38,38,0.30) !important; }
+
+body[data-mode="light"] .border-amber-500\/20,
+body[data-mode="light"] .border-amber-500\/30,
+body[data-mode="light"] .border-yellow-400\/20,
+body[data-mode="light"] .border-yellow-500\/20,
+body[data-mode="light"] .border-orange-500\/30 { border-color: rgba(217,119,6,0.35) !important; }
+
+body[data-mode="light"] .border-blue-500\/20,
+body[data-mode="light"] .border-blue-500\/30,
+body[data-mode="light"] .border-blue-400\/20,
+body[data-mode="light"] .border-sky-500\/30 { border-color: rgba(37,99,235,0.30) !important; }
+
+/* Subtitle/eyebrow chips — bg-white/5 pill on cards uses near-invisible bg */
+body[data-mode="light"] .bg-white\/\[0\.02\] { background-color: rgba(10,6,18,0.03) !important; }
+
+/* Section eyebrow labels — text-text-muted on white pale.
+   These use `text-text-muted` (mapped above to --ink-400 #6B5F95).
+   In context of section h2 with a tracking-wider/uppercase, we want darker. */
+body[data-mode="light"] .text-text-muted.uppercase,
+body[data-mode="light"] h2.text-text-muted { color: var(--ink-500) !important; }
+
+/* Brand-tinted backgrounds used widely */
+body[data-mode="light"] .bg-brand\/20,
+body[data-mode="light"] .bg-brand\/10,
+body[data-mode="light"] .bg-brand-purple\/5,
+body[data-mode="light"] .bg-brand-neon-blue\/5,
+body[data-mode="light"] .bg-brand-neon-lime\/5,
+body[data-mode="light"] .bg-brand-neon-purple\/10 { background-color: rgba(124,91,255,0.10) !important; }
+
+/* Reinforce card borders for legibility on the pale lavender bg */
+body[data-mode="light"] .border-white\/5,
+body[data-mode="light"] .border-white\/10 { border-color: #D9D1EE !important; }
+
+/* =============================================================
+   LIGHT MODE — subtle violet wash on cards
+   Pure white cards on a near-white page bg make any light/gradient
+   text dissolve. A 4–6% violet tint keeps everything anchored to the
+   brand and prevents fade-to-invisible.
+   ============================================================= */
+body[data-mode="light"] .glass-card,
+body[data-mode="light"] .glass-panel,
+body[data-mode="light"] .glass-surface,
+body[data-mode="light"] .aurie-card {
+  background-color: #FBF9FF !important;
+  background-image: linear-gradient(180deg, rgba(124,91,255,0.04) 0%, rgba(124,91,255,0.015) 100%) !important;
+  border-color: #D9D1EE !important;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.7), 0 2px 14px rgba(60,40,120,0.06);
+}
+
+/* Plain `bg-white` containers also get the lavender wash so they
+   harmonise with the page bg and any near-white text stays visible. */
+body[data-mode="light"] .bg-white {
+  background-color: #FBF9FF !important;
+}
+
+/* Arbitrary near-black backgrounds used in some legacy cards
+   (e.g. ContactCard uses `bg-[#0a0a0a]/60`). Force them onto the
+   lavender card surface in light mode. */
+body[data-mode="light"] [class*="bg-[#0a0a0a]"],
+body[data-mode="light"] [class*="bg-[#000000]"],
+body[data-mode="light"] [class*="bg-[#0d0a1b]"],
+body[data-mode="light"] [class*="bg-[#08060E]"],
+body[data-mode="light"] [class*="bg-[#110C1C]"],
+body[data-mode="light"] [class*="bg-[#18181b]"] {
+  background-color: #FBF9FF !important;
+  background-image: linear-gradient(180deg, rgba(124,91,255,0.05) 0%, rgba(124,91,255,0.02) 100%) !important;
+  border-color: #D9D1EE !important;
+}
+
+/* Tailwind `bg-zinc-*` and `bg-neutral-*` greys (used heavily in
+   team-chat and meetings panels designed dark-first). */
+body[data-mode="light"] .bg-zinc-900,
+body[data-mode="light"] .bg-zinc-900\/50,
+body[data-mode="light"] .bg-zinc-900\/20,
+body[data-mode="light"] .bg-zinc-900\/40,
+body[data-mode="light"] .bg-zinc-800,
+body[data-mode="light"] .bg-zinc-800\/50,
+body[data-mode="light"] .bg-neutral-900,
+body[data-mode="light"] .bg-neutral-800,
+body[data-mode="light"] .bg-slate-900,
+body[data-mode="light"] .bg-slate-800,
+body[data-mode="light"] .bg-gray-900,
+body[data-mode="light"] .bg-gray-800 {
+  background-color: #FBF9FF !important;
+  color: var(--ink-700);
+}
+
+body[data-mode="light"] .bg-zinc-700,
+body[data-mode="light"] .bg-neutral-700,
+body[data-mode="light"] .bg-slate-700,
+body[data-mode="light"] .bg-gray-700 {
+  background-color: #EDE8F8 !important;
+  color: var(--ink-700);
+}
+
+body[data-mode="light"] .border-zinc-600,
+body[data-mode="light"] .border-zinc-700,
+body[data-mode="light"] .border-zinc-800,
+body[data-mode="light"] .border-zinc-900,
+body[data-mode="light"] .border-neutral-700,
+body[data-mode="light"] .border-neutral-800,
+body[data-mode="light"] .border-slate-700,
+body[data-mode="light"] .border-slate-800 { border-color: var(--divider) !important; }
+
+/* Placeholder text on light-bg inputs */
+body[data-mode="light"] .placeholder-gray-500::placeholder,
+body[data-mode="light"] .placeholder-gray-400::placeholder { color: var(--ink-300) !important; }
+
+/* Arbitrary purple-ish text colors (e.g. `text-[#a78bfa]`,
+   `text-[#8b5cf6]`) need light-mode mapping to the accent. */
+body[data-mode="light"] [class*="text-[#a78bfa]"],
+body[data-mode="light"] [class*="text-[#8b5cf6]"],
+body[data-mode="light"] [class*="text-[#7c3aed]"] {
+  color: var(--accent) !important;
+}
+
+body[data-mode="light"] [class*="bg-[#8b5cf6]"],
+body[data-mode="light"] [class*="bg-[#7c3aed]"] {
+  background-color: var(--accent) !important;
+}
+
+body[data-mode="light"] [class*="border-[#8b5cf6]"],
+body[data-mode="light"] [class*="border-[#7c3aed]"] {
+  border-color: var(--accent) !important;
+}
+
+/* Gradient text safety net — if a heading uses
+   `bg-clip-text text-transparent`, fall back to the accent in light
+   mode. The bg-gradient itself still paints, but the contained colour
+   is forced readable. */
+body[data-mode="light"] .bg-clip-text.text-transparent,
+body[data-mode="light"] [class*="from-white"].bg-clip-text,
+body[data-mode="light"] [class*="to-white"].bg-clip-text {
+  background-image: linear-gradient(90deg, var(--accent) 0%, var(--accent-hi) 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+}
+
+/* =============================================================
+   COLOR UTILITIES — bridge to var()
+   So existing `text-text-primary`, `bg-background` keep working
+   ============================================================= */
+.ink-100 { color: var(--ink-100); }
+.ink-200 { color: var(--ink-200); }
+.ink-300 { color: var(--ink-300); }
+.ink-400 { color: var(--ink-400); }
+.ink-500 { color: var(--ink-500); }
+.ink-600 { color: var(--ink-600); }
+.ink-700 { color: var(--ink-700); }
+.accent { color: var(--accent); }
+.success { color: var(--success); }
+.danger { color: var(--danger); }
+.warning { color: var(--warning); }
+.bg-paper { background: var(--bg-2); }
+.bg-paper-2 { background: var(--bg-3); }
+.bg-paper-3 { background: var(--bg-4); }
+.border-divider { border-color: var(--divider); }
+.border-divider-strong { border-color: var(--divider-strong); }

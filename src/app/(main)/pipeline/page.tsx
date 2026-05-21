@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { PipelineKanban } from '@/features/pipeline/components'
+import { PipelineKanban, PipelineStats } from '@/features/pipeline/components'
 
 export default function PipelinePage() {
     return (
@@ -9,8 +9,8 @@ export default function PipelinePage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-3xl font-black uppercase tracking-wider">Pipeline</h1>
-                    <p className="text-gray-400 mt-1">Vista de embudo de ventas</p>
+                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-ink-700">Pipeline</h1>
+                    <p className="text-sm text-ink-400 mt-1">Vista de embudo de ventas</p>
                 </div>
                 <Link
                     href="/contacts"
@@ -22,6 +22,9 @@ export default function PipelinePage() {
                     Nuevo Lead
                 </Link>
             </div>
+
+            {/* Stats */}
+            <PipelineStats />
 
             {/* Kanban */}
             <PipelineKanban />

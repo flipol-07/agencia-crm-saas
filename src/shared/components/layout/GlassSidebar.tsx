@@ -122,7 +122,7 @@ function SidebarContent() {
     const settingsLink = links.find(l => l.href === '/settings')
 
     return (
-        <aside className="hidden lg:flex w-64 flex-col border-r border-white/5 sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden bg-background/30 backdrop-blur-2xl">
+        <aside className="hidden lg:flex w-64 flex-col border-r border-divider sticky top-[73px] h-[calc(100vh-73px)] overflow-hidden bg-bg/30 backdrop-blur-2xl">
             <nav className="flex-1 p-3 space-y-1 overflow-y-auto scrollbar-hide py-6">
                 {mainLinks.map((link) => {
                     const active = isActive(link.href)
@@ -130,28 +130,28 @@ function SidebarContent() {
                         <Link
                             key={link.href}
                             href={link.href}
-                            className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative overflow-hidden ${active
-                                ? 'bg-brand/10 text-white shadow-[0_0_15px_rgba(139,92,246,0.15)] border border-brand/20'
-                                : 'text-text-secondary hover:text-white hover:bg-white/5 border border-transparent'
+                            className={`flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-300 group relative overflow-hidden ${active
+                                ? 'bg-bg-3 text-ink-700 border border-divider-strong'
+                                : 'text-ink-400 hover:text-ink-700 hover:bg-bg-3 border border-transparent'
                                 }`}
                         >
-                            {/* Active Glow Indicator */}
+                            {/* Active accent bar */}
                             {active && (
-                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-brand rounded-r-full shadow-[0_0_10px_#8b5cf6]" />
+                                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 bg-accent rounded-r-full" />
                             )}
 
-                            <div className={`transition-colors relative z-10 ${active ? 'text-brand drop-shadow-[0_0_8px_rgba(139,92,246,0.5)]' : 'text-current group-hover:text-brand transition-colors duration-300'}`}>
+                            <div className={`transition-colors relative z-10 ${active ? 'text-accent' : 'text-current group-hover:text-accent transition-colors duration-300'}`}>
                                 {link.icon}
                             </div>
                             <span className="font-medium flex-1 relative z-10 tracking-wide text-sm">{link.label}</span>
 
                             {(link as any).isContact && totalUnread > 0 && (
-                                <span className="bg-brand-neon-purple text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[1.25rem] text-center relative z-10 shadow-[0_0_10px_rgba(217,70,239,0.4)]">
+                                <span className="bg-accent text-bg text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[1.25rem] text-center relative z-10">
                                     {totalUnread}
                                 </span>
                             )}
                             {link.href === '/team-chat' && teamUnread > 0 && (
-                                <span className="bg-brand-neon-purple text-white text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[1.25rem] text-center animate-pulse relative z-10 shadow-[0_0_10px_rgba(217,70,239,0.4)]">
+                                <span className="bg-accent text-bg text-[10px] font-bold px-2 py-0.5 rounded-full min-w-[1.25rem] text-center animate-pulse relative z-10">
                                     {teamUnread}
                                 </span>
                             )}
@@ -161,15 +161,15 @@ function SidebarContent() {
             </nav>
 
             {settingsLink && (
-                <div className="p-4 border-t border-white/5 mt-auto bg-black/20">
+                <div className="p-4 border-t border-divider mt-auto bg-bg-2/40">
                     <Link
                         href={settingsLink.href}
-                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group relative ${isActive(settingsLink.href)
-                            ? 'bg-brand-neon-purple/10 text-white shadow-[0_0_15px_rgba(217,70,239,0.15)] border border-brand-neon-purple/20'
-                            : 'text-text-secondary hover:text-white hover:bg-white/5 border border-transparent'
+                        className={`flex items-center gap-3 px-4 py-3 rounded-md transition-all duration-300 group relative ${isActive(settingsLink.href)
+                            ? 'bg-bg-3 text-ink-700 border border-divider-strong'
+                            : 'text-ink-400 hover:text-ink-700 hover:bg-bg-3 border border-transparent'
                             }`}
                     >
-                        <div className={`transition-colors relative z-10 ${isActive(settingsLink.href) ? 'text-brand-neon-purple drop-shadow-[0_0_8px_rgba(217,70,239,0.5)]' : 'text-current group-hover:text-brand-neon-purple transition-colors duration-300'}`}>
+                        <div className={`transition-colors relative z-10 ${isActive(settingsLink.href) ? 'text-accent' : 'text-current group-hover:text-accent transition-colors duration-300'}`}>
                             {settingsLink.icon}
                         </div>
                         <span className="font-medium flex-1 tracking-wide text-sm">Configuración</span>
@@ -182,7 +182,7 @@ function SidebarContent() {
 
 export function GlassSidebar() {
     return (
-        <Suspense fallback={<div className="hidden lg:flex w-64 fixed top-[73px] bottom-0 left-0 border-r border-white/5 animate-pulse bg-background/30 backdrop-blur-xl" />}>
+        <Suspense fallback={<div className="hidden lg:flex w-64 fixed top-[73px] bottom-0 left-0 border-r border-divider animate-pulse bg-bg/30 backdrop-blur-xl" />}>
             <SidebarContent />
         </Suspense>
     )

@@ -1,0 +1,115 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - link "Aurie AURIE." [ref=e7] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aurie" [ref=e10]
+        - heading "AURIE." [level=1] [ref=e11]
+    - generic [ref=e12]:
+      - complementary [ref=e13]:
+        - navigation [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e19]: Dashboard
+          - link "Calendario" [ref=e20] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e22]
+            - generic [ref=e24]: Calendario
+          - link "Pipeline" [ref=e25] [cursor=pointer]:
+            - /url: /pipeline
+            - img [ref=e27]
+            - generic [ref=e29]: Pipeline
+          - link "Contactos" [ref=e30] [cursor=pointer]:
+            - /url: /contacts
+            - img [ref=e33]
+            - generic [ref=e35]: Contactos
+          - link "Tareas" [ref=e36] [cursor=pointer]:
+            - /url: /tasks
+            - img [ref=e38]
+            - generic [ref=e40]: Tareas
+          - link "Facturas" [ref=e41] [cursor=pointer]:
+            - /url: /invoices
+            - img [ref=e43]
+            - generic [ref=e45]: Facturas
+          - link "Chat de Equipo" [ref=e46] [cursor=pointer]:
+            - /url: /team-chat
+            - img [ref=e48]
+            - generic [ref=e50]: Chat de Equipo
+          - link "Reuniones" [ref=e51] [cursor=pointer]:
+            - /url: /meetings
+            - img [ref=e53]
+            - generic [ref=e55]: Reuniones
+          - link "Correo" [ref=e56] [cursor=pointer]:
+            - /url: /mail
+            - img [ref=e58]
+            - generic [ref=e60]: Correo
+          - link "Economía" [ref=e61] [cursor=pointer]:
+            - /url: /expenses
+            - img [ref=e63]
+            - generic [ref=e65]: Economía
+        - link "Configuración" [ref=e67] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e69]
+          - generic [ref=e72]: Configuración
+      - main [ref=e73]:
+        - button [ref=e76] [cursor=pointer]:
+          - img [ref=e78]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e86] [cursor=pointer]:
+    - img [ref=e87]
+  - alert [ref=e90]
+  - generic [ref=e92]:
+    - generic [ref=e93]:
+      - link "Aura AURIE" [ref=e94] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aura" [ref=e96]
+        - generic [ref=e97]: AURIE
+      - button [ref=e98] [cursor=pointer]:
+        - img [ref=e99]
+    - navigation [ref=e101]:
+      - link "Dashboard" [ref=e102] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e104]
+        - generic [ref=e106]: Dashboard
+      - link "Calendario" [ref=e107] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e109]
+        - generic [ref=e111]: Calendario
+      - link "Pipeline" [ref=e112] [cursor=pointer]:
+        - /url: /pipeline
+        - img [ref=e114]
+        - generic [ref=e116]: Pipeline
+      - link "Contactos" [ref=e117] [cursor=pointer]:
+        - /url: /contacts
+        - img [ref=e119]
+        - generic [ref=e121]: Contactos
+      - link "Tareas" [ref=e122] [cursor=pointer]:
+        - /url: /tasks
+        - img [ref=e124]
+        - generic [ref=e126]: Tareas
+      - link "Facturas" [ref=e127] [cursor=pointer]:
+        - /url: /invoices
+        - img [ref=e129]
+        - generic [ref=e131]: Facturas
+      - link "Chat de Equipo" [ref=e132] [cursor=pointer]:
+        - /url: /team-chat
+        - img [ref=e134]
+        - generic [ref=e136]: Chat de Equipo
+      - link "Reuniones" [ref=e137] [cursor=pointer]:
+        - /url: /meetings
+        - img [ref=e139]
+        - generic [ref=e141]: Reuniones
+      - link "Correo" [ref=e142] [cursor=pointer]:
+        - /url: /mail
+        - img [ref=e144]
+        - generic [ref=e146]: Correo
+      - link "Economía" [ref=e147] [cursor=pointer]:
+        - /url: /expenses
+        - img [ref=e149]
+        - generic [ref=e151]: Economía
+    - link "Ajustes" [ref=e153] [cursor=pointer]:
+      - /url: /settings
+      - img [ref=e155]
+      - generic [ref=e158]: Ajustes

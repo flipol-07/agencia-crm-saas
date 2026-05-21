@@ -1,0 +1,28 @@
+[     285ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[     881ms] [LOG] [Fast Refresh] done in 702ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1564ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1647ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2018ms] [LOG] Realtime Auth State Change: SIGNED_IN @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2095ms] [LOG] Realtime Auth State Change: INITIAL_SESSION @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2209ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2308ms] [WARNING] PushSubscriptionManager: NEXT_PUBLIC_VAPID_PUBLIC_KEY ausente @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2619ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    2713ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3187ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779340706087]: CLOSED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3207ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779340706193]: CLOSED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3463ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779340706212]: SUBSCRIBED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  181494ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  181643ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  182025ms] [LOG] Realtime Auth State Change: SIGNED_IN @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  182267ms] [LOG] Realtime Auth State Change: INITIAL_SESSION @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  182503ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  182568ms] [WARNING] PushSubscriptionManager: NEXT_PUBLIC_VAPID_PUBLIC_KEY ausente @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  182626ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  182932ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  183246ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779340886180]: CLOSED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  183269ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779340886252]: CLOSED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  183414ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779340886274]: SUBSCRIBED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  287813ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  288094ms] [LOG] [Fast Refresh] done in 315ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  305417ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  305481ms] [LOG] [Fast Refresh] done in 136ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297

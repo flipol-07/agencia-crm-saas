@@ -1,0 +1,74 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - link "Aurie AURIE." [ref=e7] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aurie" [ref=e10]
+        - heading "AURIE." [level=1] [ref=e11]
+    - generic [ref=e12]:
+      - complementary [ref=e13]:
+        - navigation [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e19]: Dashboard
+          - link "Calendario" [ref=e20] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e22]
+            - generic [ref=e24]: Calendario
+          - link "Pipeline" [ref=e25] [cursor=pointer]:
+            - /url: /pipeline
+            - img [ref=e27]
+            - generic [ref=e29]: Pipeline
+          - link "Contactos" [ref=e30] [cursor=pointer]:
+            - /url: /contacts
+            - img [ref=e32]
+            - generic [ref=e34]: Contactos
+          - link "Tareas" [ref=e35] [cursor=pointer]:
+            - /url: /tasks
+            - img [ref=e37]
+            - generic [ref=e39]: Tareas
+          - link "Facturas" [ref=e40] [cursor=pointer]:
+            - /url: /invoices
+            - img [ref=e42]
+            - generic [ref=e44]: Facturas
+          - link "Chat de Equipo" [ref=e45] [cursor=pointer]:
+            - /url: /team-chat
+            - img [ref=e47]
+            - generic [ref=e49]: Chat de Equipo
+          - link "Reuniones" [ref=e50] [cursor=pointer]:
+            - /url: /meetings
+            - img [ref=e53]
+            - generic [ref=e55]: Reuniones
+          - link "Correo" [ref=e56] [cursor=pointer]:
+            - /url: /mail
+            - img [ref=e58]
+            - generic [ref=e60]: Correo
+          - link "Economía" [ref=e61] [cursor=pointer]:
+            - /url: /expenses
+            - img [ref=e63]
+            - generic [ref=e65]: Economía
+        - link "Configuración" [ref=e67] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e69]
+          - generic [ref=e72]: Configuración
+      - main [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - heading "Reuniones" [level=1] [ref=e77]
+              - paragraph [ref=e78]: Gestiona y consulta el conocimiento extraído de tus reuniones
+            - button "Nueva Reunión" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+              - text: Nueva Reunión
+          - generic [ref=e83]:
+            - textbox "Buscar por título o empresa..." [ref=e84]
+            - img [ref=e85]
+          - paragraph [ref=e90]: Cargando base de conocimientos...
+        - button [ref=e92] [cursor=pointer]:
+          - img [ref=e94]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e102] [cursor=pointer]:
+    - img [ref=e103]
+  - alert [ref=e106]

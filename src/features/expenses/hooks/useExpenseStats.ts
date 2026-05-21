@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isDemoEmail } from '@/shared/lib/demo'
 
 interface ExpenseStats {
     total_expenses: number
@@ -53,7 +52,7 @@ export function useExpenseStats(options: UseExpenseStatsOptions | boolean | null
         try {
             const supabase = createClient()
             const { data: { user } } = await supabase.auth.getUser()
-            const shouldScopeDemo = isDemoEmail(user?.email)
+            const scopeUserId = userId || user?.id
 
             let statsQuery = (supabase.from('expenses') as any)
                 .select('type, amount, tax_amount, tax_deductible')
@@ -64,9 +63,9 @@ export function useExpenseStats(options: UseExpenseStatsOptions | boolean | null
                 .eq('is_personal', false)
                 .not('sector_id', 'is', null)
 
-            if (shouldScopeDemo) {
-                statsQuery = statsQuery.eq('user_id', userId || user?.id)
-                sectorQuery = sectorQuery.eq('user_id', userId || user?.id)
+            if (scopeUserId) {
+                statsQuery = statsQuery.eq('user_id', scopeUserId)
+                sectorQuery = sectorQuery.eq('user_id', scopeUserId)
             }
 
             // Re-fetch using client SDK

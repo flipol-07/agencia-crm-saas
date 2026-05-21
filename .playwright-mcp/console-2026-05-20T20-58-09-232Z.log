@@ -1,0 +1,23 @@
+[    3209ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3679ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    3689ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/grid.svg:0
+[    4113ms] [WARNING] Image with src "/aurie-official-logo.png" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   13742ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   13770ms] [LOG] [Fast Refresh] done in 127ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   27487ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   27910ms] [LOG] [Fast Refresh] done in 523ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   29417ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   29486ms] [LOG] [Fast Refresh] done in 246ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30299ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30302ms] [LOG] Realtime Auth State Change: INITIAL_SESSION @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30387ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30523ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30539ms] [WARNING] PushSubscriptionManager: NEXT_PUBLIC_VAPID_PUBLIC_KEY ausente @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30549ms] [WARNING] PushSubscriptionManager: NEXT_PUBLIC_VAPID_PUBLIC_KEY ausente @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   30885ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779310720080]: CLOSED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   31094ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779310720118]: SUBSCRIBED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   31098ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779310720157]: SUBSCRIBED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   49281ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[   49318ms] [LOG] [Fast Refresh] done in 182ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  157596ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[  157625ms] [LOG] [Fast Refresh] done in 111ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297

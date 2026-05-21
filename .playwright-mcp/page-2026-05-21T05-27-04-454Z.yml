@@ -1,0 +1,110 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - link "Aurie AURIE." [ref=e7] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aurie" [ref=e10]
+        - heading "AURIE." [level=1] [ref=e11]
+    - generic [ref=e12]:
+      - complementary [ref=e13]:
+        - navigation [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e19]: Dashboard
+          - link "Calendario" [ref=e20] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e22]
+            - generic [ref=e24]: Calendario
+          - link "Pipeline" [ref=e25] [cursor=pointer]:
+            - /url: /pipeline
+            - img [ref=e27]
+            - generic [ref=e29]: Pipeline
+          - link "Contactos" [ref=e30] [cursor=pointer]:
+            - /url: /contacts
+            - img [ref=e33]
+            - generic [ref=e35]: Contactos
+          - link "Tareas" [ref=e36] [cursor=pointer]:
+            - /url: /tasks
+            - img [ref=e38]
+            - generic [ref=e40]: Tareas
+          - link "Facturas" [ref=e41] [cursor=pointer]:
+            - /url: /invoices
+            - img [ref=e43]
+            - generic [ref=e45]: Facturas
+          - link "Chat de Equipo" [ref=e46] [cursor=pointer]:
+            - /url: /team-chat
+            - img [ref=e48]
+            - generic [ref=e50]: Chat de Equipo
+          - link "Reuniones" [ref=e51] [cursor=pointer]:
+            - /url: /meetings
+            - img [ref=e53]
+            - generic [ref=e55]: Reuniones
+          - link "Correo" [ref=e56] [cursor=pointer]:
+            - /url: /mail
+            - img [ref=e58]
+            - generic [ref=e60]: Correo
+          - link "Economía" [ref=e61] [cursor=pointer]:
+            - /url: /expenses
+            - img [ref=e63]
+            - generic [ref=e65]: Economía
+        - link "Configuración" [ref=e67] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e69]
+          - generic [ref=e72]: Configuración
+      - main [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - heading "Contactos" [level=1] [ref=e77]
+              - paragraph [ref=e78]: Gestión de base de datos de clientes
+            - button "Nuevo Contacto" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+              - text: Nuevo Contacto
+          - generic [ref=e82]:
+            - link "jose jose Cualificación jose@jose.es 🌐 Web 0%" [ref=e83] [cursor=pointer]:
+              - /url: /contacts/9e6234f4-b92b-45be-9a17-022a50ce41bb
+              - generic [ref=e84]:
+                - generic [ref=e86]:
+                  - generic [ref=e87]:
+                    - heading "jose" [level=3] [ref=e89]
+                    - paragraph [ref=e90]: jose
+                  - generic [ref=e91]: Cualificación
+                - generic [ref=e93]:
+                  - img [ref=e95]
+                  - generic [ref=e97]: jose@jose.es
+                - generic [ref=e98]:
+                  - generic [ref=e100]: 🌐 Web
+                  - generic [ref=e104]: 0%
+            - link "Pere cabiscol Pere Preparando Propuesta +34 626 84 81 33 📤 Outbound 0%" [ref=e105] [cursor=pointer]:
+              - /url: /contacts/ae14e781-869e-4827-aa0d-b0108728e6c2
+              - generic [ref=e106]:
+                - generic [ref=e108]:
+                  - generic [ref=e109]:
+                    - heading "Pere cabiscol" [level=3] [ref=e111]
+                    - paragraph [ref=e112]: Pere
+                  - generic [ref=e113]: Preparando Propuesta
+                - generic [ref=e115]:
+                  - img [ref=e117]
+                  - generic [ref=e119]: +34 626 84 81 33
+                - generic [ref=e120]:
+                  - generic [ref=e122]: 📤 Outbound
+                  - generic [ref=e126]: 0%
+            - link "Gimnasia Extremadura Cualificación GYMASOFUJB@GYMACDDD.ES 📤 Outbound 80%" [ref=e127] [cursor=pointer]:
+              - /url: /contacts/9a0a765b-3f45-44ad-a37c-fcad57285d88
+              - generic [ref=e128]:
+                - generic [ref=e130]:
+                  - heading "Gimnasia Extremadura" [level=3] [ref=e133]
+                  - generic [ref=e134]: Cualificación
+                - generic [ref=e136]:
+                  - img [ref=e138]
+                  - generic [ref=e140]: GYMASOFUJB@GYMACDDD.ES
+                - generic [ref=e141]:
+                  - generic [ref=e143]: 📤 Outbound
+                  - generic [ref=e147]: 80%
+        - button [ref=e149] [cursor=pointer]:
+          - img [ref=e151]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e159] [cursor=pointer]:
+    - img [ref=e160]

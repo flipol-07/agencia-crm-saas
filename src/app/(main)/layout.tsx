@@ -13,7 +13,7 @@ export default function MainLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className="min-h-screen bg-background text-text-primary selection:bg-[#8b5cf6]/30 selection:text-white font-sans">
+    <div className="min-h-screen bg-bg text-ink-700 selection:bg-accent/30 selection:text-paper font-sans">
       <Suspense fallback={null}>
         <RealtimeNotifications />
       </Suspense>

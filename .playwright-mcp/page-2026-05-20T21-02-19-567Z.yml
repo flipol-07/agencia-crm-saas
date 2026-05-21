@@ -1,0 +1,238 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - generic [ref=e5]:
+        - link "Aurie AURIE." [ref=e7] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aurie" [ref=e10]
+          - heading "AURIE." [level=1] [ref=e11]
+        - generic [ref=e137]:
+          - generic [ref=e139]: Pol
+          - button "Activar modo claro" [ref=e141] [cursor=pointer]:
+            - img [ref=e142]
+          - button "1" [ref=e149] [cursor=pointer]:
+            - img [ref=e150]
+            - generic [ref=e152]: "1"
+          - button "Cerrar sesión" [ref=e153] [cursor=pointer]:
+            - img [ref=e154]
+    - generic [ref=e12]:
+      - complementary [ref=e13]:
+        - navigation [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e19]: Dashboard
+          - link "Calendario" [ref=e20] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e22]
+            - generic [ref=e24]: Calendario
+          - link "Pipeline" [ref=e25] [cursor=pointer]:
+            - /url: /pipeline
+            - img [ref=e28]
+            - generic [ref=e30]: Pipeline
+          - link "Contactos" [ref=e31] [cursor=pointer]:
+            - /url: /contacts
+            - img [ref=e33]
+            - generic [ref=e35]: Contactos
+          - link "Tareas" [ref=e36] [cursor=pointer]:
+            - /url: /tasks
+            - img [ref=e38]
+            - generic [ref=e40]: Tareas
+          - link "Facturas" [ref=e41] [cursor=pointer]:
+            - /url: /invoices
+            - img [ref=e43]
+            - generic [ref=e45]: Facturas
+          - link "Chat de Equipo 1" [ref=e156] [cursor=pointer]:
+            - /url: /team-chat
+            - img [ref=e48]
+            - generic [ref=e50]: Chat de Equipo
+            - generic [ref=e157]: "1"
+          - link "Reuniones" [ref=e51] [cursor=pointer]:
+            - /url: /meetings
+            - img [ref=e53]
+            - generic [ref=e55]: Reuniones
+          - link "Correo" [ref=e56] [cursor=pointer]:
+            - /url: /mail
+            - img [ref=e58]
+            - generic [ref=e60]: Correo
+          - link "Economía" [ref=e61] [cursor=pointer]:
+            - /url: /expenses
+            - img [ref=e63]
+            - generic [ref=e65]: Economía
+        - link "Configuración" [ref=e67] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e69]
+          - generic [ref=e72]: Configuración
+      - main [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - heading "Pipeline" [level=1] [ref=e77]
+              - paragraph [ref=e78]: Vista de embudo de ventas
+            - link "Nuevo Lead" [ref=e79] [cursor=pointer]:
+              - /url: /contacts
+              - img [ref=e80]
+              - text: Nuevo Lead
+          - generic [ref=e82]:
+            - generic [ref=e158]:
+              - generic [ref=e159]: Leads activos
+              - generic [ref=e160]: "2"
+            - generic [ref=e161]:
+              - generic [ref=e162]: Valor total
+              - generic [ref=e163]: 1000 €
+            - generic [ref=e164]:
+              - generic [ref=e165]: Valor medio
+              - generic [ref=e166]: 500 €
+            - generic [ref=e167]:
+              - generic [ref=e168]: Pipeline ponderado
+              - generic [ref=e169]: 0 €
+            - generic [ref=e170]:
+              - generic [ref=e171]: Estancados +14d
+              - generic [ref=e172]: "2"
+            - generic [ref=e173]:
+              - generic [ref=e174]: Win rate
+              - generic [ref=e175]: 100%
+          - generic [ref=e176]:
+            - generic [ref=e177]:
+              - generic [ref=e179]:
+                - heading "Nuevo" [level=3] [ref=e180]
+                - generic [ref=e181]: "0"
+              - generic [ref=e183]: Arrastra clientes aquí
+            - generic [ref=e184]:
+              - generic [ref=e185]:
+                - generic [ref=e186]:
+                  - heading "Cualificación" [level=3] [ref=e187]
+                  - generic [ref=e188]: "2"
+                - generic [ref=e189]: 1,300 €
+              - generic [ref=e190]:
+                - button "jose 🌐 Reactivar 0% cierre Sin contacto jose Email 1,000€" [ref=e191] [cursor=pointer]:
+                  - generic [ref=e192]:
+                    - generic [ref=e193]:
+                      - link "jose" [ref=e194]:
+                        - /url: /contacts/9e6234f4-b92b-45be-9a17-022a50ce41bb
+                        - heading "jose" [level=4] [ref=e195]
+                      - generic [ref=e196]: 🌐
+                    - generic [ref=e197]:
+                      - generic [ref=e198]: Reactivar
+                      - generic [ref=e199]: 0% cierre
+                      - generic [ref=e200]: Sin contacto
+                    - paragraph [ref=e201]: jose
+                    - generic [ref=e202]:
+                      - generic [ref=e203]:
+                        - img [ref=e204]
+                        - text: Email
+                      - generic [ref=e206]: 1,000€
+                - button "Gimnasia Extremadura 📤 Normal 80% cierre Sin contacto Email 300€" [ref=e207] [cursor=pointer]:
+                  - generic [ref=e208]:
+                    - generic [ref=e209]:
+                      - link "Gimnasia Extremadura" [ref=e210]:
+                        - /url: /contacts/9a0a765b-3f45-44ad-a37c-fcad57285d88
+                        - heading "Gimnasia Extremadura" [level=4] [ref=e211]
+                      - generic [ref=e212]: 📤
+                    - generic [ref=e213]:
+                      - generic [ref=e214]: Normal
+                      - generic [ref=e215]: 80% cierre
+                      - generic [ref=e216]: Sin contacto
+                    - generic [ref=e217]:
+                      - generic [ref=e218]:
+                        - img [ref=e219]
+                        - text: Email
+                      - generic [ref=e221]: 300€
+            - generic [ref=e222]:
+              - generic [ref=e224]:
+                - heading "Preparando Propuesta" [level=3] [ref=e225]
+                - generic [ref=e226]: "1"
+              - button "Pere cabiscol 📤 Reactivar 0% cierre Sin contacto Pere WA -" [ref=e228] [cursor=pointer]:
+                - generic [ref=e229]:
+                  - generic [ref=e230]:
+                    - link "Pere cabiscol" [ref=e231]:
+                      - /url: /contacts/ae14e781-869e-4827-aa0d-b0108728e6c2
+                      - heading "Pere cabiscol" [level=4] [ref=e232]
+                    - generic [ref=e233]: 📤
+                  - generic [ref=e234]:
+                    - generic [ref=e235]: Reactivar
+                    - generic [ref=e236]: 0% cierre
+                    - generic [ref=e237]: Sin contacto
+                  - paragraph [ref=e238]: Pere
+                  - generic [ref=e239]:
+                    - generic [ref=e240]:
+                      - img [ref=e241]
+                      - text: WA
+                    - generic [ref=e243]: "-"
+            - generic [ref=e244]:
+              - generic [ref=e246]:
+                - heading "Propuesta Enviada" [level=3] [ref=e247]
+                - generic [ref=e248]: "0"
+              - generic [ref=e250]: Arrastra clientes aquí
+            - generic [ref=e251]:
+              - generic [ref=e253]:
+                - heading "Ganado" [level=3] [ref=e254]
+                - generic [ref=e255]: "0"
+              - generic [ref=e257]: Arrastra clientes aquí
+            - generic [ref=e258]:
+              - generic [ref=e260]:
+                - heading "Perdido" [level=3] [ref=e261]
+                - generic [ref=e262]: "0"
+              - generic [ref=e264]: Arrastra clientes aquí
+          - status [ref=e265]
+        - button [ref=e121] [cursor=pointer]:
+          - img [ref=e123]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e131] [cursor=pointer]:
+    - img [ref=e132]
+  - alert [ref=e135]
+  - generic [ref=e267]:
+    - generic [ref=e268]:
+      - link "Aura AURIE" [ref=e269] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aura" [ref=e271]
+        - generic [ref=e272]: AURIE
+      - button [ref=e273] [cursor=pointer]:
+        - img [ref=e274]
+    - navigation [ref=e276]:
+      - link "Dashboard" [ref=e277] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e279]
+        - generic [ref=e281]: Dashboard
+      - link "Calendario" [ref=e282] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e284]
+        - generic [ref=e286]: Calendario
+      - link "Pipeline" [ref=e287] [cursor=pointer]:
+        - /url: /pipeline
+        - img [ref=e289]
+        - generic [ref=e291]: Pipeline
+      - link "Contactos" [ref=e292] [cursor=pointer]:
+        - /url: /contacts
+        - img [ref=e294]
+        - generic [ref=e296]: Contactos
+      - link "Tareas" [ref=e297] [cursor=pointer]:
+        - /url: /tasks
+        - img [ref=e299]
+        - generic [ref=e301]: Tareas
+      - link "Facturas" [ref=e302] [cursor=pointer]:
+        - /url: /invoices
+        - img [ref=e304]
+        - generic [ref=e306]: Facturas
+      - link "Chat de Equipo 1" [ref=e307] [cursor=pointer]:
+        - /url: /team-chat
+        - img [ref=e309]
+        - generic [ref=e311]: Chat de Equipo
+        - generic [ref=e312]: "1"
+      - link "Reuniones" [ref=e313] [cursor=pointer]:
+        - /url: /meetings
+        - img [ref=e315]
+        - generic [ref=e317]: Reuniones
+      - link "Correo" [ref=e318] [cursor=pointer]:
+        - /url: /mail
+        - img [ref=e320]
+        - generic [ref=e322]: Correo
+      - link "Economía" [ref=e323] [cursor=pointer]:
+        - /url: /expenses
+        - img [ref=e325]
+        - generic [ref=e327]: Economía
+    - link "Ajustes" [ref=e329] [cursor=pointer]:
+      - /url: /settings
+      - img [ref=e331]
+      - generic [ref=e334]: Ajustes

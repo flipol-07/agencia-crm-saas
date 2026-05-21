@@ -1,0 +1,273 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - generic [ref=e5]: Admin Panel
+    - navigation [ref=e6]:
+      - link "Dashboard" [ref=e7] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e8]
+        - text: Dashboard
+      - link "Volver a Tienda" [ref=e13] [cursor=pointer]:
+        - /url: /
+        - img [ref=e14]
+        - text: Volver a Tienda
+    - button "Configuración" [ref=e17] [cursor=pointer]:
+      - img [ref=e18]
+      - text: Configuración
+  - main [ref=e21]:
+    - generic [ref=e22]:
+      - heading "Vista General" [level=1] [ref=e23]
+      - generic [ref=e26]: AD
+    - generic [ref=e28]:
+      - generic [ref=e30]:
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - generic [ref=e33]:
+              - paragraph [ref=e34]: Ingresos Totales
+              - heading "594,6 mil €" [level=4] [ref=e35]
+            - img [ref=e37]
+          - generic [ref=e39]:
+            - generic [ref=e40]: +12.5%
+            - generic [ref=e41]: vs mes anterior
+        - generic [ref=e42]:
+          - generic [ref=e43]:
+            - generic [ref=e44]:
+              - paragraph [ref=e45]: Ventas Totales
+              - heading "4,879" [level=4] [ref=e46]
+            - img [ref=e48]
+          - generic [ref=e51]:
+            - generic [ref=e52]: +18.2%
+            - generic [ref=e53]: vs mes anterior
+        - generic [ref=e54]:
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - paragraph [ref=e57]: Stock Crítico
+              - heading "2" [level=4] [ref=e58]
+            - img [ref=e60]
+          - generic [ref=e64]:
+            - generic [ref=e65]: Requiere atención
+            - generic [ref=e66]: vs mes anterior
+        - generic [ref=e67]:
+          - generic [ref=e68]:
+            - generic [ref=e69]:
+              - paragraph [ref=e70]: Sin Stock
+              - heading "0" [level=4] [ref=e71]
+            - img [ref=e73]
+          - generic [ref=e78]:
+            - generic [ref=e79]: Perdida potencial
+            - generic [ref=e80]: vs mes anterior
+      - generic [ref=e81]:
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - heading "Ventas Históricas vs Predicción IA" [level=3] [ref=e86]
+            - paragraph [ref=e87]: Análisis de la demanda y proyecciones futuras (próximos 2 meses)
+          - generic [ref=e88]:
+            - generic [ref=e91]: Ventas Reales
+            - generic [ref=e94]: Predicción IA
+        - generic [ref=e98]:
+          - generic [ref=e99]:
+            - heading "Pricing Dinámico por IA" [level=3] [ref=e100]:
+              - img [ref=e101]
+              - text: Pricing Dinámico por IA
+            - paragraph [ref=e104]: Sugerencias automáticas para maximizar beneficios y rotación.
+          - generic [ref=e105]:
+            - generic [ref=e106]:
+              - generic [ref=e107]:
+                - heading "Auriculares Inalámbricos Pro" [level=4] [ref=e108]
+                - paragraph [ref=e109]: Exceso de stock (45 uds) - Rotación baja
+                - generic [ref=e110]:
+                  - generic [ref=e111]: 199,99 €
+                  - img [ref=e112]
+                  - generic [ref=e114]: 169,99 €
+              - button "Aplicar sugerencia" [ref=e115] [cursor=pointer]:
+                - img [ref=e116]
+            - generic [ref=e120]:
+              - generic [ref=e121]:
+                - heading "Monitor Ultrawide 34\"" [level=4] [ref=e122]
+                - paragraph [ref=e123]: Demanda alta, stock crítico (3 uds)
+                - generic [ref=e124]:
+                  - generic [ref=e125]: 599,00 €
+                  - img [ref=e126]
+                  - generic [ref=e128]: 688,85 €
+              - button "Aplicar sugerencia" [ref=e129] [cursor=pointer]:
+                - img [ref=e130]
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - heading "Cámara Web 4K" [level=4] [ref=e136]
+                - paragraph [ref=e137]: Demanda alta, stock crítico (5 uds)
+                - generic [ref=e138]:
+                  - generic [ref=e139]: 129,99 €
+                  - img [ref=e140]
+                  - generic [ref=e142]: 149,49 €
+              - button "Aplicar sugerencia" [ref=e143] [cursor=pointer]:
+                - img [ref=e144]
+            - generic [ref=e148]:
+              - generic [ref=e149]:
+                - heading "Micrófono de Condensador USB" [level=4] [ref=e150]
+                - paragraph [ref=e151]: Exceso de stock (30 uds) - Rotación baja
+                - generic [ref=e152]:
+                  - generic [ref=e153]: 89,99 €
+                  - img [ref=e154]
+                  - generic [ref=e156]: 76,49 €
+              - button "Aplicar sugerencia" [ref=e157] [cursor=pointer]:
+                - img [ref=e158]
+      - generic [ref=e162]:
+        - generic [ref=e163]:
+          - generic [ref=e164]:
+            - heading "Inventario operativo" [level=2] [ref=e165]:
+              - img [ref=e166]
+              - text: Inventario operativo
+            - paragraph [ref=e171]: Ajusta stock y precios; tienda, carrito y métricas se actualizan al instante.
+          - generic [ref=e172]:
+            - generic [ref=e173]:
+              - img
+              - textbox [ref=e174]:
+                - /placeholder: Buscar producto
+            - combobox [ref=e175]:
+              - option "Todos" [selected]
+              - option "Atención"
+              - option "Saludable"
+            - button "Reiniciar demo" [ref=e176] [cursor=pointer]:
+              - img [ref=e177]
+              - text: Reiniciar demo
+        - table [ref=e181]:
+          - rowgroup [ref=e182]:
+            - row "Producto Estado Stock Precio Ventas Acciones" [ref=e183]:
+              - columnheader "Producto" [ref=e184]
+              - columnheader "Estado" [ref=e185]
+              - columnheader "Stock" [ref=e186]
+              - columnheader "Precio" [ref=e187]
+              - columnheader "Ventas" [ref=e188]
+              - columnheader "Acciones" [ref=e189]
+          - rowgroup [ref=e190]:
+            - row "Auriculares Inalámbricos Pro Audio Saludable 45 199.99 199,99 € 1200 demanda +10 stock" [ref=e191]:
+              - cell "Auriculares Inalámbricos Pro Audio" [ref=e192]:
+                - generic [ref=e193]: Auriculares Inalámbricos Pro
+                - generic [ref=e194]: Audio
+              - cell "Saludable" [ref=e195]
+              - cell "45" [ref=e196]:
+                - spinbutton [ref=e197]: "45"
+              - cell "199.99 199,99 €" [ref=e198]:
+                - spinbutton [ref=e199]: "199.99"
+                - generic [ref=e200]: 199,99 €
+              - cell "1200 demanda" [ref=e201]:
+                - generic [ref=e202]: "1200"
+                - generic [ref=e203]:
+                  - img [ref=e204]
+                  - text: demanda
+              - cell "+10 stock" [ref=e207]:
+                - generic [ref=e208]:
+                  - button "+10 stock" [ref=e209] [cursor=pointer]
+                  - button "Bajar precio 5%" [ref=e210] [cursor=pointer]:
+                    - img [ref=e211]
+                  - button "Subir precio 5%" [ref=e214] [cursor=pointer]:
+                    - img [ref=e215]
+            - row "Teclado Mecánico Custom Periféricos Bajo 12 149.5 149,50 € 340 demanda +10 stock" [ref=e218]:
+              - cell "Teclado Mecánico Custom Periféricos" [ref=e219]:
+                - generic [ref=e220]: Teclado Mecánico Custom
+                - generic [ref=e221]: Periféricos
+              - cell "Bajo" [ref=e222]
+              - cell "12" [ref=e223]:
+                - spinbutton [ref=e224]: "12"
+              - cell "149.5 149,50 €" [ref=e225]:
+                - spinbutton [ref=e226]: "149.5"
+                - generic [ref=e227]: 149,50 €
+              - cell "340 demanda" [ref=e228]:
+                - generic [ref=e229]: "340"
+                - generic [ref=e230]:
+                  - img [ref=e231]
+                  - text: demanda
+              - cell "+10 stock" [ref=e234]:
+                - generic [ref=e235]:
+                  - button "+10 stock" [ref=e236] [cursor=pointer]
+                  - button "Bajar precio 5%" [ref=e237] [cursor=pointer]:
+                    - img [ref=e238]
+                  - button "Subir precio 5%" [ref=e241] [cursor=pointer]:
+                    - img [ref=e242]
+            - row "Monitor Ultrawide 34\" Monitores Crítico 3 599 599,00 € 89 demanda +10 stock" [ref=e245]:
+              - cell "Monitor Ultrawide 34\" Monitores" [ref=e246]:
+                - generic [ref=e247]: Monitor Ultrawide 34"
+                - generic [ref=e248]: Monitores
+              - cell "Crítico" [ref=e249]
+              - cell "3" [ref=e250]:
+                - spinbutton [ref=e251]: "3"
+              - cell "599 599,00 €" [ref=e252]:
+                - spinbutton [ref=e253]: "599"
+                - generic [ref=e254]: 599,00 €
+              - cell "89 demanda" [ref=e255]:
+                - generic [ref=e256]: "89"
+                - generic [ref=e257]:
+                  - img [ref=e258]
+                  - text: demanda
+              - cell "+10 stock" [ref=e261]:
+                - generic [ref=e262]:
+                  - button "+10 stock" [ref=e263] [cursor=pointer]
+                  - button "Bajar precio 5%" [ref=e264] [cursor=pointer]:
+                    - img [ref=e265]
+                  - button "Subir precio 5%" [ref=e268] [cursor=pointer]:
+                    - img [ref=e269]
+            - row "Ratón Ergonómico Inalámbrico Periféricos Saludable 150 59.99 59,99 € 2000 demanda +10 stock" [ref=e272]:
+              - cell "Ratón Ergonómico Inalámbrico Periféricos" [ref=e273]:
+                - generic [ref=e274]: Ratón Ergonómico Inalámbrico
+                - generic [ref=e275]: Periféricos
+              - cell "Saludable" [ref=e276]
+              - cell "150" [ref=e277]:
+                - spinbutton [ref=e278]: "150"
+              - cell "59.99 59,99 €" [ref=e279]:
+                - spinbutton [ref=e280]: "59.99"
+                - generic [ref=e281]: 59,99 €
+              - cell "2000 demanda" [ref=e282]:
+                - generic [ref=e283]: "2000"
+                - generic [ref=e284]:
+                  - img [ref=e285]
+                  - text: demanda
+              - cell "+10 stock" [ref=e288]:
+                - generic [ref=e289]:
+                  - button "+10 stock" [ref=e290] [cursor=pointer]
+                  - button "Bajar precio 5%" [ref=e291] [cursor=pointer]:
+                    - img [ref=e292]
+                  - button "Subir precio 5%" [ref=e295] [cursor=pointer]:
+                    - img [ref=e296]
+            - row "Cámara Web 4K Video Crítico 5 129.99 129,99 € 450 demanda +10 stock" [ref=e299]:
+              - cell "Cámara Web 4K Video" [ref=e300]:
+                - generic [ref=e301]: Cámara Web 4K
+                - generic [ref=e302]: Video
+              - cell "Crítico" [ref=e303]
+              - cell "5" [ref=e304]:
+                - spinbutton [ref=e305]: "5"
+              - cell "129.99 129,99 €" [ref=e306]:
+                - spinbutton [ref=e307]: "129.99"
+                - generic [ref=e308]: 129,99 €
+              - cell "450 demanda" [ref=e309]:
+                - generic [ref=e310]: "450"
+                - generic [ref=e311]:
+                  - img [ref=e312]
+                  - text: demanda
+              - cell "+10 stock" [ref=e315]:
+                - generic [ref=e316]:
+                  - button "+10 stock" [ref=e317] [cursor=pointer]
+                  - button "Bajar precio 5%" [ref=e318] [cursor=pointer]:
+                    - img [ref=e319]
+                  - button "Subir precio 5%" [ref=e322] [cursor=pointer]:
+                    - img [ref=e323]
+            - row "Micrófono de Condensador USB Audio Saludable 30 89.99 89,99 € 800 demanda +10 stock" [ref=e326]:
+              - cell "Micrófono de Condensador USB Audio" [ref=e327]:
+                - generic [ref=e328]: Micrófono de Condensador USB
+                - generic [ref=e329]: Audio
+              - cell "Saludable" [ref=e330]
+              - cell "30" [ref=e331]:
+                - spinbutton [ref=e332]: "30"
+              - cell "89.99 89,99 €" [ref=e333]:
+                - spinbutton [ref=e334]: "89.99"
+                - generic [ref=e335]: 89,99 €
+              - cell "800 demanda" [ref=e336]:
+                - generic [ref=e337]: "800"
+                - generic [ref=e338]:
+                  - img [ref=e339]
+                  - text: demanda
+              - cell "+10 stock" [ref=e342]:
+                - generic [ref=e343]:
+                  - button "+10 stock" [ref=e344] [cursor=pointer]
+                  - button "Bajar precio 5%" [ref=e345] [cursor=pointer]:
+                    - img [ref=e346]
+                  - button "Subir precio 5%" [ref=e349] [cursor=pointer]:
+                    - img [ref=e350]

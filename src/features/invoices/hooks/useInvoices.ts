@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isDemoEmail } from '@/shared/lib/demo'
 import type {
     Invoice,
     InvoiceWithDetails
@@ -42,8 +41,8 @@ export function useInvoices(contactId?: string) {
                 query = query.eq('contact_id', contactId)
             } else {
                 const { data: { user } } = await supabase.auth.getUser()
-                if (isDemoEmail(user?.email)) {
-                    query = query.or(`created_by.eq.${user?.id},issuer_profile_id.eq.${user?.id}`)
+                if (user?.id) {
+                    query = query.or(`created_by.eq.${user.id},issuer_profile_id.eq.${user.id}`)
                 }
             }
 

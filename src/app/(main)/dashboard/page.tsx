@@ -1,4 +1,4 @@
-import { StatCard, RecentLeads, PriorityTasks, TrendChart, ExpenseChart, ProjectProgress, PeriodSelector, RecommendationsWidget } from '@/features/dashboard/components'
+import { StatCard, RecentLeads, PriorityTasks, TrendChart, ExpenseChart, ProjectProgress, PeriodSelector, RecommendationsWidget, AlertsPanel, InvoiceAgingWidget, TopDealsWidget, CashForecastWidget, AuraQuickPrompts } from '@/features/dashboard/components'
 import { format } from 'date-fns'
 import { es } from 'date-fns/locale'
 import {
@@ -6,7 +6,12 @@ import {
   getExecutiveKPIs,
   getMonthlyTrend,
   getExpenseDistribution,
-  getProjectsProgress
+  getProjectsProgress,
+  getExecutiveAlerts,
+  getConversionMetrics,
+  getInvoiceAging,
+  getTopDeals,
+  getCashForecast,
 } from '@/features/dashboard/services/dashboard.service'
 import { Suspense } from 'react'
 import { Skeleton } from '@/shared/components/ui/Skeleton'
@@ -40,10 +45,10 @@ export default async function DashboardPage({ searchParams }: Props) {
       {/* Page Shell (Instant) */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 pb-2 border-b border-white/5">
         <div>
-          <h1 className="text-2xl sm:text-4xl font-display font-black text-white tracking-tight uppercase">Dashboard</h1>
-          <p className="text-gray-400 mt-1 flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="capitalize text-[#8b5cf6]">{currentMonth}</span>
+          <h1 className="text-xl sm:text-2xl font-semibold text-ink-700 tracking-tight">Dashboard</h1>
+          <p className="text-sm text-ink-400 mt-1 flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-success animate-pulse"></span>
+            <span className="capitalize text-accent">{currentMonth}</span>
           </p>
         </div>
 
@@ -72,6 +77,13 @@ async function AuthenticatedDashboardContent({ period }: { period: DashboardPeri
 
   return (
     <div className="space-y-8">
+      {/* ZONA 0: ALERTS PANEL */}
+      <Suspense fallback={<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map(i => <div key={i} className="h-28 animate-pulse bg-white/5 rounded-2xl border border-white/10" />)}
+      </div>}>
+        <DashboardAlertsSection userId={userId} />
+      </Suspense>
+
       {/* ZONA 1: KPIS EJECUTIVOS */}
       <Suspense fallback={<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         {[1, 2, 3, 4].map(i => <div key={i} className="h-32 animate-pulse bg-white/5 rounded-2xl border border-white/10" />)}
@@ -79,8 +91,10 @@ async function AuthenticatedDashboardContent({ period }: { period: DashboardPeri
         <DashboardKPIsSection userId={userId} period={period} />
       </Suspense>
 
+      {/* ZONA 1.5: AURA QUICK PROMPTS */}
+      <AuraQuickPrompts />
 
-      {/* ZONA 1.5: RECOMENDACIONES IA */}
+      {/* ZONA 1.6: RECOMENDACIONES IA */}
       <Suspense fallback={<div className="h-40 animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
         <RecommendationsWidget userId={userId} />
       </Suspense>
@@ -93,34 +107,68 @@ async function AuthenticatedDashboardContent({ period }: { period: DashboardPeri
         <DashboardAnalyticsSection userId={userId} period={period} />
       </Suspense>
 
+      {/* ZONA 2.5: FINANZAS — Forecast + Aging */}
+      <section>
+        <h2 className="text-xs uppercase tracking-wider font-semibold text-text-muted mb-4 flex items-center gap-2">
+          <span className="w-8 h-px bg-gradient-to-r from-emerald-500 to-transparent"></span>
+          Finanzas y Cobros
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Suspense fallback={<div className="h-72 animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
+            <DashboardForecastSection userId={userId} />
+          </Suspense>
+          <Suspense fallback={<div className="h-72 animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
+            <DashboardAgingSection userId={userId} />
+          </Suspense>
+        </div>
+      </section>
+
       {/* ZONA 3: CENTRO DE ACCIÓN */}
       <section>
         <h2 className="text-xs uppercase tracking-wider font-semibold text-text-muted mb-4 flex items-center gap-2">
           <span className="w-8 h-px bg-gradient-to-r from-blue-500 to-transparent"></span>
           Centro de Acción
         </h2>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-4 gap-6">
           <Suspense fallback={<div className="h-[400px] animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
-            <div className="lg:col-span-1">
-              <PriorityTasks userId={userId} />
-            </div>
+            <PriorityTasks userId={userId} />
           </Suspense>
 
           <Suspense fallback={<div className="h-[400px] animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
-            <div className="lg:col-span-1">
-              <ProjectsProgressSection userId={userId} />
-            </div>
+            <DashboardTopDealsSection userId={userId} />
           </Suspense>
 
           <Suspense fallback={<div className="h-[400px] animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
-            <div className="lg:col-span-1">
-              <RecentLeads userId={userId} />
-            </div>
+            <ProjectsProgressSection userId={userId} />
+          </Suspense>
+
+          <Suspense fallback={<div className="h-[400px] animate-pulse bg-white/5 rounded-2xl border border-white/10" />}>
+            <RecentLeads userId={userId} />
           </Suspense>
         </div>
       </section>
     </div>
   )
+}
+
+async function DashboardAlertsSection({ userId }: { userId: string }) {
+  const alerts = await getExecutiveAlerts(userId)
+  return <AlertsPanel alerts={alerts} />
+}
+
+async function DashboardForecastSection({ userId }: { userId: string }) {
+  const forecast = await getCashForecast(userId)
+  return <CashForecastWidget forecast={forecast} />
+}
+
+async function DashboardAgingSection({ userId }: { userId: string }) {
+  const aging = await getInvoiceAging(userId)
+  return <InvoiceAgingWidget aging={aging} />
+}
+
+async function DashboardTopDealsSection({ userId }: { userId: string }) {
+  const deals = await getTopDeals(userId, 5)
+  return <TopDealsWidget deals={deals} />
 }
 
 function DashboardLoadingSkeleton() {
@@ -137,7 +185,10 @@ function DashboardLoadingSkeleton() {
   )
 }
 async function DashboardKPIsSection({ userId, period }: { userId: string, period: DashboardPeriod }) {
-  const kpis = await getExecutiveKPIs(userId, period)
+  const [kpis, conversion] = await Promise.all([
+    getExecutiveKPIs(userId, period),
+    getConversionMetrics(userId),
+  ])
   const profitTrend = kpis.netProfit >= 0 ? 'up' : 'down'
 
   const formatCurrency = (value: number) => {
@@ -222,6 +273,34 @@ async function DashboardKPIsSection({ userId, period }: { userId: string, period
             </svg>
           }
         />
+      </div>
+
+      {/* Secondary KPIs row: conversion + cycle */}
+      <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Tasa de cierre</div>
+            <div className="text-2xl font-bold text-white mt-1 font-display">{conversion.winRate}%</div>
+            <div className="text-xs text-gray-500 mt-0.5">{conversion.totalWon} ganados / {conversion.totalLost} perdidos</div>
+          </div>
+          <div className="text-3xl">🏆</div>
+        </div>
+        <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Ciclo promedio</div>
+            <div className="text-2xl font-bold text-white mt-1 font-display">{conversion.avgDealCycleDays}<span className="text-base text-gray-500 ml-1">días</span></div>
+            <div className="text-xs text-gray-500 mt-0.5">De lead a ganado</div>
+          </div>
+          <div className="text-3xl">⏱️</div>
+        </div>
+        <div className="rounded-2xl border border-white/5 bg-white/[0.02] p-4 flex items-center justify-between">
+          <div>
+            <div className="text-[10px] uppercase tracking-wider text-gray-500 font-bold">Leads activos</div>
+            <div className="text-2xl font-bold text-white mt-1 font-display">{conversion.totalActive}</div>
+            <div className="text-xs text-gray-500 mt-0.5">En el pipeline ahora</div>
+          </div>
+          <div className="text-3xl">🎯</div>
+        </div>
       </div>
 
       {kpis.pendingInvoices > 0 && (

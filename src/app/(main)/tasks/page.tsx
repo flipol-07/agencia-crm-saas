@@ -216,8 +216,8 @@ export default function TasksPage() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
 
                 <div>
-                    <h1 className="text-xl sm:text-3xl font-black uppercase tracking-tight text-white">Gestión de Tareas</h1>
-                    <p className="text-xs sm:text-sm text-gray-400 mt-1">
+                    <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-ink-700">Gestión de Tareas</h1>
+                    <p className="text-xs sm:text-sm text-ink-400 mt-1">
                         {loading ? 'Cargando...' : `${filteredTasks.length} tareas pendientes`}
                         {hasFilters && tasks.length !== filteredTasks.length && ` (de ${tasks.length})`}
                     </p>

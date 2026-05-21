@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
+import './aurie-design.css'
 import { Toaster } from 'sonner'
 import { DevServiceWorkerCleaner } from '@/shared/components/devtools/DevServiceWorkerCleaner'
+import { ThemeProvider } from '@/shared/components/theme'
 
 export const metadata: Metadata = {
   title: 'Aurie CRM',
@@ -23,8 +25,24 @@ export const viewport: Viewport = {
   maximumScale: 1,
   userScalable: false,
   viewportFit: 'cover',
-  themeColor: '#000000',
+  themeColor: '#08060E',
 }
+
+// Inline script: sets data-mode/data-brand on <body> BEFORE React hydrates,
+// reading from localStorage. Avoids flash of opposite theme.
+const noFlashScript = `
+(function(){
+  try {
+    var m = localStorage.getItem('aurie-theme-mode') || 'dark';
+    var apply = function(){
+      document.body.setAttribute('data-mode', m);
+      document.body.setAttribute('data-brand', 'aurie');
+    };
+    if (document.body) apply();
+    else document.addEventListener('DOMContentLoaded', apply);
+  } catch(e) {}
+})();
+`
 
 export default function RootLayout({
   children,
@@ -32,9 +50,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" suppressHydrationWarning>
-      <body>
-        {children}
+    <html lang="es" data-scroll-behavior="smooth" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: noFlashScript }} />
+      </head>
+      <body data-brand="aurie" data-mode="dark" suppressHydrationWarning>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
         <Toaster richColors position="top-center" />
         <DevServiceWorkerCleaner />
       </body>

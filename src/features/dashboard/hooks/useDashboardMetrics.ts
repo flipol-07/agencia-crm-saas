@@ -40,6 +40,12 @@ export function useDashboardMetrics() {
     useEffect(() => {
         async function fetchMetrics() {
             try {
+                const { data: { user } } = await supabase.auth.getUser()
+                if (!user?.id) {
+                    setLoading(false)
+                    return
+                }
+                const uid = user.id
                 const now = new Date()
                 const thirtyDaysAgo = formatISO(subDays(now, 30))
                 const firstDayOfMonth = formatISO(startOfMonth(now))
@@ -55,7 +61,6 @@ export function useDashboardMetrics() {
                 const outreachVolume = outreachCount || 0
 
                 // 2. Response Rate (Approximate: Inbound Emails vs Outreach)
-                // Getting unique leads who responded would be better but expensive without specialized table
                 const { count: inboundCount } = await supabase
                     .from('contact_emails')
                     .select('*', { count: 'exact', head: true })
@@ -66,10 +71,11 @@ export function useDashboardMetrics() {
                     ? Math.round(((inboundCount || 0) / outreachVolume) * 100)
                     : 0
 
-                // 3. Pipeline Health
+                // 3. Pipeline Health, scoped to user
                 const { data: leadsData } = await (supabase.from('contacts') as any)
                     .select('estimated_value, status, last_interaction')
-                    .not('status', 'in', '("won","lost","archived")')
+                    .or(`created_by.eq.${uid},assigned_to.eq.${uid}`)
+                    .not('status', 'in', '("won","lost")')
 
                 const activeLeads = leadsData?.length || 0
                 const pipelineValue = leadsData?.reduce((sum: number, lead: any) => sum + (lead.estimated_value || 0), 0) || 0
@@ -79,9 +85,10 @@ export function useDashboardMetrics() {
                     !lead.last_interaction || lead.last_interaction < sevenDaysAgo
                 ).length || 0
 
-                // 4. Financials
+                // 4. Financials, scoped to user
                 const { data: invoicesData } = await (supabase.from('invoices') as any)
                     .select('total, status, issue_date, paid_date')
+                    .or(`created_by.eq.${uid},issuer_profile_id.eq.${uid}`)
 
                 const invoices = invoicesData || []
 

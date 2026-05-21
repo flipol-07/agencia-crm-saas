@@ -30,18 +30,20 @@ export async function getAuraCopilotContext(userId: string): Promise<CopilotCont
     // 3. Tareas Urgentes
     const urgentTasks = await getPriorityTasks(userId)
 
-    // 4. Leads Recientes (30 días)
-    const { data: recentLeads } = await supabase
+    // 4. Leads Recientes (30 días), scoped to user
+    const { data: recentLeads } = await (supabase
         .from('contacts')
-        .select('id, company_name, contact_name, status, created_at')
+        .select('id, company_name, contact_name, status, created_at') as any)
+        .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
         .gt('created_at', format(subMonths(new Date(), 1), 'yyyy-MM-dd'))
         .order('created_at', { ascending: false })
         .limit(5)
 
-    // 5. Facturas Pendientes/Vencidas
-    const { data: pendingInvoices } = await supabase
+    // 5. Facturas Pendientes/Vencidas, scoped to user
+    const { data: pendingInvoices } = await (supabase
         .from('invoices')
-        .select('id, number, total, status, due_date, contacts(company_name)')
+        .select('id, number, total, status, due_date, contacts(company_name)') as any)
+        .or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
         .in('status', ['sent', 'overdue'])
         .order('due_date', { ascending: true })
         .limit(5)

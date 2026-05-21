@@ -1,0 +1,74 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - region "Notifications alt+T"
+    - banner [ref=e3]:
+      - link "Aurie AURIE." [ref=e7] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aurie" [ref=e10]
+        - heading "AURIE." [level=1] [ref=e11]
+    - generic [ref=e12]:
+      - complementary [ref=e13]:
+        - navigation [ref=e14]:
+          - link "Dashboard" [ref=e15] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e17]
+            - generic [ref=e19]: Dashboard
+          - link "Calendario" [ref=e20] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e22]
+            - generic [ref=e24]: Calendario
+          - link "Pipeline" [ref=e25] [cursor=pointer]:
+            - /url: /pipeline
+            - img [ref=e27]
+            - generic [ref=e29]: Pipeline
+          - link "Contactos" [ref=e30] [cursor=pointer]:
+            - /url: /contacts
+            - img [ref=e33]
+            - generic [ref=e35]: Contactos
+          - link "Tareas" [ref=e36] [cursor=pointer]:
+            - /url: /tasks
+            - img [ref=e38]
+            - generic [ref=e40]: Tareas
+          - link "Facturas" [ref=e41] [cursor=pointer]:
+            - /url: /invoices
+            - img [ref=e43]
+            - generic [ref=e45]: Facturas
+          - link "Chat de Equipo" [ref=e46] [cursor=pointer]:
+            - /url: /team-chat
+            - img [ref=e48]
+            - generic [ref=e50]: Chat de Equipo
+          - link "Reuniones" [ref=e51] [cursor=pointer]:
+            - /url: /meetings
+            - img [ref=e53]
+            - generic [ref=e55]: Reuniones
+          - link "Correo" [ref=e56] [cursor=pointer]:
+            - /url: /mail
+            - img [ref=e58]
+            - generic [ref=e60]: Correo
+          - link "Economía" [ref=e61] [cursor=pointer]:
+            - /url: /expenses
+            - img [ref=e63]
+            - generic [ref=e65]: Economía
+        - link "Configuración" [ref=e67] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e69]
+          - generic [ref=e72]: Configuración
+      - main [ref=e73]:
+        - generic [ref=e74]:
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - heading "Contactos" [level=1] [ref=e77]
+              - paragraph [ref=e78]: Gestión de base de datos de clientes
+            - button "Nuevo Contacto" [ref=e79] [cursor=pointer]:
+              - img [ref=e80]
+              - text: Nuevo Contacto
+          - generic [ref=e82]:
+            - img [ref=e84]
+            - heading "Sin contactos" [level=3] [ref=e86]
+            - paragraph [ref=e87]: Crea tu primer contacto para empezar
+        - button [ref=e89] [cursor=pointer]:
+          - img [ref=e91]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e99] [cursor=pointer]:
+    - img [ref=e100]
+  - alert [ref=e103]

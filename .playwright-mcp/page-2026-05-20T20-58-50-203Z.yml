@@ -1,0 +1,398 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e47]:
+    - region "Notifications alt+T"
+    - banner [ref=e48]:
+      - generic [ref=e50]:
+        - link "Aurie AURIE." [ref=e52] [cursor=pointer]:
+          - /url: /dashboard
+          - img "Aurie" [ref=e55]
+          - heading "AURIE." [level=1] [ref=e56]
+        - generic [ref=e58]:
+          - generic [ref=e60]: Pol
+          - button "Activar modo claro" [ref=e62] [cursor=pointer]:
+            - img [ref=e63]
+          - button "1" [ref=e70] [cursor=pointer]:
+            - img [ref=e71]
+            - generic [ref=e73]: "1"
+          - button "Cerrar sesión" [ref=e74] [cursor=pointer]:
+            - img [ref=e75]
+    - generic [ref=e77]:
+      - complementary [ref=e78]:
+        - navigation [ref=e79]:
+          - link "Dashboard" [ref=e80] [cursor=pointer]:
+            - /url: /dashboard
+            - img [ref=e83]
+            - generic [ref=e85]: Dashboard
+          - link "Calendario" [ref=e86] [cursor=pointer]:
+            - /url: /calendar
+            - img [ref=e88]
+            - generic [ref=e90]: Calendario
+          - link "Pipeline" [ref=e91] [cursor=pointer]:
+            - /url: /pipeline
+            - img [ref=e93]
+            - generic [ref=e95]: Pipeline
+          - link "Contactos" [ref=e96] [cursor=pointer]:
+            - /url: /contacts
+            - img [ref=e98]
+            - generic [ref=e100]: Contactos
+          - link "Tareas" [ref=e101] [cursor=pointer]:
+            - /url: /tasks
+            - img [ref=e103]
+            - generic [ref=e105]: Tareas
+          - link "Facturas" [ref=e106] [cursor=pointer]:
+            - /url: /invoices
+            - img [ref=e108]
+            - generic [ref=e110]: Facturas
+          - link "Chat de Equipo 1" [ref=e111] [cursor=pointer]:
+            - /url: /team-chat
+            - img [ref=e113]
+            - generic [ref=e115]: Chat de Equipo
+            - generic [ref=e116]: "1"
+          - link "Reuniones" [ref=e117] [cursor=pointer]:
+            - /url: /meetings
+            - img [ref=e119]
+            - generic [ref=e121]: Reuniones
+          - link "Correo" [ref=e122] [cursor=pointer]:
+            - /url: /mail
+            - img [ref=e124]
+            - generic [ref=e126]: Correo
+          - link "Economía" [ref=e127] [cursor=pointer]:
+            - /url: /expenses
+            - img [ref=e129]
+            - generic [ref=e131]: Economía
+        - link "Configuración" [ref=e133] [cursor=pointer]:
+          - /url: /settings
+          - img [ref=e135]
+          - generic [ref=e138]: Configuración
+      - main [ref=e139]:
+        - generic [ref=e140]:
+          - generic [ref=e141]:
+            - generic [ref=e142]:
+              - heading "Dashboard" [level=1] [ref=e143]
+              - paragraph [ref=e144]:
+                - generic [ref=e146]: mayo 2026
+            - generic [ref=e148]:
+              - button "30 días" [ref=e149] [cursor=pointer]
+              - button "3 meses" [ref=e150] [cursor=pointer]
+              - button "6 meses" [ref=e151] [cursor=pointer]
+              - button "1 año" [ref=e152] [cursor=pointer]
+              - button "Todo" [ref=e153] [cursor=pointer]
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - heading "Atención Inmediata" [level=2] [ref=e156]: Atención Inmediata
+              - link "😴 Reactivar → 2 leads sin contacto +30d 1000 € en riesgo" [ref=e159] [cursor=pointer]:
+                - /url: /contacts
+                - generic [ref=e160]:
+                  - generic [ref=e161]: 😴
+                  - generic [ref=e162]: Reactivar →
+                - heading "2 leads sin contacto +30d" [level=3] [ref=e163]
+                - paragraph [ref=e164]: 1000 € en riesgo
+            - generic [ref=e165]:
+              - heading "KPIs Ejecutivos" [level=2] [ref=e166]: KPIs Ejecutivos
+              - generic [ref=e168]:
+                - generic [ref=e170]:
+                  - generic [ref=e171]:
+                    - img [ref=e173]
+                    - generic [ref=e175]:
+                      - img [ref=e176]
+                      - text: 0%
+                  - generic [ref=e178]:
+                    - heading "Ingresos Cobrados" [level=3] [ref=e180]
+                    - paragraph [ref=e182]: 0 €
+                    - paragraph [ref=e183]: Facturas pagadas en los últimos 30 días
+                - generic [ref=e185]:
+                  - generic [ref=e186]:
+                    - img [ref=e188]
+                    - generic [ref=e190]:
+                      - img [ref=e191]
+                      - text: 0%
+                  - generic [ref=e193]:
+                    - heading "Gastos Empresa" [level=3] [ref=e195]
+                    - paragraph [ref=e197]: 0 €
+                    - paragraph [ref=e198]: Gastos de negocio en los últimos 30 días
+                - generic [ref=e200]:
+                  - generic [ref=e201]:
+                    - img [ref=e203]
+                    - generic [ref=e205]:
+                      - img [ref=e206]
+                      - text: 0%
+                  - generic [ref=e208]:
+                    - heading "Beneficio Neto" [level=3] [ref=e210]
+                    - paragraph [ref=e212]: 0 €
+                    - paragraph [ref=e213]: Ingresos - Gastos
+                - generic [ref=e217]:
+                  - img [ref=e220]
+                  - generic [ref=e222]:
+                    - heading "Pipeline Potencial" [level=3] [ref=e224]
+                    - paragraph [ref=e226]: 1000 €
+                    - paragraph [ref=e227]: 0 proyectos activos
+              - generic [ref=e228]:
+                - generic [ref=e229]:
+                  - generic [ref=e230]:
+                    - generic [ref=e231]: Tasa de cierre
+                    - generic [ref=e232]: 100%
+                    - generic [ref=e233]: 1 ganados / 0 perdidos
+                  - generic [ref=e234]: 🏆
+                - generic [ref=e235]:
+                  - generic [ref=e236]:
+                    - generic [ref=e237]: Ciclo promedio
+                    - generic [ref=e238]: 44días
+                    - generic [ref=e239]: De lead a ganado
+                  - generic [ref=e240]: ⏱️
+                - generic [ref=e241]:
+                  - generic [ref=e242]:
+                    - generic [ref=e243]: Leads activos
+                    - generic [ref=e244]: "2"
+                    - generic [ref=e245]: En el pipeline ahora
+                  - generic [ref=e246]: 🎯
+            - generic [ref=e247]:
+              - heading "Pregunta a Aura" [level=2] [ref=e248]: Pregunta a Aura
+              - generic [ref=e250]:
+                - button "⚡ ¿Qué hago ahora?" [ref=e251] [cursor=pointer]:
+                  - generic [ref=e252]: ⚡
+                  - generic [ref=e253]: ¿Qué hago ahora?
+                - button "💰 Cobrar facturas" [ref=e254] [cursor=pointer]:
+                  - generic [ref=e255]: 💰
+                  - generic [ref=e256]: Cobrar facturas
+                - button "🔥 Leads calientes" [ref=e257] [cursor=pointer]:
+                  - generic [ref=e258]: 🔥
+                  - generic [ref=e259]: Leads calientes
+                - button "😴 Reactivar dormidos" [ref=e260] [cursor=pointer]:
+                  - generic [ref=e261]: 😴
+                  - generic [ref=e262]: Reactivar dormidos
+                - button "📊 Resumen semanal" [ref=e263] [cursor=pointer]:
+                  - generic [ref=e264]: 📊
+                  - generic [ref=e265]: Resumen semanal
+                - button "🎯 Cerrar deals" [ref=e266] [cursor=pointer]:
+                  - generic [ref=e267]: 🎯
+                  - generic [ref=e268]: Cerrar deals
+            - generic [ref=e504]:
+              - generic [ref=e505]:
+                - heading "Recomendaciones Inteligentes" [level=2] [ref=e506]: Recomendaciones Inteligentes
+                - button "¿Qué hago ahora?" [ref=e508] [cursor=pointer]:
+                  - img [ref=e509]
+                  - text: ¿Qué hago ahora?
+              - generic [ref=e511]:
+                - generic [ref=e512]:
+                  - generic [ref=e513]:
+                    - img [ref=e515]
+                    - generic [ref=e517]:
+                      - 'heading "Urgente: Genera Leads" [level=3] [ref=e518]'
+                      - paragraph [ref=e519]: No tienes leads recientes. Debes activar estrategias de captación ya.
+                  - link "Ver estrategias →" [ref=e521] [cursor=pointer]:
+                    - /url: /estrategias-captacion
+                    - text: Ver estrategias
+                    - generic [ref=e522]: →
+                - generic [ref=e523]:
+                  - generic [ref=e524]:
+                    - img [ref=e526]
+                    - generic [ref=e528]:
+                      - heading "Revisa el Pipeline" [level=3] [ref=e529]
+                      - paragraph [ref=e530]: Tu pipeline potencial es de 1000€, pero sin leads no hay cierre. Actúa ahora.
+                  - link "Optimizar Pipeline →" [ref=e532] [cursor=pointer]:
+                    - /url: /optimizar-pipeline
+                    - text: Optimizar Pipeline
+                    - generic [ref=e533]: →
+                - generic [ref=e534]:
+                  - generic [ref=e535]:
+                    - img [ref=e537]
+                    - generic [ref=e539]:
+                      - heading "Mantén el enfoque" [level=3] [ref=e540]
+                      - paragraph [ref=e541]: Aunque no hay proyectos activos, concéntrate en el desarrollo de nuevas ideas.
+                  - link "Explorar Ideas →" [ref=e543] [cursor=pointer]:
+                    - /url: /explorar-ideas
+                    - text: Explorar Ideas
+                    - generic [ref=e544]: →
+            - generic [ref=e270]:
+              - heading "Analytics" [level=2] [ref=e271]: Analytics
+              - generic [ref=e273]:
+                - generic [ref=e274]:
+                  - heading "Tendencia Ingresos vs Gastos" [level=3] [ref=e275]: Tendencia Ingresos vs Gastos
+                  - generic [ref=e277]:
+                    - img [ref=e279]
+                    - paragraph [ref=e281]: Sin datos históricos
+                    - paragraph [ref=e282]: Registra facturas y gastos para ver la tendencia
+                - generic [ref=e283]:
+                  - heading "Distribución de Gastos" [level=3] [ref=e284]: Distribución de Gastos
+                  - generic [ref=e286]:
+                    - img [ref=e288]
+                    - paragraph [ref=e291]: Sin gastos registrados
+                    - paragraph [ref=e292]: Añade gastos de empresa para ver la distribución
+            - generic [ref=e293]:
+              - heading "Finanzas y Cobros" [level=2] [ref=e294]: Finanzas y Cobros
+              - generic [ref=e296]:
+                - generic [ref=e297]:
+                  - generic [ref=e298]:
+                    - heading "Previsión de cobros" [level=3] [ref=e299]
+                    - paragraph [ref=e300]: Facturas pendientes por vencer
+                  - generic [ref=e301]:
+                    - generic [ref=e302]: 0 €
+                    - generic [ref=e303]: Total previsto próximos 90 días
+                  - generic [ref=e304]:
+                    - generic [ref=e305]:
+                      - generic [ref=e306]: 30 días
+                      - generic [ref=e307]: 0 €
+                    - generic [ref=e308]:
+                      - generic [ref=e309]: 60 días
+                      - generic [ref=e310]: 0 €
+                    - generic [ref=e311]:
+                      - generic [ref=e312]: 90 días
+                      - generic [ref=e313]: 0 €
+                  - generic [ref=e315]:
+                    - generic [ref=e316]:
+                      - generic [ref=e317]: Pipeline ponderado
+                      - generic [ref=e318]: Valor × probabilidad
+                    - generic [ref=e319]: 0 €
+                - generic [ref=e320]:
+                  - generic [ref=e321]:
+                    - generic [ref=e322]:
+                      - heading "Antigüedad facturas" [level=3] [ref=e323]
+                      - paragraph [ref=e324]: Cobros pendientes por plazo
+                    - link "Ver todas →" [ref=e325] [cursor=pointer]:
+                      - /url: /invoices
+                  - generic [ref=e326]: Sin facturas pendientes
+            - generic [ref=e327]:
+              - heading "Centro de Acción" [level=2] [ref=e328]: Centro de Acción
+              - generic [ref=e330]:
+                - generic [ref=e331]:
+                  - generic [ref=e332]:
+                    - heading "Tareas Prioritarias" [level=3] [ref=e333]: Tareas Prioritarias
+                    - link "Ver todas" [ref=e337] [cursor=pointer]:
+                      - /url: /tasks
+                  - generic [ref=e339]:
+                    - generic [ref=e341]: 🎉
+                    - paragraph [ref=e342]: ¡Todo al día!
+                    - paragraph [ref=e343]: No tienes tareas urgentes pendientes.
+                - generic [ref=e344]:
+                  - generic [ref=e345]:
+                    - generic [ref=e346]:
+                      - heading "Top deals" [level=3] [ref=e347]
+                      - paragraph [ref=e348]: Mayor valor estimado
+                    - link "Pipeline →" [ref=e349] [cursor=pointer]:
+                      - /url: /pipeline
+                  - generic [ref=e350]:
+                    - link "1 jose Cualificación 1000 €" [ref=e351] [cursor=pointer]:
+                      - /url: /contacts/9e6234f4-b92b-45be-9a17-022a50ce41bb
+                      - generic [ref=e352]: "1"
+                      - generic [ref=e353]:
+                        - generic [ref=e354]: jose
+                        - generic [ref=e356]: Cualificación
+                      - generic [ref=e358]: 1000 €
+                    - link "2 Pere cabiscol Propuesta 0 €" [ref=e359] [cursor=pointer]:
+                      - /url: /contacts/ae14e781-869e-4827-aa0d-b0108728e6c2
+                      - generic [ref=e360]: "2"
+                      - generic [ref=e361]:
+                        - generic [ref=e362]: Pere cabiscol
+                        - generic [ref=e364]: Propuesta
+                      - generic [ref=e366]: 0 €
+                - generic [ref=e367]:
+                  - generic [ref=e368]:
+                    - heading "Proyectos Activos" [level=3] [ref=e369]: Proyectos Activos
+                    - link "Ver todos →" [ref=e371]:
+                      - /url: "#"
+                  - generic [ref=e373]:
+                    - img [ref=e375]
+                    - paragraph [ref=e377]: Sin proyectos activos
+                    - paragraph [ref=e378]: Crea un proyecto para verlo aquí
+                - generic [ref=e379]:
+                  - generic [ref=e380]:
+                    - heading "Leads Recientes" [level=3] [ref=e381]: Leads Recientes
+                    - link "Ver todos" [ref=e385] [cursor=pointer]:
+                      - /url: /contacts
+                  - generic [ref=e386]:
+                    - link "PE Pere cabiscol propuesta Pere 20 may" [ref=e387] [cursor=pointer]:
+                      - /url: /contacts/ae14e781-869e-4827-aa0d-b0108728e6c2
+                      - generic [ref=e388]:
+                        - generic [ref=e389]: PE
+                        - generic [ref=e390]:
+                          - generic [ref=e391]:
+                            - paragraph [ref=e392]: Pere cabiscol
+                            - generic [ref=e393]: propuesta
+                          - generic [ref=e394]:
+                            - text: Pere
+                            - generic [ref=e396]: 20 may
+                    - link "GI Gimnasia Extremadura cualificacion 20 may" [ref=e397] [cursor=pointer]:
+                      - /url: /contacts/9a0a765b-3f45-44ad-a37c-fcad57285d88
+                      - generic [ref=e398]:
+                        - generic [ref=e399]: GI
+                        - generic [ref=e400]:
+                          - generic [ref=e401]:
+                            - paragraph [ref=e402]: Gimnasia Extremadura
+                            - generic [ref=e403]: cualificacion
+                          - generic [ref=e404]:
+                            - generic [ref=e406]: 20 may
+                            - button [ref=e410]:
+                              - img [ref=e411]
+                    - link "JO jose cualificacion jose 20 may" [ref=e413] [cursor=pointer]:
+                      - /url: /contacts/9e6234f4-b92b-45be-9a17-022a50ce41bb
+                      - generic [ref=e414]:
+                        - generic [ref=e415]: JO
+                        - generic [ref=e416]:
+                          - generic [ref=e417]:
+                            - paragraph [ref=e418]: jose
+                            - generic [ref=e419]: cualificacion
+                          - generic [ref=e420]:
+                            - text: jose
+                            - generic [ref=e422]: 20 may
+                            - button [ref=e426]:
+                              - img [ref=e427]
+        - button [ref=e430] [cursor=pointer]:
+          - img [ref=e432]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e42] [cursor=pointer]:
+    - img [ref=e43]
+  - alert [ref=e46]
+  - generic [ref=e436]:
+    - generic [ref=e437]:
+      - link "Aura AURIE" [ref=e438] [cursor=pointer]:
+        - /url: /dashboard
+        - img "Aura" [ref=e440]
+        - generic [ref=e441]: AURIE
+      - button [ref=e442] [cursor=pointer]:
+        - img [ref=e443]
+    - navigation [ref=e445]:
+      - link "Dashboard" [ref=e446] [cursor=pointer]:
+        - /url: /dashboard
+        - img [ref=e448]
+        - generic [ref=e450]: Dashboard
+      - link "Calendario" [ref=e451] [cursor=pointer]:
+        - /url: /calendar
+        - img [ref=e453]
+        - generic [ref=e455]: Calendario
+      - link "Pipeline" [ref=e456] [cursor=pointer]:
+        - /url: /pipeline
+        - img [ref=e458]
+        - generic [ref=e460]: Pipeline
+      - link "Contactos" [ref=e461] [cursor=pointer]:
+        - /url: /contacts
+        - img [ref=e463]
+        - generic [ref=e465]: Contactos
+      - link "Tareas" [ref=e466] [cursor=pointer]:
+        - /url: /tasks
+        - img [ref=e468]
+        - generic [ref=e470]: Tareas
+      - link "Facturas" [ref=e471] [cursor=pointer]:
+        - /url: /invoices
+        - img [ref=e473]
+        - generic [ref=e475]: Facturas
+      - link "Chat de Equipo 1" [ref=e476] [cursor=pointer]:
+        - /url: /team-chat
+        - img [ref=e478]
+        - generic [ref=e480]: Chat de Equipo
+        - generic [ref=e481]: "1"
+      - link "Reuniones" [ref=e482] [cursor=pointer]:
+        - /url: /meetings
+        - img [ref=e484]
+        - generic [ref=e486]: Reuniones
+      - link "Correo" [ref=e487] [cursor=pointer]:
+        - /url: /mail
+        - img [ref=e489]
+        - generic [ref=e491]: Correo
+      - link "Economía" [ref=e492] [cursor=pointer]:
+        - /url: /expenses
+        - img [ref=e494]
+        - generic [ref=e496]: Economía
+    - link "Ajustes" [ref=e498] [cursor=pointer]:
+      - /url: /settings
+      - img [ref=e500]
+      - generic [ref=e503]: Ajustes

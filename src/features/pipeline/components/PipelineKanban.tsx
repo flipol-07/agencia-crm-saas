@@ -293,7 +293,7 @@ function getContactPriority(contact: Contact) {
     const probability = contact.probability_close || 0
     const days = getDaysSince(contact.last_interaction)
     const estimatedValue = contact.estimated_value || 0
-    const isWonOrLost = ['won', 'lost', 'archived'].includes(contact.status)
+    const isWonOrLost = ['won', 'lost'].includes(contact.status)
 
     if (!isWonOrLost && (contact.inactivity_status === 'inactive' || days >= 30)) {
         return {

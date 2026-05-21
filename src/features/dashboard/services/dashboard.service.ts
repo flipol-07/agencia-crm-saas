@@ -3,7 +3,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { startOfMonth, endOfMonth, subMonths, format } from 'date-fns'
 import { cacheLife } from 'next/cache'
-import { isDemoEmail } from '@/shared/lib/demo'
 import { generateRecommendations, Recommendation } from '../lib/recommendation-engine'
 import { aiRecommendationsService } from './ai-recommendations.service'
 
@@ -112,16 +111,6 @@ function getRangeFromPeriod(period: DashboardPeriod) {
     }
 }
 
-async function shouldUseDemoScope(supabase: any, userId: string) {
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('email')
-        .eq('id', userId)
-        .maybeSingle()
-
-    return isDemoEmail(profile?.email)
-}
-
 // ============================================
 // Service Functions
 // ============================================
@@ -135,7 +124,6 @@ export async function getExecutiveKPIs(userId: string, period: DashboardPeriod =
 
     // Use admin client to avoid cookies() inside "use cache"
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
     const { start, end, prevStart, prevEnd } = getRangeFromPeriod(period)
 
     // Parallelize all KPI queries (Current + Previous Period)
@@ -155,84 +143,76 @@ export async function getExecutiveKPIs(userId: string, period: DashboardPeriod =
     ] = await Promise.all([
         // 1. Current Income
         (async () => {
-            let q = (supabase as any).from('expenses').select('amount').eq('type', 'income')
-            if (demoScope) q = q.eq('user_id', userId)
+            let q = (supabase as any).from('expenses').select('amount').eq('type', 'income').eq('user_id', userId)
             if (start) q = q.gte('date', start)
             return q.lte('date', end)
         })(),
         // 2. Current Expenses
         (async () => {
-            let q = (supabase as any).from('expenses').select('amount').eq('type', 'expense').eq('is_personal', false)
-            if (demoScope) q = q.eq('user_id', userId)
+            let q = (supabase as any).from('expenses').select('amount').eq('type', 'expense').eq('is_personal', false).eq('user_id', userId)
             if (start) q = q.gte('date', start)
             return q.lte('date', end)
         })(),
         // 3. Current Contacts (Pipeline)
-        (async () => {
-            let q = (supabase as any).from('contacts').select('estimated_value').not('status', 'in', '("won","lost")')
-            if (demoScope) q = q.or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
-            return q
-        })(),
+        (supabase as any).from('contacts')
+            .select('estimated_value')
+            .not('status', 'in', '("won","lost")')
+            .or(`created_by.eq.${userId},assigned_to.eq.${userId}`),
         // 4. Current Projects budget
-        (async () => {
-            let q = (supabase as any).from('projects').select('budget').eq('status', 'active')
-            if (demoScope) q = q.eq('created_by', userId)
-            return q
-        })(),
+        (supabase as any).from('projects')
+            .select('budget')
+            .eq('status', 'active')
+            .eq('created_by', userId),
         // 5. Current Pending invoices
-        (async () => {
-            let q = (supabase as any).from('invoices').select('total').in('status', ['sent', 'overdue'])
-            if (demoScope) q = q.or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
-            return q
-        })(),
+        (supabase as any).from('invoices')
+            .select('total')
+            .in('status', ['sent', 'overdue'])
+            .or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`),
         // 6. Current Projects count
-        (async () => {
-            let q = supabase.from('projects').select('*', { count: 'exact', head: true }).eq('status', 'active')
-            if (demoScope) q = q.eq('created_by', userId)
-            return q
-        })(),
+        supabase.from('projects')
+            .select('*', { count: 'exact', head: true })
+            .eq('status', 'active')
+            .eq('created_by', userId),
 
         // --- PREVIOUS PERIOD QUERIES ---
 
         // 7. Prev Income
         (async () => {
             if (!prevStart || !prevEnd) return { data: [] }
-            let q = (supabase as any).from('expenses')
+            return (supabase as any).from('expenses')
                 .select('amount')
                 .eq('type', 'income')
-            if (demoScope) q = q.eq('user_id', userId)
-            return q.gte('date', prevStart)
+                .eq('user_id', userId)
+                .gte('date', prevStart)
                 .lte('date', prevEnd)
         })(),
         // 8. Prev Expenses
         (async () => {
             if (!prevStart || !prevEnd) return { data: [] }
-            let q = (supabase as any).from('expenses')
+            return (supabase as any).from('expenses')
                 .select('amount')
                 .eq('type', 'expense')
                 .eq('is_personal', false)
-            if (demoScope) q = q.eq('user_id', userId)
-            return q.gte('date', prevStart)
+                .eq('user_id', userId)
+                .gte('date', prevStart)
                 .lte('date', prevEnd)
         })(),
-        // 9. Prev Pipeline (Approx: contacts created before prevEnd and updated in that range? Hard to reconstruct pipeline state without snapshots. 
-        // Strategy: Just compare created_at volume or assume steady state for now, simplified to 0 for trend if complex)
-        // Let's try: Contacts created in the previous period.
+        // 9. Prev Pipeline (Approx: contacts created in previous period)
         (async () => {
             if (!prevStart || !prevEnd) return { data: [] }
-            let q = (supabase as any).from('contacts')
+            return (supabase as any).from('contacts')
                 .select('estimated_value')
-            if (demoScope) q = q.or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
-            return q.gte('created_at', prevStart)
+                .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+                .gte('created_at', prevStart)
                 .lte('created_at', prevEnd)
         })(),
         // 10. Prev Projects (Approx: projects created in range)
         (async () => {
             if (!prevStart || !prevEnd) return { count: 0 }
-            let q = supabase.from('projects')
+            return supabase.from('projects')
                 .select('*', { count: 'exact', head: true })
-            if (demoScope) q = q.eq('created_by', userId)
-            return q.gte('created_at', prevStart)
+                .eq('created_by', userId)
+                .gte('created_at', prevStart)
                 .lte('created_at', prevEnd)
         })()
     ])
@@ -292,28 +272,24 @@ export async function getMonthlyTrend(userId: string, months: number = 6): Promi
     cacheLife('hours')
 
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
     const now = new Date()
     const startDate = format(startOfMonth(subMonths(now, months - 1)), 'yyyy-MM-dd')
     const endDate = format(endOfMonth(now), 'yyyy-MM-dd')
 
-    // 1. Fetch all records in range in just 2 queries
-    let incomeQuery = (supabase as any).from('expenses')
+    // 1. Fetch all records in range in just 2 queries, scoped to user
+    const incomeQuery = (supabase as any).from('expenses')
             .select('amount, date')
             .eq('type', 'income')
+            .eq('user_id', userId)
             .gte('date', startDate)
             .lte('date', endDate)
-    let expenseQuery = (supabase as any).from('expenses')
+    const expenseQuery = (supabase as any).from('expenses')
             .select('amount, date')
             .eq('type', 'expense')
             .eq('is_personal', false)
+            .eq('user_id', userId)
             .gte('date', startDate)
             .lte('date', endDate)
-
-    if (demoScope) {
-        incomeQuery = incomeQuery.eq('user_id', userId)
-        expenseQuery = expenseQuery.eq('user_id', userId)
-    }
 
     const [incomeResult, expenseResult] = await Promise.all([
         incomeQuery,
@@ -363,10 +339,9 @@ export async function getExpenseDistribution(userId: string, period: DashboardPe
     cacheLife('hours')
 
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
     const { start, end } = getRangeFromPeriod(period)
 
-    // Get expenses with category info
+    // Get expenses with category info, scoped to user
     let query = supabase
         .from('expenses')
         .select(`
@@ -375,10 +350,10 @@ export async function getExpenseDistribution(userId: string, period: DashboardPe
         `)
         .eq('type', 'expense')
         .eq('is_personal', false)
+        .eq('user_id', userId)
 
     if (start) query = query.gte('date', start)
     query = query.lte('date', end)
-    if (demoScope) query = query.eq('user_id', userId)
 
     const { data: expenses } = await query
 
@@ -428,10 +403,9 @@ export async function getProjectsProgress(userId: string): Promise<ProjectProgre
     cacheLife('minutes')
 
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
 
-    // Get active projects with client info
-    let projectsQuery = (supabase as any)
+    // Get active projects with client info, scoped to user
+    const projectsQuery = (supabase as any)
         .from('projects')
         .select(`
             id,
@@ -441,10 +415,9 @@ export async function getProjectsProgress(userId: string): Promise<ProjectProgre
             contacts ( company_name )
         `)
         .eq('status', 'active')
+        .eq('created_by', userId)
         .order('deadline', { ascending: true })
         .limit(5)
-
-    if (demoScope) projectsQuery = projectsQuery.eq('created_by', userId)
 
     const { data: projects } = await projectsQuery as { data: { id: string; name: string; status: string; deadline: string | null; contacts: { company_name: string } | null }[] | null }
 
@@ -490,14 +463,12 @@ export async function getRecentLeads(userId: string) {
     cacheLife('minutes')
 
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
-    let query = supabase
+    const query = (supabase
         .from('contacts')
-        .select('*')
+        .select('*') as any)
+        .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
         .order('updated_at', { ascending: false })
         .limit(5)
-
-    if (demoScope) query = (query as any).or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
 
     const { data } = await query
 
@@ -512,19 +483,17 @@ export async function getPriorityTasks(userId: string) {
     cacheLife('minutes')
 
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
     const today = new Date().toISOString().split('T')[0]
 
-    let query = (supabase.from('tasks') as any)
+    const query = (supabase.from('tasks') as any)
         .select(`
             id, title, priority, due_date, is_completed,
             projects ( name, contacts ( company_name ) )
         `)
         .eq('is_completed', false)
+        .eq('assigned_to', userId)
         .order('due_date', { ascending: true, nullsFirst: false })
         .limit(6)
-
-    if (demoScope) query = query.eq('assigned_to', userId)
 
     let { data } = await query
 
@@ -563,7 +532,6 @@ export async function getDashboardRecommendations(userId: string): Promise<Recom
     cacheLife('minutes')
 
     const supabase = createAdminClient()
-    const demoScope = await shouldUseDemoScope(supabase, userId)
 
     // 1. Get Role
     const { data: profile } = await supabase
@@ -572,18 +540,21 @@ export async function getDashboardRecommendations(userId: string): Promise<Recom
         .eq('id', userId)
         .single() as { data: { professional_role: string } | null }
 
-    // 2. Get KPIs (reuse existing function logic or call it if not for cache issues - better to fetch necessary data in parallel here for speed)
-    // We reuse getExecutiveKPIs but since we are inside a cached function, calling another cached function is fine in Next 16 (deduped).
+    // 2. Get KPIs
     const kpis = await getExecutiveKPIs(userId, '30d')
 
-    // 3. Get Context Data
-    let recentLeadsQuery = supabase.from('contacts').select('id', { count: 'exact', head: true }).gt('created_at', format(subMonths(new Date(), 1), 'yyyy-MM-dd'))
-    let highPrioTasksQuery = supabase.from('tasks').select('id', { count: 'exact', head: true }).eq('is_completed', false).in('priority', ['high', 'urgent'])
-
-    if (demoScope) {
-        recentLeadsQuery = (recentLeadsQuery as any).or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
-        highPrioTasksQuery = highPrioTasksQuery.eq('assigned_to', userId)
-    }
+    // 3. Get Context Data, scoped to user
+    const recentLeadsQuery = (supabase
+        .from('contacts')
+        .select('id', { count: 'exact', head: true }) as any)
+        .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+        .gt('created_at', format(subMonths(new Date(), 1), 'yyyy-MM-dd'))
+    const highPrioTasksQuery = supabase
+        .from('tasks')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_completed', false)
+        .eq('assigned_to', userId)
+        .in('priority', ['high', 'urgent'])
 
     const [recentLeads, highPrioTasks] = await Promise.all([
         recentLeadsQuery,
@@ -609,4 +580,232 @@ export async function getDashboardRecommendations(userId: string): Promise<Recom
 
     // 5. Fallback to Rule-based engine
     return generateRecommendations(context)
+}
+
+// ============================================
+// NEW V2 ANALYTICS
+// ============================================
+
+export interface ExecutiveAlerts {
+    overdueInvoices: { count: number; total: number }
+    inactiveLeads: { count: number; lostValue: number }
+    overdueTasks: { count: number }
+    upcomingTasks: { count: number }
+}
+
+export async function getExecutiveAlerts(userId: string): Promise<ExecutiveAlerts> {
+    'use cache'
+    cacheLife('minutes')
+
+    const supabase = createAdminClient()
+    const today = new Date().toISOString().split('T')[0]
+    const thirtyDaysAgo = format(subMonths(new Date(), 1), 'yyyy-MM-dd')
+    const sevenDaysAhead = format(new Date(Date.now() + 7 * 86400000), 'yyyy-MM-dd')
+
+    const [overdueInvs, inactiveLeads, overdueTasks, upcomingTasks] = await Promise.all([
+        // Overdue invoices (status sent and due_date < today, or status overdue)
+        (supabase.from('invoices') as any)
+            .select('total')
+            .or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
+            .or(`status.eq.overdue,and(status.eq.sent,due_date.lt.${today})`),
+        // Inactive leads (active status, no interaction in 30+ days)
+        (supabase.from('contacts') as any)
+            .select('estimated_value')
+            .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+            .not('status', 'in', '("won","lost")')
+            .or(`last_interaction.is.null,last_interaction.lt.${thirtyDaysAgo}`),
+        // Overdue tasks
+        supabase.from('tasks')
+            .select('id', { count: 'exact', head: true })
+            .eq('assigned_to', userId)
+            .eq('is_completed', false)
+            .lt('due_date', today),
+        // Upcoming tasks (next 7 days)
+        supabase.from('tasks')
+            .select('id', { count: 'exact', head: true })
+            .eq('assigned_to', userId)
+            .eq('is_completed', false)
+            .gte('due_date', today)
+            .lte('due_date', sevenDaysAhead),
+    ])
+
+    const overdueData = (overdueInvs.data || []) as { total: number }[]
+    const inactiveData = (inactiveLeads.data || []) as { estimated_value: number }[]
+
+    return {
+        overdueInvoices: {
+            count: overdueData.length,
+            total: overdueData.reduce((sum, inv) => sum + Number(inv.total || 0), 0),
+        },
+        inactiveLeads: {
+            count: inactiveData.length,
+            lostValue: inactiveData.reduce((sum, c) => sum + Number(c.estimated_value || 0), 0),
+        },
+        overdueTasks: { count: overdueTasks.count || 0 },
+        upcomingTasks: { count: upcomingTasks.count || 0 },
+    }
+}
+
+export interface ConversionMetrics {
+    winRate: number             // % of closed deals that were won
+    avgDealCycleDays: number    // avg days from created_at to won status (won deals only)
+    totalWon: number
+    totalLost: number
+    totalActive: number
+}
+
+export async function getConversionMetrics(userId: string): Promise<ConversionMetrics> {
+    'use cache'
+    cacheLife('hours')
+
+    const supabase = createAdminClient()
+
+    const { data } = await (supabase.from('contacts') as any)
+        .select('status, created_at, updated_at')
+        .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+
+    const rows = (data || []) as { status: string; created_at: string; updated_at: string }[]
+
+    const won = rows.filter(r => r.status === 'won')
+    const lost = rows.filter(r => r.status === 'lost')
+    const active = rows.filter(r => !['won', 'lost'].includes(r.status))
+    const closed = won.length + lost.length
+    const winRate = closed > 0 ? Math.round((won.length / closed) * 100) : 0
+
+    const cycleDays = won.length > 0
+        ? won.reduce((sum, deal) => {
+            const start = new Date(deal.created_at).getTime()
+            const end = new Date(deal.updated_at).getTime()
+            return sum + Math.max(0, (end - start) / 86400000)
+        }, 0) / won.length
+        : 0
+
+    return {
+        winRate,
+        avgDealCycleDays: Math.round(cycleDays),
+        totalWon: won.length,
+        totalLost: lost.length,
+        totalActive: active.length,
+    }
+}
+
+export interface InvoiceAging {
+    current: { count: number; total: number }      // not yet due
+    overdue30: { count: number; total: number }    // 1-30 days
+    overdue60: { count: number; total: number }    // 31-60
+    overdue90: { count: number; total: number }    // 61-90
+    overdue90plus: { count: number; total: number } // 90+
+}
+
+export async function getInvoiceAging(userId: string): Promise<InvoiceAging> {
+    'use cache'
+    cacheLife('minutes')
+
+    const supabase = createAdminClient()
+    const { data } = await (supabase.from('invoices') as any)
+        .select('total, due_date, status')
+        .or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
+        .in('status', ['sent', 'overdue'])
+
+    const rows = (data || []) as { total: number; due_date: string; status: string }[]
+    const today = new Date()
+    const aging: InvoiceAging = {
+        current: { count: 0, total: 0 },
+        overdue30: { count: 0, total: 0 },
+        overdue60: { count: 0, total: 0 },
+        overdue90: { count: 0, total: 0 },
+        overdue90plus: { count: 0, total: 0 },
+    }
+
+    for (const inv of rows) {
+        const dueDate = inv.due_date ? new Date(inv.due_date) : null
+        const total = Number(inv.total || 0)
+        if (!dueDate) {
+            aging.current.count++
+            aging.current.total += total
+            continue
+        }
+        const daysOverdue = Math.floor((today.getTime() - dueDate.getTime()) / 86400000)
+
+        if (daysOverdue <= 0) { aging.current.count++; aging.current.total += total }
+        else if (daysOverdue <= 30) { aging.overdue30.count++; aging.overdue30.total += total }
+        else if (daysOverdue <= 60) { aging.overdue60.count++; aging.overdue60.total += total }
+        else if (daysOverdue <= 90) { aging.overdue90.count++; aging.overdue90.total += total }
+        else { aging.overdue90plus.count++; aging.overdue90plus.total += total }
+    }
+
+    return aging
+}
+
+export interface TopDeal {
+    id: string
+    company_name: string
+    contact_name: string | null
+    estimated_value: number
+    probability_close: number
+    pipeline_stage: string
+    last_interaction: string | null
+}
+
+export async function getTopDeals(userId: string, limit: number = 5): Promise<TopDeal[]> {
+    'use cache'
+    cacheLife('minutes')
+
+    const supabase = createAdminClient()
+    const { data } = await (supabase.from('contacts') as any)
+        .select('id, company_name, contact_name, estimated_value, probability_close, pipeline_stage, last_interaction')
+        .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+        .not('status', 'in', '("won","lost")')
+        .not('estimated_value', 'is', null)
+        .order('estimated_value', { ascending: false })
+        .limit(limit)
+
+    return (data || []) as TopDeal[]
+}
+
+export interface CashForecast {
+    next30: number       // Sum of sent/overdue invoices due in next 30 days
+    next60: number       // 30-60 days
+    next90: number       // 60-90 days
+    weightedPipeline: number   // Sum of estimated_value * probability_close
+}
+
+export async function getCashForecast(userId: string): Promise<CashForecast> {
+    'use cache'
+    cacheLife('minutes')
+
+    const supabase = createAdminClient()
+    const today = new Date()
+    const in30 = new Date(today.getTime() + 30 * 86400000).toISOString().split('T')[0]
+    const in60 = new Date(today.getTime() + 60 * 86400000).toISOString().split('T')[0]
+    const in90 = new Date(today.getTime() + 90 * 86400000).toISOString().split('T')[0]
+
+    const [invs, contacts] = await Promise.all([
+        (supabase.from('invoices') as any)
+            .select('total, due_date')
+            .or(`created_by.eq.${userId},issuer_profile_id.eq.${userId}`)
+            .in('status', ['sent', 'overdue'])
+            .gte('due_date', today.toISOString().split('T')[0])
+            .lte('due_date', in90),
+        (supabase.from('contacts') as any)
+            .select('estimated_value, probability_close')
+            .or(`created_by.eq.${userId},assigned_to.eq.${userId}`)
+            .not('status', 'in', '("won","lost")'),
+    ])
+
+    const invoiceRows = (invs.data || []) as { total: number; due_date: string }[]
+    let next30 = 0, next60 = 0, next90 = 0
+    for (const inv of invoiceRows) {
+        const dueDate = inv.due_date
+        const total = Number(inv.total || 0)
+        if (dueDate <= in30) next30 += total
+        else if (dueDate <= in60) next60 += total
+        else if (dueDate <= in90) next90 += total
+    }
+
+    const contactRows = (contacts.data || []) as { estimated_value: number; probability_close: number }[]
+    const weighted = contactRows.reduce((sum, c) =>
+        sum + (Number(c.estimated_value || 0) * (Number(c.probability_close || 0) / 100)), 0)
+
+    return { next30, next60, next90, weightedPipeline: Math.round(weighted) }
 }

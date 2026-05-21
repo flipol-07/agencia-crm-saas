@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { isDemoEmail } from '@/shared/lib/demo'
 import type { Contact, ContactInsert, ContactUpdate } from '@/types/database'
 import {
     createContactAction,
@@ -26,8 +25,8 @@ export function useContacts() {
             .select('*')
             .order('created_at', { ascending: false })
 
-        if (isDemoEmail(user?.email)) {
-            query = query.or(`created_by.eq.${user?.id},assigned_to.eq.${user?.id}`)
+        if (user?.id) {
+            query = query.or(`created_by.eq.${user.id},assigned_to.eq.${user.id}`)
         }
 
         const { data, error } = await query
@@ -118,8 +117,8 @@ export function useContact(id: string) {
             .select('*')
             .eq('id', id)
 
-        if (isDemoEmail(user?.email)) {
-            query = query.or(`created_by.eq.${user?.id},assigned_to.eq.${user?.id}`)
+        if (user?.id) {
+            query = query.or(`created_by.eq.${user.id},assigned_to.eq.${user.id}`)
         }
 
         const { data, error } = await query

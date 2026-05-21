@@ -1,0 +1,20 @@
+[    1238ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1344ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1752ms] [LOG] Realtime Auth State Change: INITIAL_SESSION @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    1889ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    5015ms] [LOG] Realtime: Subscribing for user 4d5b3ce1-d1da-4405-b59e-125bbd34e569 @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    5028ms] [WARNING] PushSubscriptionManager: NEXT_PUBLIC_VAPID_PUBLIC_KEY ausente @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    5412ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779341241942]: CLOSED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    5850ms] [LOG] Realtime Hub [auth_hub_4d5b3ce1-d1da-4405-b59e-125bbd34e569_1779341241970]: SUBSCRIBED  @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6714ms] [LOG] IntelligentWidget Debug: {userId: undefined, tasksCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    6715ms] [LOG] IntelligentWidget Debug: {userId: undefined, tasksCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7343ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7344ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 0} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7352ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7352ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7420ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7421ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7427ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7428ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7479ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297
+[    7479ms] [LOG] IntelligentWidget Debug: {userId: 4d5b3ce1-d1da-4405-b59e-125bbd34e569, tasksCount: 25} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_f3530cac._.js:2297

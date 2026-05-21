@@ -7,39 +7,77 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        // ---- Aurie design system (CSS variables driven, theme-aware) ----
+        bg: 'var(--bg)',
+        'bg-2': 'var(--bg-2)',
+        'bg-3': 'var(--bg-3)',
+        'bg-4': 'var(--bg-4)',
+        paper: 'var(--paper)',
+        ink: {
+          100: 'var(--ink-100)',
+          200: 'var(--ink-200)',
+          300: 'var(--ink-300)',
+          400: 'var(--ink-400)',
+          450: 'var(--ink-450)',
+          500: 'var(--ink-500)',
+          600: 'var(--ink-600)',
+          700: 'var(--ink-700)',
+        },
+        accent: 'var(--accent)',
+        'accent-hi': 'var(--accent-hi)',
+        'accent-soft': 'var(--accent-soft)',
+        'accent-tint': 'var(--accent-tint)',
+        ochre: 'var(--ochre)',
+        success: 'var(--success)',
+        danger: 'var(--danger)',
+        warning: 'var(--warning)',
+        divider: {
+          DEFAULT: 'var(--divider)',
+          2: 'var(--divider-2)',
+          strong: 'var(--divider-strong)',
+        },
+
+        // ---- Legacy bridge: map old token names to new theme-aware vars ----
         background: {
-          DEFAULT: '#080112', // Deep Purple/Black (Aurie Premium)
-          secondary: '#11041d', // Slightly lighter Dark Purple
-          tertiary: '#1a0b2e', // Deep Slate Purple
-          glass: 'rgba(13, 10, 27, 0.6)', // Frosted Dark Purple
+          DEFAULT: 'var(--bg)',
+          secondary: 'var(--bg-2)',
+          tertiary: 'var(--bg-3)',
+          glass: 'rgba(13, 10, 27, 0.6)',
           'glass-strong': 'rgba(8, 1, 18, 0.8)',
         },
         text: {
-          primary: '#f8fafc', // Slate 50
-          secondary: '#94a3b8', // Slate 400
-          muted: '#64748b', // Slate 500
+          primary: 'var(--ink-700)',
+          secondary: 'var(--ink-500)',
+          muted: 'var(--ink-300)',
         },
         brand: {
-          DEFAULT: '#8b5cf6', // Violet 500
-          purple: '#a855f7', // Purple 500
-          cyan: '#06b6d4', // Cyan 500
-          pink: '#ec4899', // Pink 500
+          DEFAULT: 'var(--accent)',
+          purple: 'var(--ochre)',         // legacy purple -> secondary (violet on dark, lime on light)
+          cyan: 'var(--accent)',
+          pink: 'var(--accent)',
           neon: {
-            purple: '#d946ef', // Fuchsia 500
-            blue: '#3b82f6', // Blue 500
-            cyan: '#22d3ee', // Cyan 400
-            lime: '#8b5cf6', // Replaced with Purple by user request
+            purple: 'var(--ochre)',
+            blue: 'var(--ochre)',
+            cyan: 'var(--accent)',
+            lime: 'var(--accent)',
           }
         },
         border: {
-          subtle: 'rgba(255, 255, 255, 0.05)',
-          medium: 'rgba(255, 255, 255, 0.1)',
-          glow: 'rgba(139, 92, 246, 0.3)', // Violet glow
+          subtle: 'var(--divider-2)',
+          medium: 'var(--divider)',
+          glow: 'var(--accent-line)',
         }
       },
       fontFamily: {
-        sans: ['var(--font-inter)', 'sans-serif'],
-        display: ['var(--font-outfit)', 'sans-serif'],
+        sans: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        body: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        // `font-display` is widely used as a "weighty heading" cue across the
+        // codebase. For a CRM we want it legible, not a condensed display face,
+        // so it maps to the body font here. The Anton wordmark font is
+        // available via the explicit `.aurie-wordmark` class only.
+        display: ['var(--font-body)', 'system-ui', 'sans-serif'],
+        wordmark: ['var(--font-display)', 'sans-serif'],
+        mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-out forwards',
@@ -56,8 +94,8 @@ const config: Config = {
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         pulseGlow: {
-          '0%, 100%': { boxShadow: '0 0 10px rgba(139, 92, 246, 0.2)' },
-          '50%': { boxShadow: '0 0 20px rgba(139, 92, 246, 0.5)' },
+          '0%, 100%': { boxShadow: '0 0 10px rgba(184, 240, 58, 0.2)' },
+          '50%': { boxShadow: '0 0 20px rgba(184, 240, 58, 0.5)' },
         }
       }
     },

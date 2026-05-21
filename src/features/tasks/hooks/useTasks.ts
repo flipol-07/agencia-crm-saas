@@ -268,12 +268,13 @@ export function useTasksWithDetails() {
         setLoading(true)
         setError(null)
 
-        const { data, error } = await (supabase.from('tasks') as any)
+        const { data: { user } } = await supabase.auth.getUser()
+        let query = (supabase.from('tasks') as any)
             .select(`
                 *,
                 projects (
-                    id, 
-                    name, 
+                    id,
+                    name,
                     contact_id,
                     contacts (id, company_name)
                 ),
@@ -288,6 +289,12 @@ export function useTasksWithDetails() {
             `)
             .order('priority', { ascending: false })
             .order('due_date', { ascending: true, nullsFirst: false })
+
+        if (user?.id) {
+            query = query.eq('assigned_to', user.id)
+        }
+
+        const { data, error } = await query
 
         if (error) {
             setError(error.message)
