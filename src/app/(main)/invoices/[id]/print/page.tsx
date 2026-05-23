@@ -93,11 +93,15 @@ function PrintInvoiceClient() {
 
     useEffect(() => {
         if (data) {
-            // Wait for images/fonts to load ideally, but let's try direct
-            setTimeout(() => {
+            const printWhenReady = async () => {
+                await document.fonts?.ready
                 window.print()
-                // window.close() // Optional: close after print dialog
-            }, 1000)
+            }
+            const timeout = window.setTimeout(() => {
+                void printWhenReady()
+            }, 600)
+
+            return () => window.clearTimeout(timeout)
         }
     }, [data])
 

@@ -1,6 +1,32 @@
-import { useRef, useState } from 'react'
+import { useRef, useState, type ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
+import {
+    AlignCenter,
+    AlignLeft,
+    AlignRight,
+    Bold,
+    Building2,
+    CalendarDays,
+    FileText,
+    Hash,
+    ImageIcon,
+    Layers,
+    Link2,
+    Minus,
+    Move,
+    PanelRight,
+    Pilcrow,
+    Square,
+    Table2,
+    Trash2,
+    Type,
+    Upload,
+    UserRound,
+    WalletCards,
+} from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { InvoiceTemplate, InvoiceElement } from '@/types/database'
+import type { InvoiceElement, InvoiceTemplate } from '@/types/database'
+import { DEFAULT_INVOICE_FONT } from '@/features/invoices/lib/invoice-fonts'
 import { FontSelector } from './FontSelector'
 import { ColorPicker } from './ColorPicker'
 
@@ -10,6 +36,56 @@ interface Props {
     onChange: (updates: Partial<InvoiceTemplate>) => void
 }
 
+interface InsertOption {
+    type: InvoiceElement['type']
+    label: string
+    Icon: LucideIcon
+}
+
+const INSERT_OPTIONS: InsertOption[] = [
+    { type: 'title', label: 'Título', Icon: Type },
+    { type: 'text', label: 'Texto', Icon: Pilcrow },
+    { type: 'image', label: 'Imagen', Icon: ImageIcon },
+    { type: 'table', label: 'Tabla', Icon: Table2 },
+    { type: 'issuer', label: 'Emisor', Icon: Building2 },
+    { type: 'recipient', label: 'Cliente', Icon: UserRound },
+    { type: 'invoice_number', label: 'Número', Icon: Hash },
+    { type: 'date', label: 'Fecha', Icon: CalendarDays },
+    { type: 'total', label: 'Totales', Icon: WalletCards },
+    { type: 'square', label: 'Forma', Icon: Square },
+    { type: 'line', label: 'Línea', Icon: Minus },
+]
+
+const WEIGHTS = [
+    { value: '400', label: 'Normal' },
+    { value: '600', label: 'Semi' },
+    { value: '700', label: 'Bold' },
+    { value: '900', label: 'Black' },
+]
+
+const ALIGN_OPTIONS = [
+    { value: 'left', label: 'Izquierda', Icon: AlignLeft },
+    { value: 'center', label: 'Centro', Icon: AlignCenter },
+    { value: 'right', label: 'Derecha', Icon: AlignRight },
+] as const
+
+const inputClass = 'h-10 w-full rounded-md border border-white/10 bg-black/30 px-3 text-sm text-white outline-none transition-colors focus:border-brand'
+const tinyLabelClass = 'mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500'
+
+function numberValue(value: string, fallback = 0): number {
+    const parsed = Number.parseFloat(value)
+    return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function Section({ title, children }: { title: string; children: ReactNode }) {
+    return (
+        <section className="border-t border-white/10 pt-4">
+            <h3 className="mb-3 text-[10px] font-black uppercase tracking-[0.18em] text-gray-500">{title}</h3>
+            {children}
+        </section>
+    )
+}
+
 export function TemplateEditor({ template, selectedElementId, onChange }: Props) {
     const supabase = createClient()
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -17,44 +93,54 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
     const [uploading, setUploading] = useState(false)
 
     const config = template.config || { elements: [] }
-    const selectedElement = config.elements?.find(el => el.id === selectedElementId)
+    const elements = config.elements || []
+    const selectedElement = elements.find(el => el.id === selectedElementId)
+    const selectedLabel = selectedElement ? INSERT_OPTIONS.find(item => item.type === selectedElement.type)?.label || selectedElement.type : null
 
-    const updateElements = (elements: InvoiceElement[]) => {
-        onChange({ config: { ...config, elements } })
+    const updateConfig = (updates: Partial<typeof config>) => {
+        onChange({ config: { ...config, ...updates } })
+    }
+
+    const updateElements = (nextElements: InvoiceElement[]) => {
+        updateConfig({ elements: nextElements })
     }
 
     const addElement = (type: InvoiceElement['type']) => {
+        const isLine = type === 'line'
+        const isImage = type === 'image'
+        const isTable = type === 'table'
         const newElement: InvoiceElement = {
             id: `el-${Date.now()}`,
             type,
             x: 50,
             y: 50,
-            width: type === 'table' ? 150 : (type === 'image' ? 40 : (type === 'line' ? 100 : 100)),
-            height: type === 'table' ? 100 : (type === 'image' ? 40 : (type === 'line' ? 1 : 10)),
-            content: type === 'title' ? 'NUEVO TITULO' : type === 'text' ? 'Nuevo bloque de texto...' : '',
+            width: isTable ? 150 : isImage ? 40 : isLine ? 100 : 100,
+            height: isTable ? 100 : isImage ? 40 : isLine ? 1 : 10,
+            content: type === 'title' ? 'Nuevo título' : type === 'text' ? 'Nuevo texto' : '',
             fontSize: type === 'title' ? 24 : 10,
             fontWeight: type === 'title' ? '700' : '400',
-            color: '#000000',
+            fontFamily: config.global_font || DEFAULT_INVOICE_FONT,
+            color: '#111827',
             align: 'left',
             opacity: 1,
-            zIndex: config.elements?.length ? Math.max(...config.elements.map(e => e.zIndex || 1)) + 1 : 1
+            zIndex: elements.length ? Math.max(...elements.map(element => element.zIndex || 1)) + 1 : 1
         }
-        updateElements([...(config.elements || []), newElement])
+        updateElements([...elements, newElement])
     }
 
     const deleteElement = (id: string) => {
-        updateElements((config.elements || []).filter(el => el.id !== id))
+        updateElements(elements.filter(el => el.id !== id))
     }
 
     const updateSelected = (updates: Partial<InvoiceElement>) => {
         if (!selectedElementId) return
-        updateElements((config.elements || []).map(el =>
+        updateElements(elements.map(el =>
             el.id === selectedElementId ? { ...el, ...updates } : el
         ))
     }
 
-    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>, isBackground = false) => {
-        const file = e.target.files?.[0]
+    const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, isBackground = false) => {
+        const file = event.target.files?.[0]
         if (!file) return
 
         setUploading(true)
@@ -74,297 +160,301 @@ export function TemplateEditor({ template, selectedElementId, onChange }: Props)
                 .getPublicUrl(filePath)
 
             if (isBackground) {
-                onChange({ config: { ...config, background_url: publicUrl } })
+                updateConfig({ background_url: publicUrl })
             } else {
                 updateSelected({ src: publicUrl })
             }
         } catch (error) {
             console.error('Error uploading:', error)
-            alert('Error al subir la imagen. Asegúrate de que el bucket "invoice-assets" exista.')
+            alert('Error al subir la imagen. Revisa el bucket "invoice-assets".')
         } finally {
             setUploading(false)
+            event.target.value = ''
         }
     }
 
     return (
-        <div className="h-full p-4 overflow-y-auto w-full transition-all duration-300">
-            <h2 className="text-sm font-black text-white mb-6 flex items-center gap-2 uppercase tracking-tighter">
-                <span className="text-brand">⚡</span> Propiedades de Diseño
-            </h2>
-
-            {/* ELEMENTS ADDER */}
-            <div className="mb-10">
-                <h3 className="text-xs uppercase text-gray-500 font-bold tracking-widest mb-4">Añadir Bloques</h3>
-                <div className="grid grid-cols-2 gap-2">
-                    <button onClick={() => addElement('title')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Título</button>
-                    <button onClick={() => addElement('text')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Texto</button>
-                    <button onClick={() => addElement('image')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Imagen</button>
-                    <button onClick={() => addElement('table')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Tabla Items</button>
-                    <button onClick={() => addElement('issuer')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Mis Datos</button>
-                    <button onClick={() => addElement('recipient')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Cliente</button>
-                    <button onClick={() => addElement('invoice_number')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Nº Factura</button>
-                    <button onClick={() => addElement('total')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Totales</button>
-                    <button onClick={() => addElement('square')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Cuadrado</button>
-                    <button onClick={() => addElement('line')} className="p-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold transition-all hover:scale-105 active:scale-95 text-white">+ Línea</button>
+        <div className="h-full w-full overflow-y-auto bg-zinc-950/80 text-white">
+            <div className="sticky top-0 z-10 border-b border-white/10 bg-zinc-950/95 px-4 py-3 backdrop-blur">
+                <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
+                        <p className="text-[10px] font-black uppercase tracking-[0.22em] text-brand">Diseñador</p>
+                        <h2 className="truncate text-sm font-semibold text-white">Editor de factura</h2>
+                    </div>
+                    <div className="flex h-9 w-9 items-center justify-center rounded-md border border-white/10 bg-white/[0.04] text-gray-400">
+                        <PanelRight className="h-4 w-4" />
+                    </div>
                 </div>
             </div>
 
-            {/* SELECTED ELEMENT PROPERTIES */}
-            {selectedElement ? (
-                <div className="space-y-6 animate-in fade-in duration-200">
-                    <div className="flex justify-between items-center border-b border-white/10 pb-4">
-                        <h3 className="text-brand font-bold uppercase text-xs">Propiedades ({selectedElement.type})</h3>
-                        <button onClick={() => deleteElement(selectedElement.id)} className="text-red-400 hover:text-red-300 text-xs font-bold">Eliminar</button>
+            <div className="space-y-5 p-4">
+                <Section title="Insertar">
+                    <div className="grid grid-cols-3 gap-2">
+                        {INSERT_OPTIONS.map(({ type, label, Icon }) => (
+                            <button
+                                key={type}
+                                type="button"
+                                onClick={() => addElement(type)}
+                                className="flex h-[58px] flex-col items-center justify-center gap-1 rounded-md border border-white/10 bg-white/[0.04] text-[10px] font-semibold text-gray-300 transition-colors hover:border-brand/40 hover:bg-brand/10 hover:text-white"
+                                title={`Insertar ${label}`}
+                            >
+                                <Icon className="h-4 w-4" />
+                                <span>{label}</span>
+                            </button>
+                        ))}
                     </div>
+                </Section>
 
-                    <div className="space-y-4">
-                        {/* Content (Conditional) */}
+                {selectedElement ? (
+                    <div className="space-y-5 animate-in fade-in duration-200">
+                        <div className="rounded-lg border border-brand/25 bg-brand/10 p-3">
+                            <div className="flex items-center justify-between gap-3">
+                                <div className="min-w-0">
+                                    <p className="text-[10px] font-bold uppercase tracking-wider text-brand">Seleccionado</p>
+                                    <p className="truncate text-sm font-semibold text-white">{selectedLabel}</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => deleteElement(selectedElement.id)}
+                                    className="flex h-9 w-9 items-center justify-center rounded-md border border-red-500/20 bg-red-500/10 text-red-300 transition-colors hover:bg-red-500/20"
+                                    title="Eliminar elemento"
+                                >
+                                    <Trash2 className="h-4 w-4" />
+                                </button>
+                            </div>
+                        </div>
+
                         {(selectedElement.type === 'title' || selectedElement.type === 'text') && (
-                            <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Contenido</label>
+                            <Section title="Contenido">
                                 <textarea
                                     value={selectedElement.content || ''}
-                                    onChange={(e) => updateSelected({ content: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-3 text-sm text-white focus:border-brand outline-none h-24"
+                                    onChange={(event) => updateSelected({ content: event.target.value })}
+                                    className="min-h-24 w-full resize-none rounded-md border border-white/10 bg-black/30 p-3 text-sm text-white outline-none transition-colors focus:border-brand"
                                 />
-                            </div>
+                            </Section>
                         )}
 
-                        {/* Image Source & Upload */}
                         {selectedElement.type === 'image' && (
-                            <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Gestión de Imagen</label>
+                            <Section title="Imagen">
                                 <div className="space-y-2">
                                     <button
+                                        type="button"
                                         onClick={() => fileInputRef.current?.click()}
                                         disabled={uploading}
-                                        className="w-full bg-brand/10 border border-brand/30 text-brand py-2 rounded-lg text-xs font-black hover:bg-brand/20 transition-all uppercase"
+                                        className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-brand/30 bg-brand/10 text-xs font-bold uppercase tracking-wider text-brand transition-colors hover:bg-brand/20 disabled:opacity-50"
                                     >
-                                        {uploading ? 'SUBIENDO...' : 'ELegir de Galería / Subir'}
+                                        <Upload className="h-4 w-4" />
+                                        {uploading ? 'Subiendo' : 'Subir imagen'}
                                     </button>
                                     <input
                                         type="file"
                                         ref={fileInputRef}
                                         className="hidden"
                                         accept="image/*"
-                                        onChange={(e) => handleFileUpload(e)}
+                                        onChange={(event) => handleFileUpload(event)}
                                     />
-                                    <div className="flex items-center gap-2">
-                                        <div className="h-[1px] bg-white/10 flex-1" />
-                                        <span className="text-[10px] text-gray-500 font-bold">O URL</span>
-                                        <div className="h-[1px] bg-white/10 flex-1" />
+                                    <div className="relative">
+                                        <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+                                        <input
+                                            type="text"
+                                            value={selectedElement.src || ''}
+                                            onChange={(event) => updateSelected({ src: event.target.value })}
+                                            className={`${inputClass} pl-9`}
+                                            placeholder="https://..."
+                                        />
                                     </div>
-                                    <input
-                                        type="text"
-                                        value={selectedElement.src || ''}
-                                        onChange={(e) => updateSelected({ src: e.target.value })}
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-brand"
-                                        placeholder="https://..."
-                                    />
                                 </div>
-                            </div>
+                            </Section>
                         )}
 
-                        {/* Styling */}
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Tamaño Fuente</label>
-                                <input
-                                    type="number"
-                                    value={selectedElement.fontSize || 10}
-                                    onChange={(e) => {
-                                        const val = parseInt(e.target.value)
-                                        updateSelected({ fontSize: isNaN(val) ? 10 : val })
-                                    }}
-                                    className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:border-brand"
-                                />
-                            </div>
-
-                            <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Peso</label>
-                                <select
-                                    value={selectedElement.fontWeight || '400'}
-                                    onChange={(e) => updateSelected({ fontWeight: e.target.value })}
-                                    className="w-full bg-white/5 border border-white/10 rounded px-3 py-2 text-sm text-white outline-none focus:border-brand [&>option]:bg-black"
-                                >
-                                    <option value="400">Normal</option>
-                                    <option value="600">Semibold</option>
-                                    <option value="700">Bold</option>
-                                    <option value="900">Black</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        {/* Font Selector Integration */}
-                        <div>
-                            <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Tipografía</label>
-                            <FontSelector
-                                value={selectedElement.fontFamily || 'Inter'}
-                                onChange={(font) => updateSelected({ fontFamily: font })}
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                            <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Opacidad ({Math.round((selectedElement.opacity || 1) * 100)}%)</label>
-                                <input
-                                    type="range"
-                                    min="0"
-                                    max="1"
-                                    step="0.1"
-                                    value={selectedElement.opacity || 1}
-                                    onChange={(e) => updateSelected({ opacity: parseFloat(e.target.value) })}
-                                    className="w-full accent-brand h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                                />
-                            </div>
-                            <div>
-                                <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Capa (Z-Index)</label>
-                                <div className="flex gap-2">
-                                    <button onClick={() => updateSelected({ zIndex: Math.max(0, (selectedElement.zIndex || 1) - 1) })} className="flex-1 bg-white/5 border border-white/10 rounded py-2 text-[10px] font-bold text-gray-400 hover:text-white">BAJAR</button>
-                                    <button onClick={() => updateSelected({ zIndex: (selectedElement.zIndex || 1) + 1 })} className="flex-1 bg-white/5 border border-white/10 rounded py-2 text-[10px] font-bold text-gray-400 hover:text-white">SUBIR</button>
+                        <Section title="Texto">
+                            <div className="space-y-3">
+                                <div>
+                                    <label className={tinyLabelClass}>Tipografía</label>
+                                    <FontSelector
+                                        value={selectedElement.fontFamily || config.global_font || DEFAULT_INVOICE_FONT}
+                                        onChange={(font) => updateSelected({ fontFamily: font })}
+                                    />
+                                </div>
+                                <div className="grid grid-cols-[1fr_auto] gap-2">
+                                    <div>
+                                        <label className={tinyLabelClass}>Tamaño</label>
+                                        <input
+                                            type="number"
+                                            min="4"
+                                            max="96"
+                                            value={selectedElement.fontSize || 10}
+                                            onChange={(event) => updateSelected({ fontSize: numberValue(event.target.value, 10) })}
+                                            className={inputClass}
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className={tinyLabelClass}>Peso</label>
+                                        <div className="flex h-10 overflow-hidden rounded-md border border-white/10 bg-black/30">
+                                            {WEIGHTS.map(weight => (
+                                                <button
+                                                    key={weight.value}
+                                                    type="button"
+                                                    onClick={() => updateSelected({ fontWeight: weight.value })}
+                                                    className={`min-w-12 px-2 text-[10px] font-bold transition-colors ${String(selectedElement.fontWeight || '400') === weight.value ? 'bg-brand text-white' : 'text-gray-400 hover:bg-white/10 hover:text-white'}`}
+                                                    title={weight.label}
+                                                >
+                                                    {weight.value === '700' ? <Bold className="mx-auto h-4 w-4" /> : weight.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className={tinyLabelClass}>Alineación</label>
+                                    <div className="grid grid-cols-3 overflow-hidden rounded-md border border-white/10 bg-black/30">
+                                        {ALIGN_OPTIONS.map(({ value, label, Icon }) => (
+                                            <button
+                                                key={value}
+                                                type="button"
+                                                onClick={() => updateSelected({ align: value })}
+                                                className={`flex h-10 items-center justify-center transition-colors ${selectedElement.align === value ? 'bg-brand text-white' : 'text-gray-400 hover:bg-white/10 hover:text-white'}`}
+                                                title={label}
+                                            >
+                                                <Icon className="h-4 w-4" />
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </Section>
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <ColorPicker
-                                label="Borde / Texto"
-                                value={selectedElement.borderColor || selectedElement.color}
-                                onChange={(color) => updateSelected({ borderColor: color, color })}
-                            />
-                            <ColorPicker
-                                label="Fondo"
-                                value={selectedElement.backgroundColor || 'transparent'}
-                                onChange={(color) => updateSelected({ backgroundColor: color })}
-                                allowTransparent
-                            />
-                        </div>
+                        <Section title="Color">
+                            <div className="grid grid-cols-1 gap-3">
+                                <ColorPicker
+                                    label="Texto y borde"
+                                    value={selectedElement.borderColor || selectedElement.color}
+                                    onChange={(color) => updateSelected({ borderColor: color, color })}
+                                />
+                                <ColorPicker
+                                    label="Fondo"
+                                    value={selectedElement.backgroundColor || 'transparent'}
+                                    onChange={(color) => updateSelected({ backgroundColor: color })}
+                                    allowTransparent
+                                />
+                            </div>
+                        </Section>
 
-                        <div>
-                            <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Grosor Borde ({selectedElement.borderWidth || 0}mm)</label>
+                        <Section title="Apariencia">
+                            <div className="space-y-4">
+                                <div>
+                                    <div className="mb-1.5 flex items-center justify-between">
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Opacidad</label>
+                                        <span className="text-[10px] font-semibold text-gray-400">{Math.round((selectedElement.opacity || 1) * 100)}%</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="1"
+                                        step="0.05"
+                                        value={selectedElement.opacity || 1}
+                                        onChange={(event) => updateSelected({ opacity: numberValue(event.target.value, 1) })}
+                                        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-white/10 accent-brand"
+                                    />
+                                </div>
+                                <div>
+                                    <div className="mb-1.5 flex items-center justify-between">
+                                        <label className="text-[10px] font-bold uppercase tracking-wider text-gray-500">Borde</label>
+                                        <span className="text-[10px] font-semibold text-gray-400">{selectedElement.borderWidth || 0}mm</span>
+                                    </div>
+                                    <input
+                                        type="range"
+                                        min="0"
+                                        max="5"
+                                        step="0.5"
+                                        value={selectedElement.borderWidth || 0}
+                                        onChange={(event) => updateSelected({ borderWidth: numberValue(event.target.value, 0) })}
+                                        className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-white/10 accent-brand"
+                                    />
+                                </div>
+                                <div>
+                                    <label className={tinyLabelClass}>Capa</label>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => updateSelected({ zIndex: Math.max(0, (selectedElement.zIndex || 1) - 1) })}
+                                            className="flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+                                        >
+                                            <Layers className="h-4 w-4" />
+                                            Bajar
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => updateSelected({ zIndex: (selectedElement.zIndex || 1) + 1 })}
+                                            className="flex h-10 items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] text-xs font-semibold text-gray-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+                                        >
+                                            <Layers className="h-4 w-4" />
+                                            Subir
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </Section>
+
+                        <Section title="Posición">
+                            <div className="grid grid-cols-2 gap-3">
+                                <label>
+                                    <span className={tinyLabelClass}>X</span>
+                                    <input type="number" step="0.1" value={selectedElement.x ?? 0} onChange={(event) => updateSelected({ x: numberValue(event.target.value) })} className={inputClass} />
+                                </label>
+                                <label>
+                                    <span className={tinyLabelClass}>Y</span>
+                                    <input type="number" step="0.1" value={selectedElement.y ?? 0} onChange={(event) => updateSelected({ y: numberValue(event.target.value) })} className={inputClass} />
+                                </label>
+                                <label>
+                                    <span className={tinyLabelClass}>Ancho</span>
+                                    <input type="number" step="0.1" value={selectedElement.width ?? 0} onChange={(event) => updateSelected({ width: numberValue(event.target.value) })} className={inputClass} />
+                                </label>
+                                <label>
+                                    <span className={tinyLabelClass}>Alto</span>
+                                    <input type="number" step="0.1" value={selectedElement.height ?? 0} onChange={(event) => updateSelected({ height: numberValue(event.target.value) })} className={inputClass} />
+                                </label>
+                            </div>
+                        </Section>
+                    </div>
+                ) : (
+                    <div className="rounded-lg border border-dashed border-white/10 bg-white/[0.03] p-5 text-center">
+                        <Move className="mx-auto mb-3 h-5 w-5 text-gray-600" />
+                        <h3 className="text-sm font-semibold text-white">Sin selección</h3>
+                        <p className="mt-1 text-xs leading-relaxed text-gray-500">Elige un elemento del lienzo para editar tipografía, color, posición y capas.</p>
+                    </div>
+                )}
+
+                <Section title="Página">
+                    <div className="space-y-3">
+                        <button
+                            type="button"
+                            onClick={() => bgPickerRef.current?.click()}
+                            disabled={uploading}
+                            className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-white/10 bg-white/[0.04] text-xs font-bold uppercase tracking-wider text-gray-200 transition-colors hover:bg-white/[0.08] disabled:opacity-50"
+                        >
+                            <FileText className="h-4 w-4" />
+                            {uploading ? 'Subiendo fondo' : 'Subir fondo A4'}
+                        </button>
+                        <input
+                            type="file"
+                            ref={bgPickerRef}
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(event) => handleFileUpload(event, true)}
+                        />
+                        <div className="relative">
+                            <Link2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
                             <input
-                                type="range"
-                                min="0"
-                                max="5"
-                                step="0.5"
-                                value={selectedElement.borderWidth || 0}
-                                onChange={(e) => updateSelected({ borderWidth: parseFloat(e.target.value) })}
-                                className="w-full accent-brand h-2 bg-white/10 rounded-lg appearance-none cursor-pointer"
+                                type="text"
+                                placeholder="URL de fondo"
+                                value={template.config?.background_url || ''}
+                                onChange={(event) => updateConfig({ background_url: event.target.value })}
+                                className={`${inputClass} pl-9`}
                             />
-                            <div className="flex justify-between text-[8px] text-gray-600 mt-1 uppercase font-bold">
-                                <span>Sin Marco</span>
-                                <span>Grueso</span>
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Alineación</label>
-                            <div className="flex gap-1">
-                                {['left', 'center', 'right'].map(align => (
-                                    <button
-                                        key={align}
-                                        onClick={() => updateSelected({ align: align as any })}
-                                        className={`flex-1 py-2 text-xs font-bold rounded capitalize tracking-widest transition-all ${selectedElement.align === align ? 'bg-brand text-white' : 'bg-white/5 text-gray-400 hover:bg-white/10'}`}
-                                    >
-                                        {align}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Dimensions & Position */}
-                        <div className="pt-4 border-t border-white/5">
-                            <h4 className="text-[10px] text-gray-500 font-black uppercase tracking-widest mb-3">Posición y Tamaño (mm)</h4>
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-3">
-                                <div>
-                                    <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">X</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        value={selectedElement.x ?? 0}
-                                        onChange={(e) => updateSelected({ x: parseFloat(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">Y</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        value={selectedElement.y ?? 0}
-                                        onChange={(e) => updateSelected({ y: parseFloat(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">Ancho</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        value={selectedElement.width ?? 0}
-                                        onChange={(e) => updateSelected({ width: parseFloat(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="text-[8px] text-gray-600 font-bold uppercase mb-1 block">Alto</label>
-                                    <input
-                                        type="number"
-                                        step="0.1"
-                                        value={selectedElement.height ?? 0}
-                                        onChange={(e) => updateSelected({ height: parseFloat(e.target.value) || 0 })}
-                                        className="w-full bg-black/40 border border-white/10 rounded px-3 py-2 text-xs text-gray-400 outline-none focus:border-brand"
-                                    />
-                                </div>
-                            </div>
                         </div>
                     </div>
-                </div>
-            ) : (
-                <div className="h-64 flex flex-col items-center justify-center text-center border-2 border-dashed border-white/5 rounded-2xl p-6">
-                    <p className="text-gray-500 text-sm mb-2 font-medium">Selecciona un elemento en el lienzo para editar sus propiedades</p>
-                    <span className="text-2xl opacity-20">🖱️</span>
-                </div>
-            )}
-
-            {/* CANVAS BACKGROUND (IMAGE UPLOAD) */}
-            <div className="mt-12 pt-8 border-t border-white/10 pb-10">
-                <h3 className="text-xs uppercase text-gray-500 font-bold tracking-widest mb-4">Diseño Base de Canva</h3>
-                <div className="space-y-4">
-                    <button
-                        onClick={() => bgPickerRef.current?.click()}
-                        disabled={uploading}
-                        className="w-full bg-white/5 border border-white/10 text-white py-3 rounded-xl text-[10px] font-black hover:bg-white/10 transition-all uppercase tracking-widest"
-                    >
-                        {uploading ? 'SUBIENDO FONDO...' : 'Subir Imagen de Canva (Fondo)'}
-                    </button>
-                    <input
-                        type="file"
-                        ref={bgPickerRef}
-                        className="hidden"
-                        accept="image/*"
-                        onChange={(e) => handleFileUpload(e, true)}
-                    />
-
-                    <div className="flex items-center gap-2 py-1">
-                        <div className="h-[1px] bg-white/10 flex-1" />
-                        <span className="text-[8px] text-gray-500 font-black">O PEGA EL LINK ABAJO</span>
-                        <div className="h-[1px] bg-white/10 flex-1" />
-                    </div>
-
-                    <input
-                        type="text"
-                        placeholder="URL de Imagen de Fondo..."
-                        value={template.config?.background_url || ''}
-                        onChange={(e) => onChange({ config: { ...template.config, background_url: e.target.value } })}
-                        className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-brand"
-                    />
-
-                    <div className="p-4 bg-brand/5 border border-brand/10 rounded-xl">
-                        <p className="text-[10px] text-brand font-bold uppercase mb-1">Tip de Diseño:</p>
-                        <p className="text-[10px] text-gray-400 leading-relaxed">Para mejores resultados, exporta tu diseño de Canva en formato A4 y súbelo aquí. Usa Aurie para añadir los datos dinámicos encima.</p>
-                    </div>
-                </div>
+                </Section>
             </div>
         </div>
     )

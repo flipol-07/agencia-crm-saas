@@ -1,7 +1,8 @@
 import { memo } from 'react'
+import { Pipette, X } from 'lucide-react'
 
 const PRESET_COLORS = [
-    '#000000', '#FFFFFF', '#6B7280', '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899', '#8b5cf6'
+    '#111827', '#FFFFFF', '#6B7280', '#EF4444', '#F59E0B', '#10B981', '#3B82F6', '#6366F1', '#8B5CF6', '#EC4899',
 ]
 
 interface Props {
@@ -12,47 +13,54 @@ interface Props {
 }
 
 export const ColorPicker = memo(function ColorPicker({ value = '#000000', onChange, label = 'Color', allowTransparent }: Props) {
+    const isTransparent = value === 'transparent'
+    const colorValue = isTransparent ? '#ffffff' : value
+
     return (
         <div>
-            <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">{label}</label>
-            <div className="flex flex-col gap-2">
-                <div className="flex gap-2 items-center">
-                    <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-white/20">
+            <label className="mb-1.5 block text-[10px] font-bold uppercase tracking-wider text-gray-500">{label}</label>
+            <div className="rounded-lg border border-white/10 bg-white/[0.04] p-2.5">
+                <div className="flex items-center gap-2">
+                    <div className="relative h-9 w-9 overflow-hidden rounded-md border border-white/15 bg-white/5">
                         <input
                             type="color"
-                            value={value}
+                            value={colorValue}
                             onChange={(e) => onChange(e.target.value)}
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                            title={`Elegir ${label.toLowerCase()}`}
                         />
                         <div
-                            className="w-full h-full"
-                            style={{ backgroundColor: value }}
+                            className={`h-full w-full ${isTransparent ? 'bg-[linear-gradient(45deg,#3f3f46_25%,transparent_25%),linear-gradient(-45deg,#3f3f46_25%,transparent_25%),linear-gradient(45deg,transparent_75%,#3f3f46_75%),linear-gradient(-45deg,transparent_75%,#3f3f46_75%)] bg-[length:10px_10px] bg-[position:0_0,0_5px,5px_-5px,-5px_0px]' : ''}`}
+                            style={{ backgroundColor: isTransparent ? '#18181b' : value }}
                         />
+                        <Pipette className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-white drop-shadow" />
                     </div>
                     <input
                         type="text"
                         value={value}
                         onChange={(e) => onChange(e.target.value)}
-                        className="bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-white flex-1 font-mono uppercase focus:border-brand outline-none"
+                        className="h-9 min-w-0 flex-1 rounded-md border border-white/10 bg-black/30 px-2.5 text-xs uppercase text-white outline-none transition-colors focus:border-brand"
+                        spellCheck={false}
                     />
-                </div>
-
-                {/* Presets */}
-                <div className="flex flex-wrap gap-1.5">
                     {allowTransparent && (
                         <button
+                            type="button"
                             onClick={() => onChange('transparent')}
-                            className={`w-6 h-6 rounded-full border border-white/20 transition-transform hover:scale-110 flex items-center justify-center bg-zinc-900 overflow-hidden ${value === 'transparent' ? 'ring-2 ring-brand ring-offset-2 ring-offset-black' : ''}`}
+                            className={`flex h-9 w-9 items-center justify-center rounded-md border transition-colors ${isTransparent ? 'border-brand bg-brand/15 text-brand' : 'border-white/10 bg-white/[0.03] text-gray-400 hover:text-white'}`}
                             title="Transparente"
                         >
-                            <div className="w-[1px] h-full bg-red-500 rotate-45" />
+                            <X className="h-4 w-4" />
                         </button>
                     )}
+                </div>
+
+                <div className="mt-2 grid grid-cols-5 gap-1.5">
                     {PRESET_COLORS.map(color => (
                         <button
                             key={color}
+                            type="button"
                             onClick={() => onChange(color)}
-                            className={`w-6 h-6 rounded-full border border-white/10 transition-transform hover:scale-110 ${value === color ? 'ring-2 ring-brand ring-offset-2 ring-offset-black' : ''}`}
+                            className={`h-6 rounded-md border transition-transform hover:scale-105 ${value === color ? 'border-white ring-2 ring-brand ring-offset-1 ring-offset-zinc-950' : 'border-white/15'}`}
                             style={{ backgroundColor: color }}
                             title={color}
                         />

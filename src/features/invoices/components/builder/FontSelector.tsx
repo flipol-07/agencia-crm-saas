@@ -1,17 +1,6 @@
 import { memo } from 'react'
-
-const GOOGLE_FONTS = [
-    { name: 'Inter', family: 'Inter, sans-serif' },
-    { name: 'Roboto', family: 'Roboto, sans-serif' },
-    { name: 'Open Sans', family: '"Open Sans", sans-serif' },
-    { name: 'Montserrat', family: 'Montserrat, sans-serif' },
-    { name: 'Lato', family: 'Lato, sans-serif' },
-    { name: 'Poppins', family: 'Poppins, sans-serif' },
-    { name: 'Playfair Display', family: '"Playfair Display", serif' },
-    { name: 'Merriweather', family: 'Merriweather, serif' },
-    { name: 'Oswald', family: 'Oswald, sans-serif' },
-    { name: 'Raleway', family: 'Raleway, sans-serif' },
-]
+import { ChevronDown } from 'lucide-react'
+import { INVOICE_FONTS, fontFamilyForCss } from '@/features/invoices/lib/invoice-fonts'
 
 interface Props {
     value: string
@@ -20,29 +9,33 @@ interface Props {
 
 export const FontSelector = memo(function FontSelector({ value, onChange }: Props) {
     return (
-        <div className="space-y-2">
-            <label className="text-[10px] text-gray-500 font-bold uppercase mb-1 block">Tipografía</label>
-            <div className="grid grid-cols-1 gap-2 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                {GOOGLE_FONTS.map((font) => (
+        <div className="relative">
+            <select
+                value={value}
+                onChange={(event) => onChange(event.target.value)}
+                className="h-10 w-full appearance-none rounded-md border border-white/10 bg-white/[0.06] px-3 pr-9 text-sm text-white outline-none transition-colors focus:border-brand [&>option]:bg-zinc-950"
+                style={{ fontFamily: fontFamilyForCss(value) }}
+            >
+                {INVOICE_FONTS.map((font) => (
+                    <option key={font.name} value={font.name}>
+                        {font.name}
+                    </option>
+                ))}
+            </select>
+            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-500" />
+            <div className="mt-2 flex flex-wrap gap-1.5">
+                {INVOICE_FONTS.slice(0, 5).map(font => (
                     <button
                         key={font.name}
+                        type="button"
                         onClick={() => onChange(font.name)}
-                        className={`
-                            w-full text-left px-3 py-2 text-sm rounded transition-colors
-                            ${value === font.name
-                                ? 'bg-brand text-white font-bold'
-                                : 'bg-white/5 text-gray-300 hover:bg-white/10'}
-                        `}
-                        style={{ fontFamily: font.family }}
+                        className={`h-7 rounded-md border px-2.5 text-[10px] font-semibold transition-colors ${value === font.name ? 'border-brand bg-brand/15 text-brand' : 'border-white/10 bg-white/[0.03] text-gray-400 hover:bg-white/[0.08] hover:text-white'}`}
+                        style={{ fontFamily: font.cssFamily }}
                     >
                         {font.name}
                     </button>
                 ))}
             </div>
-            {/* Hidden link tags to load fonts for preview (simple hack, better via _document or global css) */}
-            <style jsx global>{`
-                @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Lato:wght@400;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;700&family=Open+Sans:wght@400;700&family=Oswald:wght@400;700&family=Playfair+Display:wght@400;700&family=Poppins:wght@400;700&family=Raleway:wght@400;700&family=Roboto:wght@400;700&display=swap');
-            `}</style>
         </div>
     )
 })

@@ -83,9 +83,15 @@ function PrintInvoiceContent() {
 
     useEffect(() => {
         if (data) {
-            setTimeout(() => {
+            const printWhenReady = async () => {
+                await document.fonts?.ready
                 window.print()
-            }, 1500)
+            }
+            const timeout = window.setTimeout(() => {
+                void printWhenReady()
+            }, 600)
+
+            return () => window.clearTimeout(timeout)
         }
     }, [data])
 

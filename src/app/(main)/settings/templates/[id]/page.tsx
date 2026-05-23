@@ -51,7 +51,7 @@ const MOCK_SETTINGS = {
 
 export default function TemplateEditorPage({ params }: { params: Promise<{ id: string }> }) {
     return (
-        <Suspense fallback={<div className="fixed inset-0 bg-black flex items-center justify-center text-gray-500 z-[100]">Cargando editor de precisión...</div>}>
+        <Suspense fallback={<div className="fixed inset-0 bg-black flex items-center justify-center text-gray-500 z-[100]">Cargando editor de factura...</div>}>
             <TemplateEditorContent params={params} />
         </Suspense>
     )
@@ -142,7 +142,7 @@ function TemplateEditorClient() {
         }
     }
 
-    if (loading) return <div className="fixed inset-0 bg-black flex items-center justify-center text-gray-500 z-[100]">Cargando editor de precisión...</div>
+    if (loading) return <div className="fixed inset-0 bg-black flex items-center justify-center text-gray-500 z-[100]">Cargando editor de factura...</div>
     if (!template) return <div className="fixed inset-0 bg-black flex items-center justify-center text-white z-[100]">Plantilla no encontrada</div>
 
     return (
@@ -165,7 +165,7 @@ function TemplateEditorClient() {
                     <div>
                         <h1 className="text-sm font-black uppercase tracking-[0.2em] text-white leading-none mb-1.5">{template.name || 'MINIMAL CLEAN'}</h1>
                         <p className="text-[10px] text-gray-500 font-bold uppercase tracking-tighter">
-                            EDITOR DE PRECISIÓN
+                            EDITOR VISUAL DE FACTURA
                         </p>
                     </div>
                 </div>

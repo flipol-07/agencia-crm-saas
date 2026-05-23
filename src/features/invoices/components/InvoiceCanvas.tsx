@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from 'react'
 import type { InvoiceTemplate, InvoiceWithDetails, Settings, InvoiceElement } from '@/types/database'
 import { AlignmentGuides } from './builder/AlignmentGuides'
 import { useElementSnapping } from '../hooks/useElementSnapping'
+import { DEFAULT_INVOICE_FONT, fontFamilyForCss } from '../lib/invoice-fonts'
 
 interface Props {
     template: InvoiceTemplate
@@ -49,9 +50,10 @@ export function InvoiceCanvas({
     const handleElementMouseDown = (e: React.MouseEvent, elementId: string) => {
         if (!editable || isResizing) return
 
-        // Prevent drag if we are clicking inside a contentEditable
         const target = e.target as HTMLElement
         if (target.getAttribute('contenteditable') === 'true' || target.tagName === 'INPUT') {
+            e.stopPropagation()
+            onSelectElement?.(elementId)
             return
         }
 
@@ -185,13 +187,15 @@ export function InvoiceCanvas({
         onUpdateTemplate({ config: { ...template.config, elements: newElements } })
     }
 
+    const defaultFont = template.config?.global_font || DEFAULT_INVOICE_FONT
+
     const getElementStyles = (el: InvoiceElement) => ({
         left: `${el.x}mm`,
         top: `${el.y}mm`,
         width: el.width ? `${el.width}mm` : 'auto',
         height: el.height ? `${el.height}mm` : 'auto',
         color: el.color || 'black',
-        fontFamily: el.fontFamily || 'Inter',
+        fontFamily: fontFamilyForCss(el.fontFamily || defaultFont),
         fontSize: el.fontSize ? `${el.fontSize}pt` : '10pt',
         fontWeight: el.fontWeight || 'normal',
         textAlign: el.align as any || 'left',
@@ -238,7 +242,7 @@ export function InvoiceCanvas({
                                 suppressContentEditableWarning
                                 onBlur={(e) => handleContentEdit(el.id, e.currentTarget.innerText)}
                                 className="m-0 p-0 leading-tight focus:outline-none focus:bg-brand/5 focus:ring-2 focus:ring-brand/20 rounded px-1 transition-all"
-                                style={{ fontSize: 'inherit', fontWeight: 'inherit' }}
+                                style={{ fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}
                             >
                                 {el.content || 'TITULO'}
                             </h1>
@@ -249,7 +253,7 @@ export function InvoiceCanvas({
                                 suppressContentEditableWarning
                                 onBlur={(e) => handleContentEdit(el.id, e.currentTarget.innerText)}
                                 className="m-0 p-0 leading-normal whitespace-pre-line focus:outline-none focus:bg-brand/5 focus:ring-2 focus:ring-brand/20 rounded px-1 transition-all"
-                                style={{ fontSize: 'inherit', fontWeight: 'inherit' }}
+                                style={{ fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}
                             >
                                 {el.content || 'Escribe algo...'}
                             </div>
@@ -259,8 +263,8 @@ export function InvoiceCanvas({
                                 contentEditable={editable}
                                 suppressContentEditableWarning
                                 onBlur={(e) => onUpdateInvoice?.({ invoice_number: e.currentTarget.innerText.replace('#', '') })}
-                                className="m-0 p-0 font-mono focus:outline-none focus:bg-[#8b5cf6]/5"
-                                style={{ fontSize: 'inherit' }}
+                                className="m-0 p-0 focus:outline-none focus:bg-[#8b5cf6]/5"
+                                style={{ fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}
                             >
                                 #{invoice.invoice_number}
                             </div>
@@ -271,25 +275,25 @@ export function InvoiceCanvas({
                                 suppressContentEditableWarning
                                 onBlur={(e) => onUpdateInvoice?.({ issue_date: e.currentTarget.innerText })}
                                 className="m-0 p-0 focus:outline-none focus:bg-[#8b5cf6]/5"
-                                style={{ fontSize: 'inherit' }}
+                                style={{ fontFamily: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}
                             >
                                 {invoice.issue_date}
                             </div>
                         )}
 
                         {el.type === 'issuer' && (
-                            <div style={{ fontSize: 'inherit', textAlign: 'inherit' }}>
-                                <p className="font-bold leading-tight" style={{ fontSize: '1.2em', color: 'inherit' }}>{settings?.company_name}</p>
-                                <p className="opacity-70 whitespace-pre-line leading-tight" style={{ fontSize: '0.9em', color: 'inherit' }}>{settings?.address}</p>
-                                <p className="opacity-70 leading-tight" style={{ fontSize: '0.9em', color: 'inherit' }}>{settings?.tax_id}</p>
+                            <div style={{ fontFamily: 'inherit', fontSize: 'inherit', textAlign: 'inherit' }}>
+                                <p className="font-bold leading-tight" style={{ fontFamily: 'inherit', fontSize: '1.2em', color: 'inherit' }}>{settings?.company_name}</p>
+                                <p className="opacity-70 whitespace-pre-line leading-tight" style={{ fontFamily: 'inherit', fontSize: '0.9em', color: 'inherit' }}>{settings?.address}</p>
+                                <p className="opacity-70 leading-tight" style={{ fontFamily: 'inherit', fontSize: '0.9em', color: 'inherit' }}>{settings?.tax_id}</p>
                             </div>
                         )}
 
                         {el.type === 'recipient' && (
-                            <div style={{ fontSize: 'inherit', textAlign: 'inherit' }}>
-                                <h3 className="font-bold uppercase tracking-widest opacity-50 mb-1" style={{ fontSize: '0.8em', color: 'inherit' }}>Cliente</h3>
-                                <p className="font-bold leading-tight" style={{ fontSize: '1.2em', color: 'inherit' }}>{client?.company_name}</p>
-                                <p className="opacity-70 leading-tight" style={{ fontSize: '0.9em', color: 'inherit' }}>{client?.tax_address}</p>
+                            <div style={{ fontFamily: 'inherit', fontSize: 'inherit', textAlign: 'inherit' }}>
+                                <h3 className="font-bold uppercase tracking-widest opacity-50 mb-1" style={{ fontFamily: 'inherit', fontSize: '0.8em', color: 'inherit' }}>Cliente</h3>
+                                <p className="font-bold leading-tight" style={{ fontFamily: 'inherit', fontSize: '1.2em', color: 'inherit' }}>{client?.company_name}</p>
+                                <p className="opacity-70 leading-tight" style={{ fontFamily: 'inherit', fontSize: '0.9em', color: 'inherit' }}>{client?.tax_address}</p>
                             </div>
                         )}
 
@@ -302,7 +306,7 @@ export function InvoiceCanvas({
                         )}
 
                         {el.type === 'table' && (
-                            <div className="w-full" style={{ fontSize: 'inherit', textAlign: 'inherit' }}>
+                            <div className="w-full" style={{ fontFamily: 'inherit', fontSize: 'inherit', textAlign: 'inherit' }}>
                                 <table className="w-full border-collapse" style={{ color: 'inherit' }}>
                                     <thead>
                                         <tr style={{ borderBottom: `1px solid ${el.color || '#e5e7eb'}` }}>
@@ -320,7 +324,7 @@ export function InvoiceCanvas({
                                                         suppressContentEditableWarning
                                                         onBlur={(e) => onUpdateItem?.(item.id, { description: e.currentTarget.innerText })}
                                                         className="focus:outline-none focus:bg-brand/5 focus:ring-1 focus:ring-brand/20 rounded px-1"
-                                                        style={{ fontSize: '0.9em', color: 'inherit', fontWeight: 500 }}
+                                                        style={{ fontFamily: 'inherit', fontSize: '0.9em', color: 'inherit', fontWeight: 500 }}
                                                     >
                                                         {item.description}
                                                     </div>
@@ -337,7 +341,7 @@ export function InvoiceCanvas({
                                                             })
                                                         }}
                                                         className="focus:outline-none focus:bg-brand/5 focus:ring-1 focus:ring-brand/20 rounded px-1"
-                                                        style={{ fontSize: '0.9em', color: 'inherit', opacity: 0.8 }}
+                                                        style={{ fontFamily: 'inherit', fontSize: '0.9em', color: 'inherit', opacity: 0.8 }}
                                                     >
                                                         {item.quantity}
                                                     </div>
@@ -351,7 +355,7 @@ export function InvoiceCanvas({
                                                             onUpdateItem?.(item.id, { total_price: total })
                                                         }}
                                                         className="focus:outline-none focus:bg-brand/5 focus:ring-1 focus:ring-brand/20 rounded px-1"
-                                                        style={{ fontSize: '0.9em', color: 'inherit' }}
+                                                        style={{ fontFamily: 'inherit', fontSize: '0.9em', color: 'inherit' }}
                                                     >
                                                         {item.total_price.toFixed(2)}€
                                                     </div>
@@ -364,7 +368,7 @@ export function InvoiceCanvas({
                         )}
 
                         {el.type === 'total' && (
-                            <div className="space-y-1" style={{ fontSize: 'inherit', textAlign: 'inherit' }}>
+                            <div className="space-y-1" style={{ fontFamily: 'inherit', fontSize: 'inherit', textAlign: 'inherit' }}>
                                 <div className="flex flex-col" style={{ alignItems: el.align === 'center' ? 'center' : el.align === 'right' ? 'flex-end' : 'flex-start' }}>
                                     <div className="flex justify-between gap-4 opacity-50 w-full max-w-[200px]" style={{ fontSize: '0.8em', color: 'inherit' }}>
                                         <span>SUBTOTAL</span>

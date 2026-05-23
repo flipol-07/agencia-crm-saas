@@ -180,7 +180,7 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                         onClick={() => setShowEditor(!showEditor)}
                         className={`px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all ${showEditor ? 'bg-[#8b5cf6] text-white shadow-lg shadow-[#8b5cf6]/20' : 'bg-white/5 border border-white/10 hover:bg-white/10 text-white'}`}
                     >
-                        ✨ {showEditor ? 'Modo Editor Activo' : 'Editor de Bloques'}
+                        {showEditor ? 'Editor visual activo' : 'Editor visual'}
                     </button>
                 </div>
 
@@ -210,7 +210,10 @@ export function InvoiceDetailView({ initialInvoice, settings: initialSettings }:
                                 editable={showEditor}
                                 selectedElementId={selectedElementId}
                                 onSelectElement={setSelectedElementId}
-                                onUpdateTemplate={(updates) => setSelectedTemplate({ ...selectedTemplate, ...updates })}
+                                onUpdateTemplate={(updates) => {
+                                    setSelectedTemplate({ ...selectedTemplate, ...updates })
+                                    setHasChanges(true)
+                                }}
                                 onUpdateItem={(itemId, updates) => {
                                     setItems(prev => prev.map(item => item.id === itemId ? { ...item, ...updates } : item))
                                     setHasChanges(true)
