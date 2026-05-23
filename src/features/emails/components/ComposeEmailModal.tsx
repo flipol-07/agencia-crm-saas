@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { toast } from 'sonner'
 import { sendEmailAction } from '../actions/send'
+import { Send, X } from 'lucide-react'
 
 interface ComposeEmailModalProps {
     isOpen: boolean
@@ -63,68 +64,72 @@ export function ComposeEmailModal({ isOpen, onClose, initialTo = '', initialSubj
     if (!isOpen) return null
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
             <div
                 ref={modalRef}
-                className="bg-[var(--bg-2)] w-full max-w-2xl rounded-2xl shadow-2xl border border-[var(--divider)] flex flex-col max-h-[90vh] animate-in fade-in zoom-in-95 duration-200"
+                className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden rounded-[28px] border border-[var(--divider)] bg-[var(--bg)] shadow-[0_30px_90px_rgba(0,0,0,0.45)] animate-in fade-in zoom-in-95 duration-200"
             >
-                <div className="flex justify-between items-center p-4 border-b border-[var(--divider)]">
-                    <h3 className="text-lg font-bold text-[var(--ink-700)]">Nuevo Mensaje</h3>
-                    <button onClick={onClose} className="text-[var(--ink-400)] hover:text-[var(--ink-700)] transition-colors">
-                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                        </svg>
+                <div className="flex items-center justify-between border-b border-[var(--divider)] px-4 py-4 md:px-5">
+                    <div>
+                        <p className="text-xs font-medium uppercase text-[var(--ink-300)]">Correo</p>
+                        <h3 className="text-lg font-semibold text-[var(--ink-700)]">Nuevo mensaje</h3>
+                    </div>
+                    <button
+                        onClick={onClose}
+                        className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-[var(--divider-strong)] bg-[var(--bg-2)] text-[var(--ink-400)] transition-colors hover:text-[var(--ink-700)]"
+                    >
+                        <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="flex-1 flex flex-col overflow-hidden">
-                    <div className="p-4 space-y-4 flex-1 overflow-y-auto">
+                    <div className="flex-1 space-y-4 overflow-y-auto px-4 py-4 md:px-5">
                         <div>
-                            <label className="block text-sm font-medium text-[var(--ink-400)] mb-1">Para:</label>
+                            <label className="mb-1 block text-sm font-medium text-[var(--ink-400)]">Para</label>
                             <input
-                                type="email" // or text for multiple (simple for now)
+                                type="email"
                                 value={to}
                                 onChange={e => setTo(e.target.value)}
-                                className="w-full bg-[var(--bg-3)] border border-[var(--divider)] rounded-lg px-3 py-2 text-[var(--ink-700)] placeholder:text-[var(--ink-300)] focus:outline-none focus:border-[var(--accent-line)]"
+                                className="w-full rounded-2xl border border-[var(--divider)] bg-[var(--bg-2)] px-4 py-3 text-[var(--ink-700)] placeholder:text-[var(--ink-300)] focus:border-[var(--ochre)] focus:outline-none"
                                 required
                                 placeholder="ejemplo@correo.com"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-[var(--ink-400)] mb-1">Asunto:</label>
+                            <label className="mb-1 block text-sm font-medium text-[var(--ink-400)]">Asunto</label>
                             <input
                                 type="text"
                                 value={subject}
                                 onChange={e => setSubject(e.target.value)}
-                                className="w-full bg-[var(--bg-3)] border border-[var(--divider)] rounded-lg px-3 py-2 text-[var(--ink-700)] placeholder:text-[var(--ink-300)] focus:outline-none focus:border-[var(--accent-line)]"
+                                className="w-full rounded-2xl border border-[var(--divider)] bg-[var(--bg-2)] px-4 py-3 text-[var(--ink-700)] placeholder:text-[var(--ink-300)] focus:border-[var(--ochre)] focus:outline-none"
                                 required
                                 placeholder="Asunto del mensaje"
                             />
                         </div>
                         <div className="flex-1 h-full min-h-[200px]">
-                            <label className="block text-sm font-medium text-[var(--ink-400)] mb-1">Mensaje:</label>
+                            <label className="mb-1 block text-sm font-medium text-[var(--ink-400)]">Mensaje</label>
                             <textarea
                                 value={body}
                                 onChange={e => setBody(e.target.value)}
-                                className="w-full h-full min-h-[200px] bg-[var(--bg-3)] border border-[var(--divider)] rounded-lg px-3 py-2 text-[var(--ink-700)] placeholder:text-[var(--ink-300)] focus:outline-none focus:border-[var(--accent-line)] resize-none font-sans"
+                                className="h-full min-h-[240px] w-full resize-none rounded-3xl border border-[var(--divider)] bg-[var(--bg-2)] px-4 py-3 font-sans text-[var(--ink-700)] placeholder:text-[var(--ink-300)] focus:border-[var(--ochre)] focus:outline-none"
                                 required
                                 placeholder="Escribe tu mensaje aquí..."
                             />
                         </div>
                     </div>
 
-                    <div className="p-4 border-t border-[var(--divider)] flex justify-end gap-3 bg-[var(--bg)]">
+                    <div className="flex justify-end gap-3 border-t border-[var(--divider)] bg-[var(--bg-2)] px-4 py-4 md:px-5">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="px-4 py-2 text-[var(--ink-500)] hover:text-[var(--ink-700)] font-medium"
+                            className="rounded-full px-4 py-2 font-medium text-[var(--ink-500)] transition-colors hover:bg-[var(--bg)] hover:text-[var(--ink-700)]"
                         >
                             Cancelar
                         </button>
                         <button
                             type="submit"
                             disabled={isSending}
-                            className="px-6 py-2 bg-[var(--accent)] text-[var(--bg)] font-bold rounded-lg hover:opacity-90 transition-all disabled:opacity-50 flex items-center gap-2"
+                            className="inline-flex items-center gap-2 rounded-full bg-[var(--ochre)] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:brightness-110 disabled:opacity-50"
                         >
                             {isSending ? (
                                 <>
@@ -133,7 +138,7 @@ export function ComposeEmailModal({ isOpen, onClose, initialTo = '', initialSubj
                                 </>
                             ) : (
                                 <>
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+                                    <Send className="h-4 w-4" />
                                     Enviar
                                 </>
                             )}

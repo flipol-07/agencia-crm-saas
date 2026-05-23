@@ -157,6 +157,7 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
     }, [emails, selectedFolder])
 
     const activeConversation = threads.find((t: any) => t.id === selectedThreadId)
+    const hasActiveConversation = Boolean(activeConversation)
 
     const handleCompose = () => {
         setComposeTo('')
@@ -173,7 +174,7 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
     }
 
     return (
-        <div className="flex h-full overflow-hidden bg-[var(--bg)] text-[var(--ink-700)]">
+        <div className="flex h-full overflow-hidden rounded-[28px] border border-[var(--divider)] bg-[var(--bg)] text-[var(--ink-700)] shadow-[0_28px_80px_rgba(0,0,0,0.32)]">
             <MailSidebar
                 selectedFolder={selectedFolder}
                 onFolderSelect={(f) => {
@@ -183,34 +184,27 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
                 onCompose={handleCompose}
             />
 
-            <div className={`flex-1 h-full min-h-0 border-r border-[var(--divider)] ${selectedThreadId ? 'hidden md:block' : 'block'}`}>
-                <MailThreadList
-                    threads={threads}
-                    selectedThreadId={selectedThreadId}
-                    onThreadSelect={setSelectedThreadId}
-                    folder={selectedFolder}
-                    onToggleRead={handleToggleRead}
-                />
-            </div>
-
-            <main className={`flex-[2] h-full overflow-hidden bg-[var(--bg-2)] ${selectedThreadId ? 'block' : 'hidden md:block'}`}>
-                {activeConversation ? (
-                    <MailView
-                        conversation={activeConversation}
-                        onReply={handleReply}
-                        onBack={() => setSelectedThreadId(null)}
-                    />
+            <section className="flex min-w-0 flex-1 bg-[var(--bg)]">
+                {hasActiveConversation ? (
+                    <main className="flex min-w-0 flex-1 overflow-hidden bg-[var(--bg-2)]">
+                        <MailView
+                            conversation={activeConversation}
+                            onReply={handleReply}
+                            onBack={() => setSelectedThreadId(null)}
+                        />
+                    </main>
                 ) : (
-                    <div className="flex h-full items-center justify-center text-[var(--ink-300)]">
-                        <div className="text-center p-8">
-                            <svg className="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            <p className="text-lg font-medium text-[var(--ink-450)]">Selecciona una conversación</p>
-                        </div>
+                    <div className="flex min-w-0 flex-1 overflow-hidden">
+                        <MailThreadList
+                            threads={threads}
+                            selectedThreadId={selectedThreadId}
+                            onThreadSelect={setSelectedThreadId}
+                            folder={selectedFolder}
+                            onToggleRead={handleToggleRead}
+                        />
                     </div>
                 )}
-            </main>
+            </section>
 
             <ComposeEmailModal
                 isOpen={isComposeOpen}

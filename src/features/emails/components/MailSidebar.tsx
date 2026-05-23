@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { syncGlobalEmails } from '../actions/sync-global'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
+import { Inbox, PencilLine, RefreshCw, Send } from 'lucide-react'
 
 interface MailSidebarProps {
     selectedFolder: 'inbound' | 'outbound'
@@ -29,58 +30,62 @@ export function MailSidebar({ selectedFolder, onFolderSelect, onCompose }: MailS
     }
 
     return (
-        <div className="w-16 md:w-64 border-r border-[var(--divider)] flex flex-col bg-[var(--bg-2)] h-full transition-all duration-300">
-            <div className="p-2 md:p-4 space-y-3">
+        <div className="flex h-full w-[72px] flex-col border-r border-[var(--divider)] bg-[var(--bg)] transition-all duration-300 md:w-[280px]">
+            <div className="border-b border-[var(--divider)] px-3 py-4 md:px-5 md:py-5">
+                <div className="hidden md:block">
+                    <p className="text-xs font-medium uppercase text-[var(--ink-300)]">Buzon</p>
+                    <h2 className="mt-1 text-lg font-semibold text-[var(--ink-700)]">Correo</h2>
+                </div>
+                <div className="flex justify-center md:hidden">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-2xl border border-[var(--divider-strong)] bg-[var(--bg-2)] text-[var(--ochre)]">
+                        <Inbox className="h-5 w-5" />
+                    </div>
+                </div>
+            </div>
+
+            <div className="space-y-3 p-3 md:p-4">
                 <button
                     onClick={onCompose}
-                    className="w-full flex items-center justify-center md:gap-2 bg-[var(--accent)] text-[var(--bg)] font-bold rounded-lg py-3 text-sm shadow-lg shadow-[var(--accent-tint)] hover:opacity-90 transition-all hover:scale-[1.02]"
+                    className="flex w-full items-center justify-center rounded-2xl bg-[var(--ochre)] px-3 py-3 text-sm font-semibold text-white shadow-[0_10px_30px_rgba(124,91,255,0.28)] transition-all hover:brightness-110 md:justify-start md:gap-2 md:px-4"
                     title="Redactar"
                 >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
+                    <PencilLine className="h-5 w-5" />
                     <span className="hidden md:inline">Redactar</span>
                 </button>
 
                 <button
                     onClick={handleSync}
                     disabled={isSyncing}
-                    className="w-full flex items-center justify-center md:gap-2 bg-[var(--accent-tint)] hover:bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-line)] rounded-lg py-2 text-sm font-medium transition-all disabled:opacity-50"
+                    className="flex w-full items-center justify-center rounded-2xl border border-[var(--divider-strong)] bg-[var(--bg-2)] px-3 py-2.5 text-sm font-medium text-[var(--ink-500)] transition-all hover:border-[var(--ochre)] hover:text-[var(--ink-700)] disabled:opacity-50 md:justify-start md:gap-2 md:px-4"
                     title="Sincronizar"
                 >
-                    <svg className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
+                    <RefreshCw className={`h-4 w-4 ${isSyncing ? 'animate-spin' : ''}`} />
                     <span className="hidden md:inline">{isSyncing ? 'Sincronizando...' : 'Sincronizar'}</span>
                 </button>
             </div>
 
-            <nav className="flex-1 p-2 space-y-1">
+            <nav className="flex-1 space-y-1 px-3 pb-4 md:px-4">
                 <button
                     onClick={() => onFolderSelect('inbound')}
-                    className={`w-full flex items-center justify-center md:justify-start md:gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFolder === 'inbound'
-                        ? 'bg-[var(--bg-3)] text-[var(--ink-700)]'
-                        : 'text-[var(--ink-400)] hover:text-[var(--ink-700)] hover:bg-[var(--bg-3)]'
+                    className={`flex w-full items-center justify-center rounded-2xl px-3 py-3 text-sm font-medium transition-colors md:justify-start md:gap-3 md:px-4 ${selectedFolder === 'inbound'
+                        ? 'border border-[var(--divider-strong)] bg-[var(--ochre-soft)] text-[var(--ink-700)]'
+                        : 'text-[var(--ink-400)] hover:bg-[var(--bg-2)] hover:text-[var(--ink-700)]'
                         }`}
                     title="Bandeja de Entrada"
                 >
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                    </svg>
+                    <Inbox className="h-5 w-5 flex-shrink-0" />
                     <span className="hidden md:inline">Bandeja de Entrada</span>
                 </button>
 
                 <button
                     onClick={() => onFolderSelect('outbound')}
-                    className={`w-full flex items-center justify-center md:justify-start md:gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFolder === 'outbound'
-                        ? 'bg-[var(--bg-3)] text-[var(--ink-700)]'
-                        : 'text-[var(--ink-400)] hover:text-[var(--ink-700)] hover:bg-[var(--bg-3)]'
+                    className={`flex w-full items-center justify-center rounded-2xl px-3 py-3 text-sm font-medium transition-colors md:justify-start md:gap-3 md:px-4 ${selectedFolder === 'outbound'
+                        ? 'border border-[var(--divider-strong)] bg-[var(--ochre-soft)] text-[var(--ink-700)]'
+                        : 'text-[var(--ink-400)] hover:bg-[var(--bg-2)] hover:text-[var(--ink-700)]'
                         }`}
                     title="Enviados"
                 >
-                    <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                    <Send className="h-5 w-5 flex-shrink-0" />
                     <span className="hidden md:inline">Enviados</span>
                 </button>
             </nav>
