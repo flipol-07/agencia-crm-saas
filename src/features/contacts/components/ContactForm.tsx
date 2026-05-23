@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import type { ContactSource } from '@/types/database'
+import { useEffect, useState } from 'react'
+import type { ContactSource, CustomFieldDefinition } from '@/types/database'
 import { ServiceTagSelector } from './ServiceTagSelector'
+import { listCustomFieldDefinitionsAction } from '../actions/customFieldActions'
 
 interface ContactFormProps {
     onSubmit: (data: ContactFormData) => Promise<void>
@@ -22,6 +23,7 @@ export interface ContactFormData {
     source: ContactSource
     notes: string
     estimated_value: string
+    custom_fields: Record<string, unknown>
 }
 
 export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps) {
@@ -37,7 +39,19 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
         source: 'outbound',
         notes: '',
         estimated_value: '',
+        custom_fields: {},
     })
+    const [customDefs, setCustomDefs] = useState<CustomFieldDefinition[]>([])
+
+    useEffect(() => {
+        listCustomFieldDefinitionsAction().then(res => {
+            if (res.success && res.data) setCustomDefs(res.data)
+        })
+    }, [])
+
+    const setCustomFieldValue = (name: string, value: unknown) => {
+        setFormData(prev => ({ ...prev, custom_fields: { ...prev.custom_fields, [name]: value } }))
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
@@ -218,6 +232,51 @@ export function ContactForm({ onSubmit, onCancel, isLoading }: ContactFormProps)
                         placeholder="Contexto inicial del lead..."
                     />
                 </div>
+
+                {customDefs.length > 0 && customDefs.map(def => {
+                    const inputId = `cf-${def.name}`
+                    const value = formData.custom_fields[def.name]
+                    const base = "w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition-all"
+                    return (
+                        <div key={def.id} className={def.type === 'textarea' ? 'md:col-span-2' : ''}>
+                            <label htmlFor={inputId} className="block text-sm font-medium text-gray-300 mb-2">
+                                {def.label}{def.required && ' *'}
+                            </label>
+                            {def.type === 'text' && (
+                                <input id={inputId} type="text" required={def.required} value={String(value ?? '')}
+                                    onChange={e => setCustomFieldValue(def.name, e.target.value)} className={base} />
+                            )}
+                            {def.type === 'textarea' && (
+                                <textarea id={inputId} rows={3} required={def.required} value={String(value ?? '')}
+                                    onChange={e => setCustomFieldValue(def.name, e.target.value)} className={`${base} resize-none`} />
+                            )}
+                            {def.type === 'number' && (
+                                <input id={inputId} type="number" required={def.required} value={value === undefined || value === null ? '' : String(value)}
+                                    onChange={e => setCustomFieldValue(def.name, e.target.value === '' ? null : Number(e.target.value))} className={base} />
+                            )}
+                            {def.type === 'date' && (
+                                <input id={inputId} type="date" required={def.required} value={String(value ?? '')}
+                                    onChange={e => setCustomFieldValue(def.name, e.target.value || null)} className={base} />
+                            )}
+                            {def.type === 'select' && (
+                                <select id={inputId} required={def.required} value={String(value ?? '')}
+                                    onChange={e => setCustomFieldValue(def.name, e.target.value)} className={base}>
+                                    <option value="" className="bg-gray-900">— Selecciona —</option>
+                                    {(def.options || []).map(o => (
+                                        <option key={o} value={o} className="bg-gray-900">{o}</option>
+                                    ))}
+                                </select>
+                            )}
+                            {def.type === 'checkbox' && (
+                                <label className="flex items-center gap-2 text-sm text-gray-300">
+                                    <input id={inputId} type="checkbox" checked={Boolean(value)}
+                                        onChange={e => setCustomFieldValue(def.name, e.target.checked)} />
+                                    {def.label}
+                                </label>
+                            )}
+                        </div>
+                    )
+                })}
             </div>
 
             <div className="flex justify-end gap-3 pt-4">

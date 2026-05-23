@@ -4,7 +4,8 @@ import { useEffect, useState, Suspense } from 'react'
 import { useParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { InvoiceCanvas } from '@/features/invoices/components/InvoiceCanvas'
-import type { InvoiceWithDetails, Settings, InvoiceTemplate } from '@/types/database'
+import { buildEffectiveInvoiceSettings, templateFromInvoiceConfig } from '@/features/invoices/lib/invoice-presentation'
+import type { InvoiceWithDetails, Profile, Settings, InvoiceTemplate } from '@/types/database'
 
 export default function PrintInvoicePage({ params }: { params: Promise<{ id: string }> }) {
     return (
@@ -20,7 +21,7 @@ function PrintContent({ params }: { params: Promise<{ id: string }> }) {
 
 function PrintInvoiceClient() {
     const { id } = useParams()
-    const [data, setData] = useState<{ invoice: InvoiceWithDetails, settings: Settings, template: InvoiceTemplate } | null>(null)
+    const [data, setData] = useState<{ invoice: InvoiceWithDetails, settings: Settings | null, template: InvoiceTemplate } | null>(null)
     const [loading, setLoading] = useState(true)
     const supabase = createClient()
 
@@ -39,33 +40,47 @@ function PrintInvoiceClient() {
                     .single()
 
                 if (invError) throw invError
+                const invoiceData = invoice as unknown as InvoiceWithDetails
 
                 // 2. Fetch Settings
                 const { data: settings } = await supabase
                     .from('settings')
                     .select('*')
-                    .single()
+                    .limit(1)
+                    .maybeSingle()
+
+                let issuerProfile: Profile | null = null
+                if (invoiceData.issuer_profile_id) {
+                    const { data: profile } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', invoiceData.issuer_profile_id)
+                        .maybeSingle()
+                    issuerProfile = (profile || null) as Profile | null
+                }
 
                 // 3. Resolve Template
-                let template: InvoiceTemplate | null = null
-                if (invoice.template_id) {
+                let template: InvoiceTemplate | null = templateFromInvoiceConfig(invoiceData)
+                if (!template && invoiceData.template_id) {
                     const { data: t } = await supabase
                         .from('invoice_templates')
                         .select('*')
-                        .eq('id', invoice.template_id)
-                        .single()
+                        .eq('id', invoiceData.template_id)
+                        .maybeSingle()
                     template = t
                 }
 
                 if (!template) {
-                    const { data: all } = await supabase.from('invoice_templates').select('*')
+                    const { data: all } = await supabase.from('invoice_templates').select('*').order('is_default', { ascending: false })
                     template = all?.[0] || null
                 }
 
+                if (!template) throw new Error('Plantilla de factura no encontrada')
+
                 setData({
-                    invoice: invoice as any,
-                    settings: settings as any,
-                    template: template as any
+                    invoice: invoiceData,
+                    settings: buildEffectiveInvoiceSettings((settings || null) as Settings | null, issuerProfile),
+                    template: template as InvoiceTemplate
                 })
             } catch (e) {
                 console.error(e)

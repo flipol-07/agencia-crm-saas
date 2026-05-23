@@ -1,23 +1,42 @@
 import { ContactList, ContactFormWrapper } from '@/features/contacts/components'
-import { getContactsCached } from '@/features/contacts/services/contact.service.server'
+import { ContactsToolbar } from '@/features/contacts/components/ContactsToolbar'
+import { ContactsPagination } from '@/features/contacts/components/ContactsPagination'
+import { BulkActionsBar } from '@/features/contacts/components/BulkActionsBar'
+import {
+    getContactsCached,
+    type ContactsListFilters,
+    type ContactsListResult,
+} from '@/features/contacts/services/contact.service.server'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Suspense } from 'react'
-import { Skeleton } from '@/shared/components/ui/Skeleton'
 
-export default async function ContactsPage() {
+interface ContactsPageProps {
+    searchParams: Promise<Record<string, string | string[] | undefined>>
+}
+
+function pickString(value: string | string[] | undefined): string | undefined {
+    if (Array.isArray(value)) return value[0]
+    return value
+}
+
+export default async function ContactsPage({ searchParams }: ContactsPageProps) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
+    if (!user) redirect('/login')
 
-    if (!user) {
-        redirect('/login')
+    const params = await searchParams
+    const filters: ContactsListFilters = {
+        page: Number(pickString(params.page) || '1') || 1,
+        pageSize: Number(pickString(params.pageSize) || '30') || 30,
+        search: pickString(params.search) || undefined,
+        pipelineStage: pickString(params.stage) || undefined,
+        source: pickString(params.source) || undefined,
+        status: pickString(params.status) || undefined,
     }
-
-    const userId = user.id
 
     return (
         <div className="space-y-6">
-            {/* Header */}
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-ink-700">Contactos</h1>
@@ -26,17 +45,30 @@ export default async function ContactsPage() {
                 <ContactFormWrapper />
             </div>
 
-            {/* Lista de contactos (Suspended) */}
+            <ContactsToolbar filters={filters} />
+
             <Suspense fallback={<ContactListSkeleton />}>
-                <ContactsListSection userId={userId} />
+                <ContactsListSection userId={user.id} filters={filters} />
             </Suspense>
+
+            <BulkActionsBar />
         </div>
     )
 }
 
-async function ContactsListSection({ userId }: { userId: string }) {
-    const contacts = await getContactsCached(userId)
-    return <ContactList contacts={contacts} />
+async function ContactsListSection({ userId, filters }: { userId: string; filters: ContactsListFilters }) {
+    const result = await getContactsCached(userId, filters) as ContactsListResult
+    return (
+        <div className="space-y-4">
+            <ContactList contacts={result.data} />
+            <ContactsPagination
+                page={result.page}
+                pageSize={result.pageSize}
+                count={result.count}
+                totalPages={result.totalPages}
+            />
+        </div>
+    )
 }
 
 function ContactListSkeleton() {

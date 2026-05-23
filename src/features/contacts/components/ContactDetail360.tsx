@@ -5,12 +5,12 @@ import { useRouter } from 'next/navigation'
 import type { Contact, ContactUpdate } from '@/types/database'
 import { PIPELINE_STAGES } from '@/types/database'
 import { ProjectTasksPanel } from '@/features/projects/components'
-import { InvoiceList } from '@/features/invoices/components'
+import { InvoiceList, SubscriptionsList } from '@/features/invoices/components'
 import { analyzeWebsite } from '@/features/contacts/actions/analyze-website'
 import { ContactBrief, generateContactBriefAction } from '@/features/contacts/actions/contactBriefActions'
 import { EmailList } from '@/features/emails/components'
 import { useContactEmails, useContacts } from '@/features/contacts/hooks/useContacts'
-import { ServiceTagSelector, FileSection } from '@/features/contacts/components'
+import { ServiceTagSelector, FileSection, ContactTimeline } from '@/features/contacts/components'
 
 interface ContactDetail360Props {
     contact: Contact
@@ -705,6 +705,16 @@ export function ContactDetail360({ contact, onUpdate }: ContactDetail360Props) {
                 <div className="glass rounded-xl p-6">
                     <h2 className="text-lg font-semibold text-white mb-4">📄 Facturas</h2>
                     <InvoiceList contactId={contact.id} />
+                </div>
+
+                {/* Suscripciones (facturas recurrentes) */}
+                <div className="glass rounded-xl p-6">
+                    <SubscriptionsList contactId={contact.id} />
+                </div>
+
+                {/* Timeline unificado */}
+                <div className="glass rounded-xl p-6">
+                    <ContactTimeline contactId={contact.id} />
                 </div>
 
                 {/* Archivos */}

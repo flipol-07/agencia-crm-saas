@@ -29,6 +29,7 @@ export function ContactFormWrapper() {
                 notes: data.notes || null,
                 website: data.website || null,
                 services: data.services || [],
+                custom_fields: data.custom_fields || {},
             })
 
             if (error) {

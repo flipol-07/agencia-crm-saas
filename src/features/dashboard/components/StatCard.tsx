@@ -25,12 +25,12 @@ export function StatCard({
 
     const getColorClasses = (c: string) => {
         switch (c) {
-            case 'purple': return 'text-purple-400 bg-purple-400/10 border-purple-400/20 group-hover:border-purple-400/50 group-hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]'
-            case 'blue': return 'text-blue-400 bg-blue-400/10 border-blue-400/20 group-hover:border-blue-400/50 group-hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]'
-            case 'green': return 'text-emerald-400 bg-emerald-400/10 border-emerald-400/20 group-hover:border-emerald-400/50 group-hover:shadow-[0_0_20px_rgba(52,211,153,0.2)]'
-            case 'red': return 'text-red-400 bg-red-400/10 border-red-400/20 group-hover:border-red-400/50 group-hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]'
-            case 'yellow': return 'text-yellow-400 bg-yellow-400/10 border-yellow-400/20 group-hover:border-yellow-400/50 group-hover:shadow-[0_0_20px_rgba(250,204,21,0.2)]'
-            case 'lime': return 'text-[#a78bfa] bg-[#8b5cf6]/10 border-[#8b5cf6]/20 group-hover:border-[#8b5cf6]/50 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]'
+            case 'purple': return 'text-purple-300 bg-purple-500/10 border-purple-500/20 group-hover:border-purple-500/50 group-hover:shadow-[0_0_20px_rgba(192,132,252,0.2)]'
+            case 'blue': return 'text-blue-300 bg-blue-500/10 border-blue-500/20 group-hover:border-blue-500/50 group-hover:shadow-[0_0_20px_rgba(96,165,250,0.2)]'
+            case 'green': return 'text-emerald-300 bg-emerald-500/10 border-emerald-500/20 group-hover:border-emerald-500/50 group-hover:shadow-[0_0_20px_rgba(52,211,153,0.2)]'
+            case 'red': return 'text-red-300 bg-red-500/10 border-red-500/20 group-hover:border-red-500/50 group-hover:shadow-[0_0_20px_rgba(248,113,113,0.2)]'
+            case 'yellow': return 'text-yellow-300 bg-yellow-500/10 border-yellow-500/20 group-hover:border-yellow-500/50 group-hover:shadow-[0_0_20px_rgba(250,204,21,0.2)]'
+            case 'lime': return 'text-violet-300 bg-violet-500/10 border-violet-500/20 group-hover:border-violet-500/50 group-hover:shadow-[0_0_20px_rgba(139,92,246,0.2)]'
             default: return 'text-brand-neon-blue bg-brand-neon-blue/10 border-brand-neon-blue/20 group-hover:border-brand-neon-blue/50 group-hover:shadow-[0_0_20px_rgba(59,130,246,0.2)]'
         }
     }
@@ -48,8 +48,8 @@ export function StatCard({
                         {icon}
                     </div>
                     {trend && (
-                        <div className={`flex items-center gap-1 text-sm font-medium ${trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : 'text-gray-400'
-                            } px-2 py-1 rounded-full bg-black/40 border border-white/5 backdrop-blur-sm`}>
+                        <div className={`flex items-center gap-1 text-sm font-medium ${trend === 'up' ? 'text-emerald-400' : trend === 'down' ? 'text-red-400' : 'text-[var(--ink-400)]'
+                            } px-2 py-1 rounded-full bg-[var(--bg-3)] border border-[var(--divider)] backdrop-blur-sm`}>
                             {trend === 'up' ? (
                                 <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -68,15 +68,15 @@ export function StatCard({
 
                 <div>
                     <div className="flex items-center gap-2 mb-1">
-                        <h3 className="text-gray-400 text-xs font-bold tracking-widest uppercase">{title}</h3>
+                        <h3 className="text-[var(--ink-400)] text-xs font-bold tracking-widest uppercase">{title}</h3>
                     </div>
 
                     <div className="flex items-baseline gap-2">
-                        <p className="text-2xl sm:text-3xl font-bold text-white font-display tracking-tight">{value}</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-[var(--ink-700)] font-display tracking-tight">{value}</p>
                     </div>
 
                     {subtitle && (
-                        <p className="text-xs text-gray-500 mt-2 font-medium bg-white/5 inline-block px-2 py-0.5 rounded-md border border-white/5">
+                        <p className="text-xs text-[var(--ink-450)] mt-2 font-medium bg-[var(--bg-3)] inline-block px-2 py-0.5 rounded-md border border-[var(--divider)]">
                             {subtitle}
                         </p>
                     )}

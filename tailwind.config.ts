@@ -76,7 +76,7 @@ const config: Config = {
         // so it maps to the body font here. The Anton wordmark font is
         // available via the explicit `.aurie-wordmark` class only.
         display: ['var(--font-body)', 'system-ui', 'sans-serif'],
-        wordmark: ['var(--font-display)', 'sans-serif'],
+        wordmark: ['var(--font-wordmark)', 'sans-serif'],
         mono: ['var(--font-mono)', 'ui-monospace', 'monospace'],
       },
       animation: {

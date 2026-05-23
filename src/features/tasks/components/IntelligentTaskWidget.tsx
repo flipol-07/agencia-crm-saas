@@ -14,14 +14,9 @@ interface IntelligentTaskWidgetProps {
 export function IntelligentTaskWidget({ tasks, userProfile, onOpenTask }: IntelligentTaskWidgetProps) {
     const [isOpen, setIsOpen] = useState(true)
 
-    // Prioritization Logic
-    // Prioritization Logic
     const prioritizedTasks = useMemo(() => {
         const userId = userProfile?.id
-        console.log('IntelligentWidget Debug:', { userId, tasksCount: tasks.length })
 
-        // 1. Filter tasks: Assigned to user OR High/Urgent priority (global visibility)
-        // 1. Filter tasks: Assigned to user OR High/Urgent priority (global visibility)
         const userTasks = tasks.filter(t => {
             if (t.status === 'done') return false
 

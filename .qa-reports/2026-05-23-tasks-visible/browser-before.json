@@ -1,0 +1,42 @@
+{
+  "result": {
+    "url": "http://localhost:3000/tasks",
+    "textStart": "AURIE.\nDemo Aurie\n1\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\n1\nReuniones\nCorreo\nEconomía\nConfiguración\n✨\nSugerencias IA\nBETA\n\nBasado en tu rol y prioridades\n\nOcultar\n#1\nEnviar propuesta resumida a Clínica Atlas\n⏳\nPor hacer\nAlta\n📅 24 may\nSin asignar\nGestión de Tareas\n\n1 tareas pendientes\n\nNueva Tarea\nTodas\nMis Tareas\nPrioridad\nBaja\nMedia\nAlta\nUrgente\nMiembro\nADMIN\nAntón Loredo\nDemo Aurie\nFrancisco Arroyo Morales\nPol\nSabina Jimenez\nCompletadas\n⏳\nPor hacer\n1\nEnviar propuesta resumida a Clínica Atlas\n⏳\nPor hacer\nAlta\n📅 24 may\nSin asignar\nAURIE\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\n1\nReuniones\nCorreo\nEconomía\nAjustes",
+    "cards": [
+      "Enviar propuesta resumida a Clínica Atlas⏳Por hacerAlta📅 24 maySin asignar",
+      "Enviar propuesta resumida a Clínica Atlas⏳Por hacerAlta📅 24 maySin asignar"
+    ],
+    "headings": [
+      "AURIE.",
+      "Sugerencias IABeta",
+      "Enviar propuesta resumida a Clínica Atlas",
+      "Gestión de Tareas",
+      "⏳Por hacer1",
+      "Enviar propuesta resumida a Clínica Atlas"
+    ]
+  },
+  "issues": [
+    "log: [HMR] connected",
+    "log: Realtime Auth State Change: INITIAL_SESSION",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width.",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width.",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width.",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width.",
+    "log: Realtime: Subscribing for user 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d",
+    "log: Realtime: Subscribing for user 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d",
+    "log: Realtime Hub [auth_hub_06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d_1779487401038]: CLOSED ",
+    "log: Realtime Hub [auth_hub_06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d_1779487401069]: SUBSCRIBED ",
+    "log: [HMR] connected",
+    "log: Realtime Auth State Change: INITIAL_SESSION",
+    "log: IntelligentWidget Debug: {userId: undefined, tasksCount: 0}",
+    "log: IntelligentWidget Debug: {userId: undefined, tasksCount: 0}",
+    "log: Realtime: Subscribing for user 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d",
+    "log: Realtime: Subscribing for user 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d",
+    "log: IntelligentWidget Debug: {userId: 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d, tasksCount: 1}",
+    "log: IntelligentWidget Debug: {userId: 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d, tasksCount: 1}",
+    "log: IntelligentWidget Debug: {userId: 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d, tasksCount: 1}",
+    "log: IntelligentWidget Debug: {userId: 06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d, tasksCount: 1}",
+    "log: Realtime Hub [auth_hub_06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d_1779487410160]: CLOSED ",
+    "log: Realtime Hub [auth_hub_06c5f117-7aa7-44d2-b9ab-6d3c00e8ed7d_1779487410206]: SUBSCRIBED "
+  ]
+}

@@ -30,6 +30,7 @@ export function InvoiceList({ contactId, initialInvoices }: InvoiceListProps) {
 
     const statusConfig: Record<InvoiceStatus, { label: string, color: string, border: string, bg: string }> = {
         draft: { label: 'Borrador', color: 'text-gray-400', border: 'border-gray-500/20', bg: 'bg-gray-500/10' },
+        quote: { label: 'Presupuesto', color: 'text-purple-400', border: 'border-purple-500/20', bg: 'bg-purple-500/10' },
         sent: { label: 'Enviada', color: 'text-blue-400', border: 'border-blue-500/20', bg: 'bg-blue-500/10' },
         paid: { label: 'Pagada', color: 'text-[#8b5cf6]', border: 'border-[#8b5cf6]/20', bg: 'bg-[#8b5cf6]/10' },
         overdue: { label: 'Vencida', color: 'text-red-400', border: 'border-red-500/20', bg: 'bg-red-500/10' },

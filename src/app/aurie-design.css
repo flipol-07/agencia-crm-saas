@@ -53,7 +53,8 @@ body[data-brand="aurie"]:not([data-mode="light"]) {
 
   --grain-opacity: 0.025;
 
-  --font-display:  'Anton', 'Bebas Neue', 'Archivo Black', 'Impact', sans-serif;
+  --font-wordmark: 'Anton', 'Bebas Neue', 'Archivo Black', 'Impact', sans-serif;
+  --font-display:  'DM Sans', 'Geist', -apple-system, sans-serif;
   --font-body:     'DM Sans', 'Geist', -apple-system, sans-serif;
   --font-mono:     'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
 
@@ -113,6 +114,16 @@ body[data-brand="aurie"][data-mode="light"] {
   --divider-strong:#BFB3DD;
 
   --grain-opacity: 0;
+
+  --font-wordmark: 'Anton', 'Bebas Neue', 'Archivo Black', 'Impact', sans-serif;
+  --font-display:  'DM Sans', 'Geist', -apple-system, sans-serif;
+  --font-body:     'DM Sans', 'Geist', -apple-system, sans-serif;
+  --font-mono:     'JetBrains Mono', 'Geist Mono', ui-monospace, monospace;
+
+  --tracking-display: 0.005em;
+  --tracking-tight:   0;
+  --tracking-label:   0.16em;
+  --tracking-small-cap: 0.18em;
 }
 
 body[data-brand="aurie"][data-mode="light"] {
@@ -133,13 +144,79 @@ html, body, #root {
   font-size: 14px;
   line-height: 1.5;
   font-feature-settings: "ss01", "cv11";
-  -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 body {
   min-height: 100vh;
   position: relative;
 }
+
+/* =============================================================
+   FONT-WEIGHT BALANCE BETWEEN MODES
+   DM Sans is a variable font, so we can scale weights smoothly.
+   - Dark bg makes glyphs appear ~50-80 weight units heavier (backlight
+     bleed). Compensate by dropping every weight step down a notch.
+   - Light bg makes glyphs appear thinner. Keep Tailwind defaults but
+     nudge body text up slightly so it doesn't feel anaemic on lavender.
+   ============================================================= */
+
+/* ---- DARK MODE: matches light-mode weights (user preference) ---- */
+body[data-mode="dark"],
+body:not([data-mode="light"]) {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-weight: 420;
+}
+
+body[data-mode="dark"] p,
+body[data-mode="dark"] span,
+body[data-mode="dark"] li,
+body[data-mode="dark"] a,
+body[data-mode="dark"] label,
+body[data-mode="dark"] td,
+body[data-mode="dark"] th,
+body:not([data-mode="light"]) p,
+body:not([data-mode="light"]) span,
+body:not([data-mode="light"]) li,
+body:not([data-mode="light"]) a,
+body:not([data-mode="light"]) label,
+body:not([data-mode="light"]) td,
+body:not([data-mode="light"]) th { font-weight: inherit; }
+
+body[data-mode="dark"] .font-medium,
+body:not([data-mode="light"]) .font-medium { font-weight: 500 !important; }
+
+body[data-mode="dark"] .font-semibold,
+body:not([data-mode="light"]) .font-semibold { font-weight: 580 !important; }
+
+body[data-mode="dark"] .font-bold,
+body:not([data-mode="light"]) .font-bold { font-weight: 650 !important; }
+
+body[data-mode="dark"] strong,
+body[data-mode="dark"] b,
+body:not([data-mode="light"]) strong,
+body:not([data-mode="light"]) b { font-weight: 650; }
+
+/* ---- LIGHT MODE: subpixel smoothing + slight nudge on body ---- */
+body[data-mode="light"] {
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+  font-weight: 420;
+}
+body[data-mode="light"] p,
+body[data-mode="light"] span,
+body[data-mode="light"] li,
+body[data-mode="light"] a,
+body[data-mode="light"] label,
+body[data-mode="light"] td,
+body[data-mode="light"] th { font-weight: inherit; }
+
+/* Light-mode tailwind weights stay close to defaults (already render
+   well on pale bg). Just pull `font-bold` down a hair so 700 doesn't
+   shout next to body 420. */
+body[data-mode="light"] .font-medium { font-weight: 500 !important; }
+body[data-mode="light"] .font-semibold { font-weight: 580 !important; }
+body[data-mode="light"] .font-bold { font-weight: 650 !important; }
 
 /* film grain (only on dark) */
 body[data-mode="dark"]::before,
@@ -189,7 +266,7 @@ a { color: inherit; text-decoration: none; }
 .headline-s { font-size: 13px; font-weight: 600; line-height: 1.4; }
 
 .aurie-wordmark {
-  font-family: var(--font-display);
+  font-family: var(--font-wordmark);
   text-transform: uppercase;
   font-weight: 400;
   letter-spacing: 0.02em;
@@ -679,7 +756,11 @@ body[data-mode="light"] [class*="bg-[#000000]"],
 body[data-mode="light"] [class*="bg-[#0d0a1b]"],
 body[data-mode="light"] [class*="bg-[#08060E]"],
 body[data-mode="light"] [class*="bg-[#110C1C]"],
-body[data-mode="light"] [class*="bg-[#18181b]"] {
+body[data-mode="light"] [class*="bg-[#18181b]"],
+body[data-mode="light"] [class*="bg-[#1a1a1a]"],
+body[data-mode="light"] [class*="bg-[#0b0b10]"],
+body[data-mode="light"] [class*="bg-[#141420]"],
+body[data-mode="light"] [class*="bg-[#0f0f1a]"] {
   background-color: #FBF9FF !important;
   background-image: linear-gradient(180deg, rgba(124,91,255,0.05) 0%, rgba(124,91,255,0.02) 100%) !important;
   border-color: #D9D1EE !important;
@@ -728,19 +809,47 @@ body[data-mode="light"] .placeholder-gray-400::placeholder { color: var(--ink-30
    `text-[#8b5cf6]`) need light-mode mapping to the accent. */
 body[data-mode="light"] [class*="text-[#a78bfa]"],
 body[data-mode="light"] [class*="text-[#8b5cf6]"],
+body[data-mode="light"] [class*="text-[#c4b5fd]"],
 body[data-mode="light"] [class*="text-[#7c3aed]"] {
   color: var(--accent) !important;
 }
 
-body[data-mode="light"] [class*="bg-[#8b5cf6]"],
-body[data-mode="light"] [class*="bg-[#7c3aed]"] {
+/* SOLID arbitrary purple bg → solid accent (only when no /opacity suffix).
+   Matching `\]"` ensures the class ends right after the closing bracket. */
+body[data-mode="light"] .bg-\[\#8b5cf6\],
+body[data-mode="light"] .bg-\[\#7c3aed\] {
   background-color: var(--accent) !important;
 }
 
-body[data-mode="light"] [class*="border-[#8b5cf6]"],
-body[data-mode="light"] [class*="border-[#7c3aed]"] {
+/* TRANSLUCENT arbitrary purple bg → tinted accent.
+   Each opacity step gets its own rule so /10 stays /10. */
+body[data-mode="light"] .bg-\[\#8b5cf6\]\/5,
+body[data-mode="light"] .bg-\[\#7c3aed\]\/5 { background-color: rgba(124,91,255,0.05) !important; }
+body[data-mode="light"] .bg-\[\#8b5cf6\]\/10,
+body[data-mode="light"] .bg-\[\#7c3aed\]\/10 { background-color: rgba(124,91,255,0.10) !important; }
+body[data-mode="light"] .bg-\[\#8b5cf6\]\/15,
+body[data-mode="light"] .bg-\[\#7c3aed\]\/15 { background-color: rgba(124,91,255,0.13) !important; }
+body[data-mode="light"] .bg-\[\#8b5cf6\]\/20,
+body[data-mode="light"] .bg-\[\#7c3aed\]\/20 { background-color: rgba(124,91,255,0.15) !important; }
+body[data-mode="light"] .bg-\[\#8b5cf6\]\/25,
+body[data-mode="light"] .bg-\[\#7c3aed\]\/25 { background-color: rgba(124,91,255,0.18) !important; }
+body[data-mode="light"] .bg-\[\#8b5cf6\]\/30,
+body[data-mode="light"] .bg-\[\#7c3aed\]\/30 { background-color: rgba(124,91,255,0.22) !important; }
+
+/* Hover variants */
+body[data-mode="light"] .hover\:bg-\[\#7c3aed\]:hover,
+body[data-mode="light"] .hover\:bg-\[\#8b5cf6\]:hover { background-color: var(--accent-hi) !important; }
+body[data-mode="light"] .hover\:bg-\[\#8b5cf6\]\/20:hover { background-color: rgba(124,91,255,0.18) !important; }
+body[data-mode="light"] .hover\:bg-\[\#8b5cf6\]\/25:hover { background-color: rgba(124,91,255,0.20) !important; }
+
+body[data-mode="light"] .border-\[\#8b5cf6\],
+body[data-mode="light"] .border-\[\#7c3aed\] {
   border-color: var(--accent) !important;
 }
+body[data-mode="light"] .border-\[\#8b5cf6\]\/20,
+body[data-mode="light"] .border-\[\#7c3aed\]\/20 { border-color: rgba(124,91,255,0.30) !important; }
+body[data-mode="light"] .border-\[\#8b5cf6\]\/30,
+body[data-mode="light"] .border-\[\#7c3aed\]\/30 { border-color: rgba(124,91,255,0.40) !important; }
 
 /* Gradient text safety net — if a heading uses
    `bg-clip-text text-transparent`, fall back to the accent in light

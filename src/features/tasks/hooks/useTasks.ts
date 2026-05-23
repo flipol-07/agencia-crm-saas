@@ -13,6 +13,60 @@ import type {
     TaskComment,
 } from '@/types/database'
 
+const TASK_DETAILS_SELECT = `
+    *,
+    projects (
+        id,
+        name,
+        contact_id,
+        contacts (id, company_name)
+    ),
+    contacts (id, company_name),
+    assigned_profile:profiles!tasks_assigned_to_fkey (id, full_name, email, avatar_url),
+    task_assignees (
+        id,
+        user_id,
+        created_at,
+        profiles (id, full_name, email, avatar_url)
+    ),
+    task_comments (id)
+`
+
+const VALID_TASK_STATUSES: TaskStatus[] = ['todo', 'in_progress', 'in_review', 'blocked', 'done']
+const VALID_TASK_PRIORITIES: TaskPriority[] = ['low', 'medium', 'high', 'urgent']
+
+function normalizeTaskWithDetails(rawTask: unknown): TaskWithDetails {
+    const task = rawTask as TaskWithDetails & {
+        assigned_profile?: TaskWithDetails['task_assignees'][number]['profiles'] | null
+    }
+    const status = VALID_TASK_STATUSES.includes(task.status) ? task.status : task.is_completed ? 'done' : 'todo'
+    const priority = VALID_TASK_PRIORITIES.includes(task.priority) ? task.priority : 'medium'
+    const assignees = Array.isArray(task.task_assignees) ? [...task.task_assignees] : []
+
+    if (task.assigned_to && task.assigned_profile && !assignees.some(a => a.user_id === task.assigned_to)) {
+        assignees.unshift({
+            id: `legacy-${task.id}-${task.assigned_to}`,
+            task_id: task.id,
+            user_id: task.assigned_to,
+            created_at: task.created_at,
+            profiles: task.assigned_profile,
+        })
+    }
+
+    const { assigned_profile: _assignedProfile, ...normalizedTask } = task
+    return {
+        ...normalizedTask,
+        status,
+        priority,
+        task_assignees: assignees,
+        task_comments: Array.isArray(task.task_comments) ? task.task_comments : [],
+    }
+}
+
+function normalizeTasksWithDetails(rawTasks: unknown[] | null | undefined): TaskWithDetails[] {
+    return (rawTasks || []).map(normalizeTaskWithDetails)
+}
+
 // Hook para tareas de un proyecto específico
 export function useProjectTasks(projectId: string) {
     const [tasks, setTasks] = useState<Task[]>([])
@@ -268,38 +322,17 @@ export function useTasksWithDetails() {
         setLoading(true)
         setError(null)
 
-        const { data: { user } } = await supabase.auth.getUser()
         let query = (supabase.from('tasks') as any)
-            .select(`
-                *,
-                projects (
-                    id,
-                    name,
-                    contact_id,
-                    contacts (id, company_name)
-                ),
-                contacts (id, company_name),
-                task_assignees (
-                    id,
-                    user_id,
-                    created_at,
-                    profiles (id, full_name, email, avatar_url)
-                ),
-                task_comments (id)
-            `)
+            .select(TASK_DETAILS_SELECT)
             .order('priority', { ascending: false })
             .order('due_date', { ascending: true, nullsFirst: false })
-
-        if (user?.id) {
-            query = query.eq('assigned_to', user.id)
-        }
 
         const { data, error } = await query
 
         if (error) {
             setError(error.message)
         } else {
-            setTasks(data as TaskWithDetails[] || [])
+            setTasks(normalizeTasksWithDetails(data))
         }
         setLoading(false)
     }, [supabase])
@@ -385,6 +418,15 @@ export function useTasksWithDetails() {
         contact_id?: string | null
         assigneeIds?: string[]
     }) => {
+        const { data: { user } } = await supabase.auth.getUser()
+        const explicitAssigneeIds = options?.assigneeIds || []
+        const finalAssigneeIds = explicitAssigneeIds.length > 0
+            ? Array.from(new Set(explicitAssigneeIds))
+            : user?.id
+                ? [user.id]
+                : []
+        const primaryAssigneeId = finalAssigneeIds[0] || null
+
         const { data, error } = await (supabase.from('tasks') as any)
             .insert({
                 title,
@@ -394,25 +436,10 @@ export function useTasksWithDetails() {
                 priority: options?.priority || 'medium',
                 due_date: options?.due_date || null,
                 status: 'todo',
-                is_completed: false
+                is_completed: false,
+                assigned_to: primaryAssigneeId
             })
-            .select(`
-                *,
-                projects (
-                    id, 
-                    name, 
-                    contact_id,
-                    contacts (id, company_name)
-                ),
-                contacts (id, company_name),
-                task_assignees (
-                    id,
-                    user_id,
-                    created_at,
-                    profiles (id, full_name, email, avatar_url)
-                ),
-                task_comments (id)
-            `)
+            .select(TASK_DETAILS_SELECT)
             .single()
 
         if (error) {
@@ -420,8 +447,8 @@ export function useTasksWithDetails() {
         }
 
         // Si hay asignados, insertarlos en la tabla task_assignees
-        if (options?.assigneeIds && options.assigneeIds.length > 0) {
-            const assigneesData = options.assigneeIds.map(userId => ({
+        if (finalAssigneeIds.length > 0) {
+            const assigneesData = finalAssigneeIds.map(userId => ({
                 task_id: data.id,
                 user_id: userId
             }))
@@ -435,35 +462,21 @@ export function useTasksWithDetails() {
                 // Volver a cargar la tarea con los asignados si es necesario, 
                 // o añadirlos manualmente al estado local
                 const { data: updatedTask } = await (supabase.from('tasks') as any)
-                    .select(`
-                        *,
-                        projects (
-                            id, 
-                            name, 
-                            contact_id,
-                            contacts (id, company_name)
-                        ),
-                        contacts (id, company_name),
-                        task_assignees (
-                            id,
-                            user_id,
-                            created_at,
-                            profiles (id, full_name, email, avatar_url)
-                        ),
-                        task_comments (id)
-                    `)
+                    .select(TASK_DETAILS_SELECT)
                     .eq('id', data.id)
                     .single()
 
                 if (updatedTask) {
-                    setTasks(prev => [updatedTask as TaskWithDetails, ...prev])
-                    return updatedTask as TaskWithDetails
+                    const normalizedTask = normalizeTaskWithDetails(updatedTask)
+                    setTasks(prev => [normalizedTask, ...prev])
+                    return normalizedTask
                 }
             }
         }
 
-        setTasks(prev => [data as TaskWithDetails, ...prev])
-        return data as TaskWithDetails
+        const normalizedTask = normalizeTaskWithDetails(data)
+        setTasks(prev => [normalizedTask, ...prev])
+        return normalizedTask
     }
 
     // Actualizar detalles de la tarea

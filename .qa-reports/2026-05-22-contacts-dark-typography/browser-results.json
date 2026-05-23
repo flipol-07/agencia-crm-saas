@@ -1,0 +1,93 @@
+{
+  "darkFonts": {
+    "mode": "dark",
+    "body": "\"DM Sans\", Geist, -apple-system, sans-serif",
+    "h1": "Anton, \"Bebas Neue\", \"Archivo Black\", Impact, sans-serif, sans-serif",
+    "display": "\"DM Sans\", Geist, -apple-system, sans-serif"
+  },
+  "lightFonts": {
+    "mode": "light",
+    "body": "\"DM Sans\", Geist, -apple-system, sans-serif",
+    "h1": "Anton, \"Bebas Neue\", \"Archivo Black\", Impact, sans-serif, sans-serif",
+    "display": "\"DM Sans\", Geist, -apple-system, sans-serif"
+  },
+  "routeResults": [
+    {
+      "route": "/dashboard",
+      "status": 200,
+      "url": "http://localhost:3000/dashboard",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nDashboard\n\nMayo 2026\n\n30 días\n3 meses\n6 meses\n1 año",
+      "error": null
+    },
+    {
+      "route": "/contacts",
+      "status": 200,
+      "url": "http://localhost:3000/contacts",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nContactos\n\nGestión de base de datos de clientes\n\nNu",
+      "error": null
+    },
+    {
+      "route": "/pipeline",
+      "status": 200,
+      "url": "http://localhost:3000/pipeline",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nPipeline\n\nVista de embudo de ventas\n\nNuevo Lead\nLEA",
+      "error": null
+    },
+    {
+      "route": "/calendar",
+      "status": 200,
+      "url": "http://localhost:3000/calendar",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nmayo 2026\nHOY\nMES\nSEMANA\nDÍA\nAÑADIR EVENTO\nAGENDAR\n",
+      "error": null
+    },
+    {
+      "route": "/meetings",
+      "status": 200,
+      "url": "http://localhost:3000/meetings",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nReuniones\n\nGestiona y consulta el conocimiento extr",
+      "error": null
+    },
+    {
+      "route": "/team-chat",
+      "status": 200,
+      "url": "http://localhost:3000/team-chat",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nChats\nP\nPol\n3 días\n\nHolaaa\n\n💬\nChat de Equipo\n\nSele",
+      "error": null
+    },
+    {
+      "route": "/mail",
+      "status": 200,
+      "url": "http://localhost:3000/mail",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nRedactar\nSincronizar\nBandeja de Entrada\nEnviados\nis",
+      "error": null
+    },
+    {
+      "route": "/invoices",
+      "status": 200,
+      "url": "http://localhost:3000/invoices",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nFacturas\n\nGestiona tus ingresos y cobros\n\nFACTURADO",
+      "error": null
+    },
+    {
+      "route": "/expenses",
+      "status": 200,
+      "url": "http://localhost:3000/expenses",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nEconomía\n\nGestiona tus ingresos y gastos\n\nAñadir Tr",
+      "error": null
+    },
+    {
+      "route": "/settings",
+      "status": 200,
+      "url": "http://localhost:3000/settings",
+      "bodyStart": "AURIE.\nDemo Aurie\nDashboard\nCalendario\nPipeline\nContactos\nTareas\nFacturas\nChat de Equipo\nReuniones\nCorreo\nEconomía\nConfiguración\nAJUSTES\nCONFIGURACIÓN GENERAL\nGENERAL / FISCAL\nPLAN",
+      "error": null
+    }
+  ],
+  "browserIssues": [
+    "error: PushSubscriptionManager error: TypeError: Failed to fetch\n    at PushSubscriptionManager.useEffect.setupPush (http://localhost:3000/_next/static/chunks/src_2ae04947._.js:368:52)\n    at PushSubscriptionManager.useEffect (http://localhost:3000/_next/static/chunks/src_2ae04947._.js:409:13)\n    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:14876:22)\n    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:965:74)\n    at commitHookEffectListMount (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7266:167)\n    at commitHookPassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:7301:60)\n    at reconnectPassiveEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8786:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8773:13)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8745:970)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8737:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8700:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8757:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8695:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)\n    at commitPassiveMountOnFiber (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8745:783)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_1e674e59._.js:8683:316)",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width.",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width.",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width.",
+    "warning: The width(-1) and height(-1) of chart should be greater than 0,\n       please check the style of container, or the props width(100%) and height(100%),\n       or add a minWidth(0) or minHeight(undefined) or use aspect(undefined) to control the\n       height and width."
+  ]
+}

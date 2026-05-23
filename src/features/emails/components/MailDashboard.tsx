@@ -173,7 +173,7 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
     }
 
     return (
-        <div className="flex h-full overflow-hidden bg-black text-white">
+        <div className="flex h-full overflow-hidden bg-[var(--bg)] text-[var(--ink-700)]">
             <MailSidebar
                 selectedFolder={selectedFolder}
                 onFolderSelect={(f) => {
@@ -183,7 +183,7 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
                 onCompose={handleCompose}
             />
 
-            <div className={`flex-1 h-full min-h-0 border-r border-white/10 ${selectedThreadId ? 'hidden md:block' : 'block'}`}>
+            <div className={`flex-1 h-full min-h-0 border-r border-[var(--divider)] ${selectedThreadId ? 'hidden md:block' : 'block'}`}>
                 <MailThreadList
                     threads={threads}
                     selectedThreadId={selectedThreadId}
@@ -193,7 +193,7 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
                 />
             </div>
 
-            <main className={`flex-[2] h-full overflow-hidden bg-black/40 ${selectedThreadId ? 'block' : 'hidden md:block'}`}>
+            <main className={`flex-[2] h-full overflow-hidden bg-[var(--bg-2)] ${selectedThreadId ? 'block' : 'hidden md:block'}`}>
                 {activeConversation ? (
                     <MailView
                         conversation={activeConversation}
@@ -201,12 +201,12 @@ export function MailDashboard({ initialEmails }: MailDashboardProps) {
                         onBack={() => setSelectedThreadId(null)}
                     />
                 ) : (
-                    <div className="flex h-full items-center justify-center text-gray-500">
+                    <div className="flex h-full items-center justify-center text-[var(--ink-300)]">
                         <div className="text-center p-8">
-                            <svg className="w-16 h-16 mx-auto mb-4 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                             </svg>
-                            <p className="text-lg font-medium text-gray-400">Selecciona una conversación</p>
+                            <p className="text-lg font-medium text-[var(--ink-450)]">Selecciona una conversación</p>
                         </div>
                     </div>
                 )}

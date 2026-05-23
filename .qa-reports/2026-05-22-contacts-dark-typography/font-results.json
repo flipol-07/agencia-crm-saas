@@ -1,0 +1,44 @@
+{
+  "dark": {
+    "mode": "dark",
+    "body": "\"DM Sans\", Geist, -apple-system, sans-serif",
+    "mainH1Text": "Contactos",
+    "mainH1": "\"DM Sans\", Geist, -apple-system, sans-serif",
+    "displaySamples": [
+      {
+        "text": "Alba Consulting",
+        "font": "\"DM Sans\", Geist, -apple-system, sans-serif"
+      },
+      {
+        "text": "Clínica Atlas",
+        "font": "\"DM Sans\", Geist, -apple-system, sans-serif"
+      },
+      {
+        "text": "Nova Retail Group",
+        "font": "\"DM Sans\", Geist, -apple-system, sans-serif"
+      }
+    ],
+    "wordmark": null
+  },
+  "light": {
+    "mode": "light",
+    "body": "\"DM Sans\", Geist, -apple-system, sans-serif",
+    "mainH1Text": "Contactos",
+    "mainH1": "\"DM Sans\", Geist, -apple-system, sans-serif",
+    "displaySamples": [
+      {
+        "text": "Alba Consulting",
+        "font": "\"DM Sans\", Geist, -apple-system, sans-serif"
+      },
+      {
+        "text": "Clínica Atlas",
+        "font": "\"DM Sans\", Geist, -apple-system, sans-serif"
+      },
+      {
+        "text": "Nova Retail Group",
+        "font": "\"DM Sans\", Geist, -apple-system, sans-serif"
+      }
+    ],
+    "wordmark": null
+  }
+}

@@ -2,6 +2,8 @@ import { createServerClient } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { DEMO_EMAIL } from '@/shared/lib/demo'
+import { DEMO_INVOICE_TEMPLATES, type DemoInvoiceTemplate } from '@/features/invoices/demo/demo-invoice-templates'
+import type { InvoiceTemplateConfig } from '@/types/database'
 
 type CookieOptions = {
     name: string
@@ -108,7 +110,7 @@ async function ensureDemoUser(admin: ReturnType<typeof createAdminClient>) {
         billing_email: DEMO_EMAIL,
         billing_phone: '+34 600 000 000',
         invoice_prefix: 'DEMO-',
-        next_invoice_number: 1042,
+        next_invoice_number: 1043,
         default_irpf_rate: 0,
         updated_at: new Date().toISOString(),
     }, { onConflict: 'id' })
@@ -202,6 +204,7 @@ async function seedDemoData(admin: ReturnType<typeof createAdminClient>, userId:
     const nova = contactRows.find(row => row.email === 'laura.martin@nova-retail.demo')
     const atlas = contactRows.find(row => row.email === 'sergio@clinica-atlas.demo')
     const alba = contactRows.find(row => row.email === 'marta@alba-consulting.demo')
+    const templates = await ensureDemoInvoiceTemplates(admin, userId)
 
     await (admin.from('expenses') as any)
         .delete()
@@ -262,7 +265,13 @@ async function seedDemoData(admin: ReturnType<typeof createAdminClient>, userId:
             total: 2904,
             issuer_profile_id: userId,
             created_by: userId,
+            template_id: templates.executive?.id || null,
+            config: templates.executive?.config || null,
             notes: 'Factura demo para implantación inicial.',
+            items: [
+                { description: 'Setup CRM inteligente', quantity: 1, unit_price: 1800, total_price: 1800 },
+                { description: 'Automatización de pipeline comercial', quantity: 1, unit_price: 600, total_price: 600 },
+            ],
         },
         {
             contact_id: alba?.id,
@@ -279,31 +288,60 @@ async function seedDemoData(admin: ReturnType<typeof createAdminClient>, userId:
             total: 1149.5,
             issuer_profile_id: userId,
             created_by: userId,
+            template_id: templates.nordic?.id || null,
+            config: templates.nordic?.config || null,
             notes: 'Borrador para demo de generación con IA.',
+            items: [
+                { description: 'Auditoría de facturación y gastos', quantity: 1, unit_price: 650, total_price: 650 },
+                { description: 'Configuración de plantillas profesionales', quantity: 1, unit_price: 300, total_price: 300 },
+            ],
+        },
+        {
+            contact_id: atlas?.id,
+            invoice_number: 'DEMO-1042',
+            issue_date: dateDaysAgo(1),
+            due_date: dateDaysAgo(-29),
+            status: 'draft',
+            currency: 'EUR',
+            subtotal: 850,
+            tax_rate: 21,
+            tax_amount: 178.5,
+            irpf_rate: 0,
+            irpf_amount: 0,
+            total: 1028.5,
+            issuer_profile_id: userId,
+            created_by: userId,
+            template_id: templates.blue?.id || null,
+            config: templates.blue?.config || null,
+            notes: 'Factura demo con varias líneas y diseño corporativo.',
+            items: [
+                { description: 'Servicio de consultoría', quantity: 1, unit_price: 150, total_price: 150 },
+                { description: 'Desarrollo de software', quantity: 3, unit_price: 200, total_price: 600 },
+                { description: 'Mantenimiento mensual', quantity: 1, unit_price: 100, total_price: 100 },
+            ],
         },
     ].filter(invoice => invoice.contact_id)
 
     for (const invoice of demoInvoices) {
+        const { items, ...invoicePayload } = invoice
         const { data: existing } = await (admin.from('invoices') as any)
             .select('id')
             .eq('invoice_number', invoice.invoice_number)
+            .eq('created_by', userId)
             .maybeSingle()
 
         const { data: invoiceRow } = existing
-            ? await (admin.from('invoices') as any).update(invoice).eq('id', existing.id).select('id').single()
-            : await (admin.from('invoices') as any).insert(invoice).select('id').single()
+            ? await (admin.from('invoices') as any).update(invoicePayload).eq('id', existing.id).select('id').single()
+            : await (admin.from('invoices') as any).insert(invoicePayload).select('id').single()
 
         if (invoiceRow) {
             await (admin.from('invoice_items') as any).delete().eq('invoice_id', invoiceRow.id)
-            await (admin.from('invoice_items') as any).insert([
-                {
+            await (admin.from('invoice_items') as any).insert(
+                items.map(item => ({
                     invoice_id: invoiceRow.id,
-                    description: invoice.invoice_number === 'DEMO-1040' ? 'Setup CRM inteligente' : 'Auditoría de facturación y gastos',
-                    quantity: 1,
-                    unit_price: invoice.subtotal,
-                    total_price: invoice.subtotal,
-                }
-            ])
+                    ...item,
+                }))
+            )
         }
     }
 
@@ -326,6 +364,57 @@ async function seedDemoData(admin: ReturnType<typeof createAdminClient>, userId:
             }
         ])
     }
+}
+
+async function ensureDemoInvoiceTemplates(admin: ReturnType<typeof createAdminClient>, userId: string) {
+    const result: Partial<Record<DemoInvoiceTemplate['key'], { id: string; config: InvoiceTemplateConfig }>> = {}
+
+    for (const template of DEMO_INVOICE_TEMPLATES) {
+        const payload = {
+            name: template.name,
+            description: template.description,
+            config: template.config,
+            max_items: template.max_items,
+            background_url: template.config.background_url || null,
+            is_default: template.is_default,
+            profile_id: userId,
+            updated_at: new Date().toISOString(),
+        }
+
+        const { data: existing } = await (admin.from('invoice_templates') as any)
+            .select('id')
+            .eq('profile_id', userId)
+            .eq('name', template.name)
+            .maybeSingle()
+
+        const { data, error } = existing?.id
+            ? await (admin.from('invoice_templates') as any)
+                .update(payload)
+                .eq('id', existing.id)
+                .select('id')
+                .single()
+            : await (admin.from('invoice_templates') as any)
+                .insert({
+                    ...payload,
+                    created_at: new Date().toISOString(),
+                })
+                .select('id')
+                .single()
+
+        if (error) {
+            console.error('[Demo] Error upserting invoice template:', error)
+            continue
+        }
+
+        if (data?.id) {
+            result[template.key] = {
+                id: data.id,
+                config: template.config,
+            }
+        }
+    }
+
+    return result
 }
 
 async function upsertContactByEmail(admin: ReturnType<typeof createAdminClient>, contact: Record<string, unknown>) {

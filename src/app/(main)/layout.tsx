@@ -1,7 +1,6 @@
 import { Suspense } from 'react'
 import { RealtimeNotifications } from '@/shared/components/providers/RealtimeNotifications'
 import { PushSubscriptionManager } from '@/shared/components/providers/PushSubscriptionManager'
-import { Toaster } from 'sonner'
 import { ProfileCompletionCheck } from '@/shared/components/features/ProfileCompletionCheck'
 import { GlassSidebar } from '@/shared/components/layout/GlassSidebar'
 import { GlassHeader } from '@/shared/components/layout/GlassHeader'
@@ -20,8 +19,6 @@ export default function MainLayout({
       <Suspense fallback={null}>
         <PushSubscriptionManager />
       </Suspense>
-      <Toaster position="top-right" theme="dark" richColors />
-
       <Suspense fallback={null}>
         <ProfileCompletionCheck />
       </Suspense>

@@ -11,6 +11,11 @@ import {
 } from '../types'
 import { classifyExpenseAI } from '../services/expense-ai.service'
 import { analyzeReceiptAI } from '../services/receipt-ai.service'
+import {
+    expenseCreateSchema,
+    expenseUpdateSchema,
+    expenseIdSchema,
+} from '../schemas'
 
 export async function classifyExpenseAction(params: {
     description: string
@@ -108,6 +113,9 @@ export async function uploadReceiptAction(formData: FormData): Promise<string> {
 }
 
 export async function getExpenseByIdAction(id: string): Promise<ExpenseWithRelations | null> {
+    const parsedId = expenseIdSchema.safeParse(id)
+    if (!parsedId.success) throw new Error('ID inválido')
+
     const supabase = await createClient()
     const { data, error } = await (supabase.from('expenses') as any)
         .select(`
@@ -115,7 +123,7 @@ export async function getExpenseByIdAction(id: string): Promise<ExpenseWithRelat
             sectors (id, name, color, icon),
             expense_categories (id, name, type, icon)
         `)
-        .eq('id', id)
+        .eq('id', parsedId.data)
         .single()
 
     if (error) {
@@ -126,9 +134,12 @@ export async function getExpenseByIdAction(id: string): Promise<ExpenseWithRelat
 }
 
 export async function createExpenseAction(expense: ExpenseInsert): Promise<Expense> {
+    const parsed = expenseCreateSchema.safeParse(expense)
+    if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+
     const supabase = await createClient()
     const { data, error } = await (supabase.from('expenses') as any)
-        .insert(expense as any)
+        .insert(parsed.data as any)
         .select()
         .single()
 
@@ -137,10 +148,15 @@ export async function createExpenseAction(expense: ExpenseInsert): Promise<Expen
 }
 
 export async function updateExpenseAction(id: string, expense: ExpenseUpdate): Promise<Expense> {
+    const parsedId = expenseIdSchema.safeParse(id)
+    if (!parsedId.success) throw new Error('ID inválido')
+    const parsed = expenseUpdateSchema.safeParse(expense)
+    if (!parsed.success) throw new Error(parsed.error.issues[0].message)
+
     const supabase = await createClient()
     const { data, error } = await (supabase.from('expenses') as any)
-        .update({ ...expense, updated_at: new Date().toISOString() } as any)
-        .eq('id', id)
+        .update({ ...parsed.data, updated_at: new Date().toISOString() } as any)
+        .eq('id', parsedId.data)
         .select()
         .single()
 
@@ -149,10 +165,13 @@ export async function updateExpenseAction(id: string, expense: ExpenseUpdate): P
 }
 
 export async function deleteExpenseAction(id: string): Promise<void> {
+    const parsed = expenseIdSchema.safeParse(id)
+    if (!parsed.success) throw new Error('ID inválido')
+
     const supabase = await createClient()
     const { error } = await (supabase.from('expenses') as any)
         .delete()
-        .eq('id', id)
+        .eq('id', parsed.data)
 
     if (error) throw new Error(error.message)
 }

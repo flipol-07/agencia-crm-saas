@@ -91,8 +91,8 @@ export function InvoiceForm({
 
     // Derived state from selected issuer
     const selectedIssuer = profiles.find(p => p.id === selectedIssuerId)
-    // Fallback defaults if no issuer selected (shouldn't happen ideally)
-    const currency = 'EUR' // For now hardcoded or added to profile settings later
+    // Moneda: usa la de initialData (edicion), o EUR por defecto. Selectable abajo.
+    const [currency, setCurrency] = useState<string>(initialData?.currency || 'EUR')
     const defaultTaxRate = 0 // Default 0 or 21? User settings was 21. Maybe add `default_tax_rate` to profile too? 
     // For now let's assume 0 (autónomo often IRPF/IVA complex) or 21. 
     // Let's use 21 as safe default or 0. The previous code used global settings.
@@ -501,6 +501,18 @@ export function InvoiceForm({
             {/* Totales */}
             <div className="flex justify-end pt-8 border-t border-white/5">
                 <div className="w-72 space-y-3">
+                    <div className="flex justify-between text-gray-400 text-sm items-center">
+                        <span>Moneda</span>
+                        <select
+                            value={currency}
+                            onChange={e => setCurrency(e.target.value)}
+                            className="bg-black/40 border border-white/10 rounded-lg px-2 py-1 text-right text-white text-xs outline-none focus:border-[#8b5cf6]"
+                        >
+                            {['EUR', 'USD', 'GBP', 'CHF', 'MXN', 'ARS', 'COP', 'CLP', 'BRL', 'CAD'].map(c => (
+                                <option key={c} value={c} className="bg-zinc-900">{c}</option>
+                            ))}
+                        </select>
+                    </div>
                     <div className="flex justify-between text-gray-400 text-sm">
                         <span>Subtotal</span>
                         <span className="font-mono">{subtotal.toFixed(2)} {currency}</span>

@@ -71,6 +71,7 @@ export interface Contact {
   inactivity_status: 'active' | 'warning' | 'inactive' | null
   ai_suggestions: any[] | null // JSONB
   last_analyzed_at: string | null
+  custom_fields: Record<string, unknown> | null
 }
 
 export type ContactInsert = Omit<Contact, 'id' | 'created_at' | 'updated_at'>
@@ -291,6 +292,7 @@ export type MessageUpdate = Partial<Omit<Message, 'id' | 'created_at'>>
 
 export type InvoiceStatus =
   | 'draft'
+  | 'quote'
   | 'sent'
   | 'paid'
   | 'overdue'
@@ -316,6 +318,7 @@ export interface Invoice {
   config: InvoiceTemplateConfig | null
   irpf_rate: number
   irpf_amount: number
+  converted_from_quote_id?: string | null
 }
 
 export type InvoiceInsert = Omit<Invoice, 'id' | 'created_at' | 'updated_at'>
@@ -339,6 +342,64 @@ export interface InvoiceWithDetails extends Invoice {
   contacts: Pick<Contact, 'id' | 'company_name' | 'contact_name' | 'tax_id' | 'tax_address' | 'email' | 'phone'>
   invoice_items: InvoiceItem[]
 }
+
+// ============================================
+// Invoice Subscription Types (facturas recurrentes)
+// ============================================
+
+export type InvoiceSubscriptionFrequency = 'monthly' | 'quarterly' | 'yearly'
+
+export interface InvoiceSubscription {
+  id: string
+  contact_id: string
+  template_invoice_id: string
+  issuer_profile_id: string
+  frequency: InvoiceSubscriptionFrequency
+  next_run_at: string // date
+  last_run_at: string | null
+  active: boolean
+  end_date: string | null
+  occurrences_count: number
+  notes: string | null
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type InvoiceSubscriptionInsert = Omit<
+  InvoiceSubscription,
+  'id' | 'created_at' | 'updated_at' | 'last_run_at' | 'occurrences_count'
+> & {
+  last_run_at?: string | null
+  occurrences_count?: number
+}
+
+export type InvoiceSubscriptionUpdate = Partial<
+  Omit<InvoiceSubscription, 'id' | 'created_at' | 'updated_at'>
+>
+
+// ============================================
+// Custom Field Definitions
+// ============================================
+
+export type CustomFieldType = 'text' | 'textarea' | 'number' | 'date' | 'select' | 'checkbox'
+
+export interface CustomFieldDefinition {
+  id: string
+  entity: 'contact'
+  name: string
+  label: string
+  type: CustomFieldType
+  options: string[] | null
+  position: number
+  required: boolean
+  created_by: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type CustomFieldDefinitionInsert = Omit<CustomFieldDefinition, 'id' | 'created_at' | 'updated_at'>
+export type CustomFieldDefinitionUpdate = Partial<Omit<CustomFieldDefinition, 'id' | 'created_at' | 'updated_at'>>
 
 // ============================================
 // Settings Types

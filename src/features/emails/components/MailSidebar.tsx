@@ -29,11 +29,11 @@ export function MailSidebar({ selectedFolder, onFolderSelect, onCompose }: MailS
     }
 
     return (
-        <div className="w-16 md:w-64 border-r border-white/10 flex flex-col bg-black/20 h-full transition-all duration-300">
+        <div className="w-16 md:w-64 border-r border-[var(--divider)] flex flex-col bg-[var(--bg-2)] h-full transition-all duration-300">
             <div className="p-2 md:p-4 space-y-3">
                 <button
                     onClick={onCompose}
-                    className="w-full flex items-center justify-center md:gap-2 bg-brand text-black font-bold rounded-lg py-3 text-sm shadow-lg shadow-brand/20 hover:bg-brand/90 transition-all hover:scale-[1.02]"
+                    className="w-full flex items-center justify-center md:gap-2 bg-[var(--accent)] text-[var(--bg)] font-bold rounded-lg py-3 text-sm shadow-lg shadow-[var(--accent-tint)] hover:opacity-90 transition-all hover:scale-[1.02]"
                     title="Redactar"
                 >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +45,7 @@ export function MailSidebar({ selectedFolder, onFolderSelect, onCompose }: MailS
                 <button
                     onClick={handleSync}
                     disabled={isSyncing}
-                    className="w-full flex items-center justify-center md:gap-2 bg-brand/10 hover:bg-brand/20 text-brand border border-brand/20 rounded-lg py-2 text-sm font-medium transition-all disabled:opacity-50"
+                    className="w-full flex items-center justify-center md:gap-2 bg-[var(--accent-tint)] hover:bg-[var(--accent-soft)] text-[var(--accent)] border border-[var(--accent-line)] rounded-lg py-2 text-sm font-medium transition-all disabled:opacity-50"
                     title="Sincronizar"
                 >
                     <svg className={`w-4 h-4 ${isSyncing ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -59,8 +59,8 @@ export function MailSidebar({ selectedFolder, onFolderSelect, onCompose }: MailS
                 <button
                     onClick={() => onFolderSelect('inbound')}
                     className={`w-full flex items-center justify-center md:justify-start md:gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFolder === 'inbound'
-                        ? 'bg-white/10 text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-[var(--bg-3)] text-[var(--ink-700)]'
+                        : 'text-[var(--ink-400)] hover:text-[var(--ink-700)] hover:bg-[var(--bg-3)]'
                         }`}
                     title="Bandeja de Entrada"
                 >
@@ -73,8 +73,8 @@ export function MailSidebar({ selectedFolder, onFolderSelect, onCompose }: MailS
                 <button
                     onClick={() => onFolderSelect('outbound')}
                     className={`w-full flex items-center justify-center md:justify-start md:gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${selectedFolder === 'outbound'
-                        ? 'bg-white/10 text-white'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        ? 'bg-[var(--bg-3)] text-[var(--ink-700)]'
+                        : 'text-[var(--ink-400)] hover:text-[var(--ink-700)] hover:bg-[var(--bg-3)]'
                         }`}
                     title="Enviados"
                 >

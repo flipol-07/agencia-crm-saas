@@ -20,6 +20,22 @@ import type { TaskWithDetails, TaskStatus, TaskPriority } from '@/types/database
 type ViewMode = 'list' | 'kanban'
 type FilterMode = 'all' | 'mine'
 
+const VALID_TASK_STATUS_IDS = new Set<string>(TASK_STATUSES.map(status => status.id))
+
+function getTaskStatus(task: TaskWithDetails): TaskStatus {
+    if (VALID_TASK_STATUS_IDS.has(task.status)) return task.status
+    return task.is_completed ? 'done' : 'todo'
+}
+
+function normalizeTaskForDisplay(task: TaskWithDetails): TaskWithDetails {
+    const status = getTaskStatus(task)
+    return status === task.status ? task : { ...task, status }
+}
+
+function isCompletedTask(task: TaskWithDetails): boolean {
+    return getTaskStatus(task) === 'done' || task.is_completed
+}
+
 // ============ LIST VIEW ============
 function TasksListView({
     tasks,
@@ -37,7 +53,9 @@ function TasksListView({
         statusOrder.push('done')
     }
 
-    const filteredTasks = tasks.filter(t => showCompleted || t.status !== 'done')
+    const filteredTasks = tasks
+        .map(normalizeTaskForDisplay)
+        .filter(t => showCompleted || !isCompletedTask(t))
 
     const grouped = statusOrder.reduce((acc, status) => {
         acc[status] = filteredTasks.filter(t => t.status === status)
@@ -111,7 +129,7 @@ export default function TasksPage() {
         // Mis tareas
         if (filterMode === 'mine' && user) {
             result = result.filter(t =>
-                t.task_assignees.some(a => a.user_id === user.id)
+                t.assigned_to === user.id || t.task_assignees.some(a => a.user_id === user.id)
             )
         }
 
@@ -129,6 +147,16 @@ export default function TasksPage() {
 
         return result
     }, [tasks, searchQuery, filterMode, filterAssignee, filterPriority, user])
+
+    const visibleTasks = useMemo(() => {
+        return filteredTasks
+            .map(normalizeTaskForDisplay)
+            .filter(t => showCompleted || !isCompletedTask(t))
+    }, [filteredTasks, showCompleted])
+
+    const activeTasksCount = useMemo(() => {
+        return filteredTasks.filter(t => !isCompletedTask(t)).length
+    }, [filteredTasks])
 
     const handleStatusChange = async (taskId: string, status: TaskStatus) => {
         try {
@@ -193,12 +221,14 @@ export default function TasksPage() {
         description?: string
         priority: TaskPriority
         due_date?: string | null
+        assigneeIds?: string[]
     }) => {
         await createQuickTask(taskData.title, taskData.project_id || '', {
             description: taskData.description,
             priority: taskData.priority,
             due_date: taskData.due_date || null,
-            contact_id: taskData.contact_id || null
+            contact_id: taskData.contact_id || null,
+            assigneeIds: taskData.assigneeIds
         })
         await refetch()
     }
@@ -218,7 +248,11 @@ export default function TasksPage() {
                 <div>
                     <h1 className="text-xl sm:text-2xl font-semibold tracking-tight text-ink-700">Gestión de Tareas</h1>
                     <p className="text-xs sm:text-sm text-ink-400 mt-1">
-                        {loading ? 'Cargando...' : `${filteredTasks.length} tareas pendientes`}
+                        {loading
+                            ? 'Cargando...'
+                            : showCompleted
+                                ? `${visibleTasks.length} tareas totales`
+                                : `${activeTasksCount} tareas pendientes`}
                         {hasFilters && tasks.length !== filteredTasks.length && ` (de ${tasks.length})`}
                     </p>
                 </div>
@@ -377,7 +411,7 @@ export default function TasksPage() {
                         </div>
                     ))}
                 </div>
-            ) : filteredTasks.length === 0 ? (
+            ) : visibleTasks.length === 0 ? (
                 <div className="glass rounded-xl p-12 text-center">
                     <div className="w-16 h-16 mx-auto mb-4 bg-[#8b5cf6]/10 rounded-full flex items-center justify-center">
                         {hasFilters ? (
@@ -394,19 +428,27 @@ export default function TasksPage() {
                         {hasFilters ? 'Sin resultados' : '¡Todo al día!'}
                     </h3>
                     <p className="text-gray-400">
-                        {hasFilters ? 'Prueba con otros filtros' : 'No hay tareas pendientes'}
+                        {hasFilters ? 'Prueba con otros filtros' : showCompleted ? 'No hay tareas registradas' : 'No hay tareas pendientes'}
                     </p>
+                    {!hasFilters && !showCompleted && filteredTasks.length > 0 && (
+                        <button
+                            onClick={() => setShowCompleted(true)}
+                            className="mt-5 px-4 py-2 rounded-lg border border-[#8b5cf6]/30 bg-[#8b5cf6]/10 text-[#8b5cf6] hover:bg-[#8b5cf6]/20 transition-colors text-sm font-medium"
+                        >
+                            Ver completadas
+                        </button>
+                    )}
                 </div>
             ) : viewMode === 'kanban' ? (
                 <KanbanBoard
-                    tasks={filteredTasks}
+                    tasks={visibleTasks}
                     onOpenTask={setSelectedTask}
                     onStatusChange={handleStatusChange}
                     showCompleted={showCompleted}
                 />
             ) : (
                 <TasksListView
-                    tasks={filteredTasks}
+                    tasks={visibleTasks}
                     onOpenTask={setSelectedTask}
                     onStatusChange={handleStatusChange}
                     showCompleted={showCompleted}

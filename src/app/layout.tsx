@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import './aurie-design.css'
-import { Toaster } from 'sonner'
 import { DevServiceWorkerCleaner } from '@/shared/components/devtools/DevServiceWorkerCleaner'
 import { ThemeProvider } from '@/shared/components/theme'
+import { ThemedToaster } from '@/shared/components/providers/ThemedToaster'
 
 export const metadata: Metadata = {
   title: 'Aurie CRM',
@@ -57,8 +57,8 @@ export default function RootLayout({
       <body data-brand="aurie" data-mode="dark" suppressHydrationWarning>
         <ThemeProvider>
           {children}
+          <ThemedToaster />
         </ThemeProvider>
-        <Toaster richColors position="top-center" />
         <DevServiceWorkerCleaner />
       </body>
     </html>

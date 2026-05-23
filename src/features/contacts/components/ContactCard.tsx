@@ -4,6 +4,7 @@ import Link from 'next/link'
 import type { Contact } from '@/types/database'
 import { PIPELINE_STAGES } from '@/types/database'
 import { useNotificationStore } from '@/shared/store/useNotificationStore'
+import { useContactSelectionStore } from '@/features/contacts/store/useContactSelectionStore'
 
 interface ContactCardProps {
     contact: Contact
@@ -13,6 +14,8 @@ export function ContactCard({ contact }: ContactCardProps) {
     const { unreadCounts } = useNotificationStore()
     const unreadCount = unreadCounts[contact.id] || 0
     const stage = PIPELINE_STAGES.find(s => s.id === contact.pipeline_stage) || PIPELINE_STAGES[0]
+    const isSelected = useContactSelectionStore(s => s.selectedIds.has(contact.id))
+    const toggle = useContactSelectionStore(s => s.toggle)
 
     const getStatusColor = (status: string) => {
         const colors: Record<string, string> = {
@@ -41,7 +44,21 @@ export function ContactCard({ contact }: ContactCardProps) {
 
     return (
         <Link href={`/contacts/${contact.id}`}>
-            <div className="group h-full bg-[#0a0a0a]/60 backdrop-blur-md border border-white/5 rounded-2xl p-5 hover:bg-[#0a0a0a]/80 hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] transition-all duration-500 relative overflow-hidden">
+            <div className={`group h-full bg-[#0a0a0a]/60 backdrop-blur-md border rounded-2xl p-5 hover:bg-[#0a0a0a]/80 hover:border-purple-500/30 hover:shadow-[0_0_30px_rgba(139,92,246,0.15)] transition-all duration-500 relative overflow-hidden ${isSelected ? 'border-brand-neon-lime/60 ring-1 ring-brand-neon-lime/40' : 'border-white/5'}`}>
+                {/* Checkbox de selección — bloquea el Link */}
+                <button
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); toggle(contact.id) }}
+                    className="absolute top-3 right-3 z-20 flex h-6 w-6 items-center justify-center rounded-md border border-white/15 bg-black/40 backdrop-blur transition-colors hover:border-brand-neon-lime/60"
+                    aria-label={isSelected ? 'Quitar selección' : 'Seleccionar contacto'}
+                >
+                    {isSelected && (
+                        <svg className="h-3.5 w-3.5 text-brand-neon-lime" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M16.704 5.293a1 1 0 010 1.414l-7.5 7.5a1 1 0 01-1.414 0l-3.5-3.5a1 1 0 011.414-1.414L8.5 12.086l6.793-6.793a1 1 0 011.411 0z" clipRule="evenodd" />
+                        </svg>
+                    )}
+                </button>
+
                 {/* Ambient Purple Glow on Hover */}
                 <div className="absolute -right-20 -top-20 w-64 h-64 bg-purple-600/10 rounded-full blur-[80px] group-hover:bg-purple-600/20 transition-all duration-700 pointer-events-none" />
 

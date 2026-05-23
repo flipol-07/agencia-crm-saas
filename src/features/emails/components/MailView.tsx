@@ -36,24 +36,24 @@ export function MailView({ conversation, onReply, onBack }: MailViewProps) {
     }
 
     return (
-        <div className="flex-1 flex flex-col h-full bg-black/40 animate-in slide-in-from-right duration-300">
+        <div className="flex-1 flex flex-col h-full bg-[var(--bg-2)] animate-in slide-in-from-right duration-300">
             {/* Header */}
-            <div className="p-4 md:p-6 border-b border-white/10">
+            <div className="p-4 md:p-6 border-b border-[var(--divider)]">
                 <div className="flex items-center gap-4 mb-4">
                     <button
                         onClick={onBack}
-                        className="md:hidden p-2 -ml-2 text-gray-400 hover:text-white transition-colors"
+                        className="md:hidden p-2 -ml-2 text-[var(--ink-400)] hover:text-[var(--ink-700)] transition-colors"
                         title="Volver a la lista"
                     >
                         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
-                    <h2 className="text-lg md:text-xl font-bold text-white flex-1 truncate">{conversation.subject}</h2>
+                    <h2 className="text-lg md:text-xl font-bold text-[var(--ink-700)] flex-1 truncate">{conversation.subject}</h2>
                     <div className="flex gap-2">
                         <button
                             onClick={handleReply}
-                            className="px-3 py-1.5 md:px-4 md:py-2 bg-brand text-black font-bold rounded-lg hover:bg-brand/90 transition-all flex items-center gap-2 text-sm"
+                            className="px-3 py-1.5 md:px-4 md:py-2 bg-[var(--accent)] text-[var(--bg)] font-bold rounded-lg hover:opacity-90 transition-all flex items-center gap-2 text-sm"
                         >
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
@@ -67,8 +67,8 @@ export function MailView({ conversation, onReply, onBack }: MailViewProps) {
                         </button>
                     </div>
                 </div>
-                <div className="flex items-center gap-2 text-xs md:text-sm text-gray-400 overflow-hidden">
-                    <span className="bg-white/10 px-2 py-0.5 rounded text-white flex-shrink-0">
+                <div className="flex items-center gap-2 text-xs md:text-sm text-[var(--ink-400)] overflow-hidden">
+                    <span className="bg-[var(--bg-3)] px-2 py-0.5 rounded text-[var(--ink-700)] flex-shrink-0">
                         {conversation.emails.length} mensajes
                     </span>
                     <span>•</span>
@@ -101,17 +101,17 @@ function MailMessageItem({ email, isLast }: { email: ContactEmail, isLast: boole
     return (
         <div className={`flex flex-col ${isInbound ? 'items-start' : 'items-end'}`}>
             <div className="flex items-center gap-2 mb-2 px-1">
-                <span className="font-bold text-sm text-white">
+                <span className="font-bold text-sm text-[var(--ink-700)]">
                     {isInbound ? (email.from_email || 'Desconocido').split('<')[0] : 'Tú'}
                 </span>
-                <span className="text-xs text-gray-500">
+                <span className="text-xs text-[var(--ink-300)]">
                     {formatDistanceToNow(new Date(email.received_at || email.created_at), { addSuffix: true, locale: es })}
                 </span>
             </div>
 
             <div className={`max-w-[85%] rounded-2xl p-5 shadow-lg border ${isInbound
-                ? 'bg-slate-800/50 border-white/5 rounded-tl-none text-slate-100'
-                : 'bg-brand/10 border-brand/20 text-white rounded-tr-none'
+                ? 'bg-[var(--bg-3)] border-[var(--divider)] rounded-tl-none text-[var(--ink-600)]'
+                : 'bg-[var(--accent-tint)] border-[var(--accent-line)] text-[var(--ink-700)] rounded-tr-none'
                 }`}>
 
                 <div className="text-sm leading-relaxed whitespace-pre-wrap break-words">
