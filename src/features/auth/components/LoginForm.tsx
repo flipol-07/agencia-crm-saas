@@ -5,13 +5,14 @@ import Link from 'next/link'
 import { login } from '@/actions/auth'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { useSearchParams } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export function LoginForm() {
+    const router = useRouter()
     const searchParams = useSearchParams()
     const [error, setError] = useState<string | null>(null)
     const [loading, setLoading] = useState(false)
-    const googleLoginEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_LOGIN === 'true'
+    const googleLoginEnabled = process.env.NEXT_PUBLIC_ENABLE_GOOGLE_LOGIN !== 'false'
     const authError = searchParams.get('error') === 'auth-code-error'
         ? 'No se pudo completar el inicio de sesión con Google. Usa email y contraseña.'
         : null
@@ -20,10 +21,20 @@ export function LoginForm() {
         setLoading(true)
         setError(null)
 
-        const result = await login(formData)
+        try {
+            const result = await login(formData)
 
-        if (result?.error) {
-            setError(result.error)
+            if (result?.error) {
+                setError(result.error)
+                setLoading(false)
+                return
+            }
+
+            router.replace('/dashboard')
+            router.refresh()
+        } catch (err) {
+            console.error('Email login error:', err)
+            setError('No se pudo iniciar sesión. Revisa tus credenciales e inténtalo de nuevo.')
             setLoading(false)
         }
     }

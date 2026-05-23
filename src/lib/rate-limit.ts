@@ -42,8 +42,14 @@ export async function rateLimit(identifier?: string, limit: number = MAX_REQUEST
     })
 
     if (rpcError) {
-        console.error('RateLimit RPC Error:', rpcError)
-        // Fallback or ignore for resilience
+        const { error: fallbackError } = await (supabase.rpc as any)('increment_rate_limit', {
+            row_key: key,
+        })
+
+        if (fallbackError) {
+            console.error('RateLimit RPC Error:', fallbackError)
+            // Fallback or ignore for resilience
+        }
     }
 
     // 2. Get current state to return remaining count
@@ -61,4 +67,3 @@ export async function rateLimit(identifier?: string, limit: number = MAX_REQUEST
         remaining: Math.max(0, limit - points)
     }
 }
-
